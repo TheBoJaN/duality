@@ -122,7 +122,7 @@ namespace Duality
 		/// </summary>
 		public virtual void Update()
 		{
-			this.lifetime -= Time.TimeMult * Time.MillisecondsPerFrame;
+			this.lifetime -= Time.TimeMult * Time.MsPFMult;
 			if (this.anchor == VisualLogAnchor.Object)
 			{
 				if (this.anchorObj == null || this.anchorObj.Disposed)

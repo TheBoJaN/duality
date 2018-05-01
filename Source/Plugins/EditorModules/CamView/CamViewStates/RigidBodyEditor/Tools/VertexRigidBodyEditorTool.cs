@@ -79,8 +79,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			else
 			{
-				VertexBasedShapeInfo vertexShape = this.activeShape as VertexBasedShapeInfo;
-				Vector2[] activeShapeVertices = vertexShape.Vertices;
+				Vector2[] activeShapeVertices = this.GetVertices(this.activeShape);
 
 				// Create a backup of the polygons vertices before our edit operation,
 				// so we can go back via Undo later.
@@ -96,7 +95,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 						List<Vector2> newVertices = activeShapeVertices.ToList();
 						newVertices.Insert(newIndex, this.Environment.ActiveBodyPos);
 
-						vertexShape.Vertices = newVertices.ToArray();
+						this.SetVertices(this.activeShape, newVertices.ToArray());
 						this.activeVertex = newIndex;
 					}
 				}
@@ -108,7 +107,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 						List<Vector2> newVertices = activeShapeVertices.ToList();
 						newVertices.RemoveAt(this.activeVertex);
 
-						vertexShape.Vertices = newVertices.ToArray();
+						this.SetVertices(this.activeShape, newVertices.ToArray());
 						this.activeVertex = -1;
 					}
 				}
@@ -159,14 +158,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// UndoRedo action when ending the operation.
 			else if (this.activeVertex != -1)
 			{
-				VertexBasedShapeInfo vertexShape = this.activeShape as VertexBasedShapeInfo;
-				Vector2[] activeShapeVertices = vertexShape.Vertices;
+				Vector2[] activeShapeVertices = this.GetVertices(this.activeShape);
 				Vector2 oldLocalPos = activeShapeVertices[this.activeVertex];
 				if (oldLocalPos != localPos)
 				{
 					this.activeEdgeWorldPos = worldPos;
 					activeShapeVertices[this.activeVertex] = localPos;
-					vertexShape.Vertices = activeShapeVertices;
+					this.SetVertices(this.activeShape, activeShapeVertices);
 				}
 			}
 		}
@@ -178,11 +176,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// replace the entire vertex array with the backed up version on undo.
 			if (this.backedUpShape != null)
 			{
-				VertexBasedShapeInfo vertexShape = this.backedUpShape as VertexBasedShapeInfo;
 				UndoRedoManager.Do(new EditRigidBodyPolyShapeAction(
-					vertexShape, 
+					this.backedUpShape, 
 					this.backedUpVertices,
-					vertexShape.Vertices));
+					this.GetVertices(this.backedUpShape)));
 			}
 		}
 
@@ -215,72 +212,71 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			// Determine the color in which we'll draw the interaction markers
 			ColorRgba markerColor = this.Environment.FgColor;
-			canvas.State.DepthOffset = -1.0f;
+			canvas.State.ZOffset = -1.0f;
 
-				// Prepare the transform matrix for this object, so 
-				// we can move the RigidBody vertices into world space quickly
-				Transform transform = body.GameObj.Transform;
-				Vector2 bodyPos = transform.Pos.Xy;
-				Vector2 bodyDotX;
-				Vector2 bodyDotY;
-				MathF.GetTransformDotVec(transform.Angle, transform.Scale, out bodyDotX, out bodyDotY);
+			// Prepare the transform matrix for this object, so 
+			// we can move the RigidBody vertices into world space quickly
+			Transform transform = body.GameObj.Transform;
+			Vector2 bodyPos = transform.Pos.Xy;
+			Vector2 bodyDotX;
+			Vector2 bodyDotY;
+			MathF.GetTransformDotVec(transform.Angle, transform.Scale, out bodyDotX, out bodyDotY);
 
 			// Draw an interaction indicator for every vertex of the active bodies shapes
-				Vector3 mousePosWorld = this.Environment.ActiveWorldPos;
-				foreach (ShapeInfo shape in body.Shapes)
+			Vector3 mousePosWorld = this.Environment.ActiveWorldPos;
+			foreach (ShapeInfo shape in body.Shapes)
+			{
+				if (shape is CircleShapeInfo)
 				{
-					if (shape is CircleShapeInfo)
+					CircleShapeInfo circle = shape as CircleShapeInfo;
+
+					Vector2 circleWorldPos = circle.Position;
+					MathF.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
+					circleWorldPos = bodyPos + circleWorldPos;
+
+					// Draw the circles center as a vertex
+					if (this.activeVertex == 0 && this.activeShape == shape)
+						canvas.State.ColorTint = markerColor;
+					else
+						canvas.State.ColorTint = markerColor.WithAlpha(0.75f);
+
+					canvas.FillRect(
+						circleWorldPos.X - worldKnobSize * 0.5f, 
+						circleWorldPos.Y - worldKnobSize * 0.5f, 
+						worldKnobSize,
+						worldKnobSize);
+				}
+				else
+				{
+					Vector2[] vertices = this.GetVertices(shape);
+					if (vertices == null) continue;
+
+					Vector2[] worldVertices = new Vector2[vertices.Length];
+
+					// Transform the shapes vertices into world space
+					for (int index = 0; index < vertices.Length; index++)
 					{
-						CircleShapeInfo circle = shape as CircleShapeInfo;
+						Vector2 vertex = vertices[index];
+						MathF.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
+						worldVertices[index] = bodyPos + vertex;
+					}
 
-						Vector2 circleWorldPos = circle.Position;
-						MathF.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
-						circleWorldPos = bodyPos + circleWorldPos;
-
-						// Draw the circles center as a vertex
-						if (this.activeVertex == 0 && this.activeShape == shape)
+					// Draw the vertices
+					for (int i = 0; i < worldVertices.Length; i++)
+					{
+						if (this.activeVertex == i && this.activeShape == shape)
 							canvas.State.ColorTint = markerColor;
 						else
 							canvas.State.ColorTint = markerColor.WithAlpha(0.75f);
 
 						canvas.FillRect(
-							circleWorldPos.X - worldKnobSize * 0.5f, 
-							circleWorldPos.Y - worldKnobSize * 0.5f, 
+							worldVertices[i].X - worldKnobSize * 0.5f, 
+							worldVertices[i].Y - worldKnobSize * 0.5f, 
 							worldKnobSize,
 							worldKnobSize);
 					}
-					else if (shape is VertexBasedShapeInfo)
-					{
-						VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-						Vector2[] vertices = vertexShape.Vertices;
-						if (vertices == null) continue;
-
-						Vector2[] worldVertices = new Vector2[vertices.Length];
-
-						// Transform the shapes vertices into world space
-						for (int index = 0; index < vertices.Length; index++)
-						{
-							Vector2 vertex = vertices[index];
-							MathF.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
-							worldVertices[index] = bodyPos + vertex;
-						}
-
-						// Draw the vertices
-						for (int i = 0; i < worldVertices.Length; i++)
-						{
-							if (this.activeVertex == i && this.activeShape == shape)
-								canvas.State.ColorTint = markerColor;
-							else
-								canvas.State.ColorTint = markerColor.WithAlpha(0.75f);
-
-							canvas.FillRect(
-								worldVertices[i].X - worldKnobSize * 0.5f, 
-								worldVertices[i].Y - worldKnobSize * 0.5f, 
-								worldKnobSize,
-								worldKnobSize);
-						}
-					}
 				}
+			}
 
 			// Interaction indicator for an existing vertex
 			if (this.activeVertex != -1)
@@ -370,10 +366,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 						anythingHovered = true;
 					}
 				}
-				else if (shape is VertexBasedShapeInfo)
+				else
 				{
-					VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-					Vector2[] vertices = vertexShape.Vertices;
+					Vector2[] vertices = this.GetVertices(shape);
 					if (vertices == null) continue;
 
 					Vector2[] worldVertices = new Vector2[vertices.Length];
@@ -396,6 +391,29 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					break;
 				}
 			}
+		}
+
+		private Vector2[] GetVertices(ShapeInfo shapeInfo)
+		{
+			if (shapeInfo is PolyShapeInfo)
+				return (shapeInfo as PolyShapeInfo).Vertices;
+			else if (shapeInfo is LoopShapeInfo)
+				return (shapeInfo as LoopShapeInfo).Vertices;
+			else if (shapeInfo is ChainShapeInfo)
+				return (shapeInfo as ChainShapeInfo).Vertices;
+			else
+				return null;
+		}
+		private void SetVertices(ShapeInfo shapeInfo, Vector2[] vertices)
+		{
+			if (shapeInfo is PolyShapeInfo)
+				(shapeInfo as PolyShapeInfo).Vertices = vertices;
+			else if (shapeInfo is LoopShapeInfo)
+				(shapeInfo as LoopShapeInfo).Vertices = vertices;
+			else if (shapeInfo is ChainShapeInfo)
+				(shapeInfo as ChainShapeInfo).Vertices = vertices;
+			else
+				throw new NotImplementedException();
 		}
 
 		private bool GetHoveredVertex(Vector2[] vertices, Vector2 targetPos, float radius, out int hoverIndex, out Vector2 hoverPos)

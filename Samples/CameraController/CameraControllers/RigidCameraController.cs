@@ -20,15 +20,21 @@ namespace CameraController
 			set { this.targetObj = value; }
 		}
 
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(InitContext context)
 		{
-			Camera camera = this.GameObj.GetComponent<Camera>();
-			this.GameObj.Parent = this.targetObj;
-			this.GameObj.Transform.LocalPos = new Vector3(0.0f, 0.0f, -camera.FocusDist);
+			if (context == InitContext.Activate)
+			{
+				Camera camera = this.GameObj.GetComponent<Camera>();
+				this.GameObj.Parent = this.targetObj;
+				this.GameObj.Transform.RelativePos = new Vector3(0.0f, 0.0f, -camera.FocusDist);
+			}
 		}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnShutdown(ShutdownContext context)
 		{
-			this.GameObj.Parent = null;
+			if (context == ShutdownContext.Deactivate)
+			{
+				this.GameObj.Parent = null;
+			}
 		}
 	}
 }

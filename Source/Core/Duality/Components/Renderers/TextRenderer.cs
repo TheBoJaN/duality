@@ -15,16 +15,16 @@ namespace Duality.Components.Renderers
 	[ManuallyCloned]
 	[EditorHintCategory(CoreResNames.CategoryGraphics)]
 	[EditorHintImage(CoreResNames.ImageFont)]
-	public class TextRenderer : Renderer, ICmpSerializeListener
+	public class TextRenderer : Renderer, ICmpInitializable
 	{
-		protected Alignment            blockAlign = Alignment.Center;
-		protected FormattedText        text       = new FormattedText("Hello World");
-		protected BatchInfo            customMat  = null;
-		protected ColorRgba            colorTint  = ColorRgba.White;
-		protected ContentRef<Material> iconMat    = null;
-		protected float                offset     = 0.0f;
-		[DontSerialize] protected VertexC1P3T2[][] vertFont = null;
-		[DontSerialize] protected VertexC1P3T2[]   vertIcon = null;
+		protected	Alignment				blockAlign	= Alignment.Center;
+		protected	FormattedText			text		= new FormattedText("Hello World");
+		protected	BatchInfo				customMat	= null;
+		protected	ColorRgba				colorTint	= ColorRgba.White;
+		protected	ContentRef<Material>	iconMat		= null;
+		protected	int						offset		= 0;
+		[DontSerialize] protected	VertexC1P3T2[][]	vertFont	= null;
+		[DontSerialize] protected	VertexC1P3T2[]		vertIcon	= null;
 
 
 		[EditorHintFlags(MemberFlags.Invisible)]
@@ -90,13 +90,21 @@ namespace Duality.Components.Renderers
 			set { this.customMat = value; }
 		}
 		/// <summary>
-		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
+		/// [GET / SET] A virtual Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public int Offset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
+		}
+		/// <summary>
+		/// [GET] The internal Z-Offset added to the renderers vertices based on its <see cref="Offset"/> value.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public float VertexZOffset
+		{
+			get { return this.offset * 0.01f; }
 		}
 
 
@@ -108,9 +116,11 @@ namespace Duality.Components.Renderers
 		public override void Draw(IDrawDevice device)
 		{
 			Vector3 posTemp = this.gameobj.Transform.Pos;
+			float scaleTemp = 1.0f;
+			device.PreprocessCoords(ref posTemp, ref scaleTemp);
 
 			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.gameobj.Transform.Scale, out xDot, out yDot);
+			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.gameobj.Transform.Scale * scaleTemp, out xDot, out yDot);
 
 			// Apply block alignment
 			Vector2 textOffset = Vector2.Zero;
@@ -130,29 +140,8 @@ namespace Duality.Components.Renderers
 					posTemp.Y += 0.5f;
 			}
 
-			int[] vertLen = this.text.EmitVertices(
-				ref this.vertFont, 
-				ref this.vertIcon, 
-				posTemp.X, 
-				posTemp.Y, 
-				posTemp.Z, 
-				this.colorTint, 
-				xDot, 
-				yDot);
-
-			// Apply depth offset to generated vertices
-			for (int i = 0; i < this.vertFont.Length; i++)
-			{
-				for (int j = 0; j < vertLen[i + 1]; j++)
-				{
-					this.vertFont[i][j].DepthOffset = this.offset;
-				}
-			}
-			for (int i = 0; i < vertLen[0]; i++)
-			{
-				this.vertIcon[i].DepthOffset = this.offset;
-			}
-
+			ColorRgba matColor = this.customMat != null ? this.customMat.MainColor : ColorRgba.White;
+			int[] vertLen = this.text.EmitVertices(ref this.vertFont, ref this.vertIcon, posTemp.X, posTemp.Y, posTemp.Z + this.VertexZOffset, this.colorTint * matColor, xDot, yDot);
 			if (this.text.Fonts != null)
 			{
 				for (int i = 0; i < this.text.Fonts.Length; i++)
@@ -165,8 +154,8 @@ namespace Duality.Components.Renderers
 						}
 						else
 						{
-							BatchInfo cm = device.RentMaterial(this.customMat);
-							cm.MainTexture = this.text.Fonts[i].Res.Material.MainTexture;
+							BatchInfo cm = new BatchInfo(this.customMat);
+							cm.Textures = this.text.Fonts[i].Res.Material.Textures;
 							device.AddVertices(cm, VertexMode.Quads, this.vertFont[i], vertLen[i + 1]);
 						}
 					}
@@ -178,13 +167,13 @@ namespace Duality.Components.Renderers
 			}
 		}
 
-		void ICmpSerializeListener.OnLoaded()
+		void ICmpInitializable.OnInit(InitContext context)
 		{
-			this.text.ApplySource();
+			if (context == InitContext.Loaded)
+				this.text.ApplySource();
 		}
-		void ICmpSerializeListener.OnSaved() { }
-		void ICmpSerializeListener.OnSaving() { }
-
+		void ICmpInitializable.OnShutdown(ShutdownContext context) {}
+		
 		protected override void OnSetupCloneTargets(object targetObj, ICloneTargetSetup setup)
 		{
 			base.OnSetupCloneTargets(targetObj, setup);

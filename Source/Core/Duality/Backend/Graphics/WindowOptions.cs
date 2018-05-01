@@ -9,16 +9,22 @@ namespace Duality.Backend
 {
 	public class WindowOptions
 	{
-		private Point2      size         = new Point2(800, 600);
-		private ScreenMode  screenMode   = ScreenMode.Window;
-		private RefreshMode refreshMode  = RefreshMode.VSync;
-		private string      title        = "Duality Window";
-		private bool        systemCursor = true;
+		private int				width			= 800;
+		private int				height			= 600;
+		private ScreenMode		screenMode		= ScreenMode.Window;
+		private RefreshMode		refreshMode		= RefreshMode.VSync;
+		private string			title			= "Duality Window";
+		private bool			systemCursor	= true;
 
-		public Point2 Size
+		public int Width
 		{
-			get { return this.size; }
-			set { this.size = value; }
+			get { return this.width; }
+			set { this.width = value; }
+		}
+		public int Height
+		{
+			get { return this.height; }
+			set { this.height = value; }
 		}
 		public ScreenMode ScreenMode
 		{

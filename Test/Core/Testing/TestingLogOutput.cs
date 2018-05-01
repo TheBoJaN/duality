@@ -58,14 +58,12 @@ namespace Duality.Tests
 			}
 		}
 
-		void ILogOutput.Write(LogEntry entry, object context, Log source)
+		void ILogOutput.Write(LogEntry entry)
 		{
 			if (entry.Type == LogMessageType.Error)
 				this.lastErrorMessage = entry.Message;
 			else if (entry.Type == LogMessageType.Warning)
 				this.lastWarningMessage = entry.Message;
 		}
-		void ILogOutput.PushIndent() { }
-		void ILogOutput.PopIndent() { }
 	}
 }

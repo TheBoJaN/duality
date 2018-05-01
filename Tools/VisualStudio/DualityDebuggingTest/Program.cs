@@ -15,12 +15,13 @@ namespace Duality.VisualStudio
 			DualityApp.Init(
 				DualityApp.ExecutionEnvironment.Launcher, 
 				DualityApp.ExecutionContext.Game, 
-				new DefaultAssemblyLoader(),
+				new DefaultPluginLoader(),
 				null);
 			
 			WindowOptions options = new WindowOptions
 			{
-				Size = new Point2(800, 600),
+				Width = 800,
+				Height = 600
 			};
 			using (INativeWindow launcherWindow = DualityApp.OpenWindow(options))
 			{

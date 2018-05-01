@@ -20,13 +20,12 @@ namespace Duality.Components
 		bool IsRendererQuerySorted { get; }
 
 		/// <summary>
-		/// Queries all renderers that are currently visible to the specified device
-		/// and stores their data in the specified list for further processing.
+		/// Queries all renderers that are currently visible to the specified device.
 		/// </summary>
 		/// <param name="device"></param>
-		/// <param name="visibleRenderers"></param>
+		/// <param name="targetList">The list that should be updated by this method.</param>
 		/// <returns></returns>
-		void QueryVisibleRenderers(DrawDevice device, RawList<ICmpRenderer> visibleRenderers);
+		void QueryVisibleRenderers(IDrawDevice device, RawList<ICmpRenderer> targetList);
 		/// <summary>
 		/// Updates the strategy to account for changes in the <see cref="Duality.Resources.Scene"/>
 		/// after each frame update.

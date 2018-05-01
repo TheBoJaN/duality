@@ -99,9 +99,9 @@ namespace Duality.Editor.AssetManagement
 				}
 				catch (Exception ex)
 				{
-					Logs.Editor.WriteError("An error occurred in the preparation step of '{1}': {0}", 
-						LogFormat.Exception(ex),
-						LogFormat.Type(importer.GetType()));
+					Log.Editor.WriteError("An error occurred in the preparation step of '{1}': {0}", 
+						Log.Exception(ex),
+						Log.Type(importer.GetType()));
 					continue;
 				}
 
@@ -187,11 +187,11 @@ namespace Duality.Editor.AssetManagement
 				{
 					if (!assignment.ExpectedOutput.Any(item => item.Resource == output.Resource))
 					{
-						Logs.Editor.WriteWarning(
+						Log.Editor.WriteWarning(
 							"AssetImporter '{0}' created an unpredicted output Resource: '{1}'. " + Environment.NewLine +
 							"This may cause problems in the Asset Management system, especially during Asset re-import. " + Environment.NewLine +
 							"Please fix the implementation of the PrepareImport method so it properly calls AddOutput for each predicted output Resource.",
-							LogFormat.Type(assignment.Importer.GetType()),
+							Log.Type(assignment.Importer.GetType()),
 							output.Resource);
 					}
 					else
@@ -228,9 +228,9 @@ namespace Duality.Editor.AssetManagement
 			}
 			catch (Exception ex)
 			{
-				Logs.Editor.WriteError("An error occurred while trying to import files using '{1}': {0}", 
-					LogFormat.Exception(ex),
-					LogFormat.Type(assignment.Importer.GetType()));
+				Log.Editor.WriteError("An error occurred while trying to import files using '{1}': {0}", 
+					Log.Exception(ex),
+					Log.Type(assignment.Importer.GetType()));
 				return false;
 			}
 

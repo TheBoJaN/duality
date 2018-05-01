@@ -10,7 +10,6 @@ namespace Duality.Editor.Backend
 {
 	public interface INativeRenderableSite : IDisposable
 	{
-		AAQuality AntialiasingQuality { get; }
 		Control Control { get; }
 
 		void MakeCurrent();

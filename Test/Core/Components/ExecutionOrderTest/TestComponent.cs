@@ -17,7 +17,7 @@ using NUnit.Framework;
 
 namespace Duality.Tests.Components.ExecutionOrderTest
 {
-	public class TestComponent : Component, ICmpUpdatable, ICmpInitializable, ICmpSerializeListener
+	public class TestComponent : Component, ICmpUpdatable, ICmpInitializable
 	{
 		private EventOrderLog eventLog;
 
@@ -37,25 +37,21 @@ namespace Duality.Tests.Components.ExecutionOrderTest
 		{
 			this.NotifyEvent(EventType.Update);
 		}
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			this.NotifyEvent(EventType.Activate);
+			if (context == InitContext.Activate)
+				this.NotifyEvent(EventType.Activate);
+			else if (context == InitContext.Loaded)
+				this.NotifyEvent(EventType.Loaded);
+			else if (context == InitContext.Saved)
+				this.NotifyEvent(EventType.Saved);
 		}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context)
 		{
-			this.NotifyEvent(EventType.Deactivate);
-		}
-		void ICmpSerializeListener.OnLoaded()
-		{
-			this.NotifyEvent(EventType.Loaded);
-		}
-		void ICmpSerializeListener.OnSaved()
-		{
-			this.NotifyEvent(EventType.Saved);
-		}
-		void ICmpSerializeListener.OnSaving()
-		{
-			this.NotifyEvent(EventType.Saving);
+			if (context == ShutdownContext.Deactivate)
+				this.NotifyEvent(EventType.Deactivate);
+			else if (context == ShutdownContext.Saving)
+				this.NotifyEvent(EventType.Saving);
 		}
 	}
 }

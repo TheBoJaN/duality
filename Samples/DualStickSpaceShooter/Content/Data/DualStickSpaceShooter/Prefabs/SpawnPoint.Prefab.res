@@ -1,5 +1,4 @@
 ﻿<root dataType="Struct" type="Duality.Resources.Prefab" id="129723834">
-  <assetInfo />
   <objTree dataType="Struct" type="Duality.GameObject" id="2717718507">
     <active dataType="Bool">true</active>
     <children />
@@ -27,8 +26,16 @@
           </posAbs>
           <scale dataType="Float">0.75</scale>
           <scaleAbs dataType="Float">0.75</scaleAbs>
-          <vel dataType="Struct" type="Duality.Vector3" />
-          <velAbs dataType="Struct" type="Duality.Vector3" />
+          <vel dataType="Struct" type="Duality.Vector3">
+            <X dataType="Float">0</X>
+            <Y dataType="Float">0</Y>
+            <Z dataType="Float">0</Z>
+          </vel>
+          <velAbs dataType="Struct" type="Duality.Vector3">
+            <X dataType="Float">0</X>
+            <Y dataType="Float">0</Y>
+            <Z dataType="Float">0</Z>
+          </velAbs>
         </item>
         <item dataType="Struct" type="DualStickSpaceShooter.SpawnPoint" id="954146828">
           <activated dataType="Bool">false</activated>
@@ -53,7 +60,11 @@
                   <Y dataType="Float">0</Y>
                   <Z dataType="Float">-10</Z>
                 </basePos>
-                <baseVel dataType="Struct" type="Duality.Vector3" />
+                <baseVel dataType="Struct" type="Duality.Vector3">
+                  <X dataType="Float">0</X>
+                  <Y dataType="Float">0</Y>
+                  <Z dataType="Float">0</Z>
+                </baseVel>
                 <burstDelay dataType="Struct" type="Duality.Range">
                   <MaxValue dataType="Float">500</MaxValue>
                   <MinValue dataType="Float">500</MinValue>
@@ -96,10 +107,14 @@
                   <MaxValue dataType="Float">0.1</MaxValue>
                   <MinValue dataType="Float">0</MinValue>
                 </randomVel>
-                <spriteIndex dataType="Struct" type="Duality.Range" />
+                <spriteIndex dataType="Struct" type="Duality.Range">
+                  <MaxValue dataType="Float">0</MaxValue>
+                  <MinValue dataType="Float">0</MinValue>
+                </spriteIndex>
               </item>
             </_items>
             <_size dataType="Int">1</_size>
+            <_version dataType="Int">5</_version>
           </emitters>
           <fadeInAt dataType="Float">0.25</fadeInAt>
           <fadeOutAt dataType="Float">0.75</fadeOutAt>
@@ -126,15 +141,31 @@
           </colorTint>
           <customMat />
           <gameobj dataType="ObjectRef">2717718507</gameobj>
-          <iconMat dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.Material]]" />
-          <offset dataType="Float">0</offset>
+          <iconMat dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.Material]]">
+            <contentPath />
+          </iconMat>
+          <offset dataType="Int">0</offset>
           <text dataType="Struct" type="Duality.Drawing.FormattedText" id="639194685">
+            <displayedText dataType="String">A WarmPlace</displayedText>
+            <elements dataType="Array" type="Duality.Drawing.FormattedText+Element[]" id="3328578598">
+              <item dataType="Struct" type="Duality.Drawing.FormattedText+TextElement" id="3849976064">
+                <text dataType="String">A Warm</text>
+              </item>
+              <item dataType="Struct" type="Duality.Drawing.FormattedText+NewLineElement" id="3988199886" />
+              <item dataType="Struct" type="Duality.Drawing.FormattedText+TextElement" id="1485032348">
+                <text dataType="String">Place</text>
+              </item>
+            </elements>
             <flowAreas />
-            <fonts dataType="Array" type="Duality.ContentRef`1[[Duality.Resources.Font]][]" id="3328578598">
+            <fontGlyphCount dataType="Array" type="System.Int32[]" id="356953786">
+              <item dataType="Int">11</item>
+            </fontGlyphCount>
+            <fonts dataType="Array" type="Duality.ContentRef`1[[Duality.Resources.Font]][]" id="1663900454">
               <item dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.Font]]">
                 <contentPath dataType="String">Data\DualStickSpaceShooter\Materials\WorldFont.Font.res</contentPath>
               </item>
             </fonts>
+            <iconCount dataType="Int">0</iconCount>
             <icons />
             <lineAlign dataType="Enum" type="Duality.Alignment" name="Center" value="0" />
             <maxHeight dataType="Int">0</maxHeight>
@@ -146,21 +177,22 @@
         </item>
         <item dataType="Struct" type="Duality.Components.Physics.RigidBody" id="1485527735">
           <active dataType="Bool">true</active>
-          <allowParent dataType="Bool">false</allowParent>
           <angularDamp dataType="Float">0.3</angularDamp>
           <angularVel dataType="Float">0</angularVel>
           <bodyType dataType="Enum" type="Duality.Components.Physics.BodyType" name="Static" value="0" />
           <colCat dataType="Enum" type="Duality.Components.Physics.CollisionCategory" name="Cat1" value="1" />
-          <colFilter />
           <colWith dataType="Enum" type="Duality.Components.Physics.CollisionCategory" name="All" value="2147483647" />
-          <explicitInertia dataType="Float">0</explicitInertia>
+          <continous dataType="Bool">false</continous>
           <explicitMass dataType="Float">0</explicitMass>
           <fixedAngle dataType="Bool">false</fixedAngle>
           <gameobj dataType="ObjectRef">2717718507</gameobj>
           <ignoreGravity dataType="Bool">false</ignoreGravity>
           <joints />
           <linearDamp dataType="Float">0.3</linearDamp>
-          <linearVel dataType="Struct" type="Duality.Vector2" />
+          <linearVel dataType="Struct" type="Duality.Vector2">
+            <X dataType="Float">0</X>
+            <Y dataType="Float">0</Y>
+          </linearVel>
           <revolutions dataType="Float">0</revolutions>
           <shapes dataType="Struct" type="System.Collections.Generic.List`1[[Duality.Components.Physics.ShapeInfo]]" id="1971723147">
             <_items dataType="Array" type="Duality.Components.Physics.ShapeInfo[]" id="219107446" length="4">
@@ -168,16 +200,18 @@
                 <density dataType="Float">1</density>
                 <friction dataType="Float">0.3</friction>
                 <parent dataType="ObjectRef">1485527735</parent>
-                <position dataType="Struct" type="Duality.Vector2" />
+                <position dataType="Struct" type="Duality.Vector2">
+                  <X dataType="Float">0</X>
+                  <Y dataType="Float">0</Y>
+                </position>
                 <radius dataType="Float">150</radius>
                 <restitution dataType="Float">0.3</restitution>
                 <sensor dataType="Bool">true</sensor>
-                <userTag dataType="Int">0</userTag>
               </item>
             </_items>
             <_size dataType="Int">1</_size>
+            <_version dataType="Int">18</_version>
           </shapes>
-          <useCCD dataType="Bool">false</useCCD>
         </item>
         <item dataType="Struct" type="DualStickSpaceShooter.Trigger" id="1223525211">
           <active dataType="Bool">true</active>
@@ -186,15 +220,18 @@
           <gameobj dataType="ObjectRef">2717718507</gameobj>
           <targets />
           <triggerEffect />
-          <triggerSound dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.Sound]]" />
+          <triggerSound dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.Sound]]">
+            <contentPath />
+          </triggerSound>
         </item>
       </_items>
       <_size dataType="Int">6</_size>
+      <_version dataType="Int">6</_version>
     </compList>
     <compMap dataType="Struct" type="System.Collections.Generic.Dictionary`2[[System.Type],[Duality.Component]]" id="866486430" surrogate="true">
       <header />
       <body>
-        <keys dataType="Array" type="System.Object[]" id="2102842010">
+        <keys dataType="Array" type="System.Type[]" id="2102842010">
           <item dataType="Type" id="4117674880" value="Duality.Components.Transform" />
           <item dataType="Type" id="1650660558" value="DualStickSpaceShooter.SpawnPoint" />
           <item dataType="Type" id="3609586972" value="DualStickSpaceShooter.ParticleEffect" />
@@ -202,7 +239,7 @@
           <item dataType="Type" id="2301861688" value="Duality.Components.Physics.RigidBody" />
           <item dataType="Type" id="2470027046" value="DualStickSpaceShooter.Trigger" />
         </keys>
-        <values dataType="Array" type="System.Object[]" id="3261262650">
+        <values dataType="Array" type="Duality.Component[]" id="3261262650">
           <item dataType="ObjectRef">783066143</item>
           <item dataType="ObjectRef">954146828</item>
           <item dataType="ObjectRef">3744351600</item>
@@ -224,5 +261,6 @@
     <parent />
     <prefabLink />
   </objTree>
+  <sourcePath dataType="String">SpawnPoint</sourcePath>
 </root>
 <!-- XmlFormatterBase Document Separator -->

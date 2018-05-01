@@ -285,20 +285,20 @@ namespace Duality.Tests.Resources
 		{
 			if (a.Name != b.Name) return false;
 			if (a.ActiveSingle != b.ActiveSingle) return false;
-			if (a.Children.Count != b.Children.Count) return false;
-			if (a.Components.Count != b.Components.Count) return false;
+			if (a.Children.Count() != b.Children.Count()) return false;
+			if (a.GetComponents<Component>().Count() != b.GetComponents<Component>().Count()) return false;
 
-			foreach (Component ca in a.Components)
+			foreach (Component ca in a.GetComponents<Component>())
 			{
 				Component cb = b.GetComponent(ca.GetType());
 				if (cb == null) return false;
 				if (!this.CheckEquality(ca, cb)) return false;
 			}
 
-			for (int i = 0; i < a.Children.Count; i++)
+			for (int i = 0; i < a.Children.Count(); i++)
 			{
-				GameObject ca = a.Children[i];
-				GameObject cb = b.Children[i];
+				GameObject ca = a.ChildAtIndex(i);
+				GameObject cb = b.ChildAtIndex(i);
 				if (!this.CheckEquality(ca, cb)) return false;
 			}
 
@@ -311,7 +311,7 @@ namespace Duality.Tests.Resources
 			foreach (PropertyInfo property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
 			{
 				TypeInfo propertyTypeInfo = property.PropertyType.GetTypeInfo();
-				if (!propertyTypeInfo.IsDeepCopyByAssignment()) continue;
+				if (!propertyTypeInfo.IsPlainOldData()) continue;
 
 				object va = property.GetValue(a, null);
 				object vb = property.GetValue(b, null);

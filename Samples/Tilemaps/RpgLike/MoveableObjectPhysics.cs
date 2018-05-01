@@ -72,14 +72,17 @@ namespace Duality.Samples.Tilemaps.RpgLike
 				this.baseFriction + 
 				this.currentDynamicFriction;
 		}
-		void ICmpInitializable.OnActivate() { }
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnInit(Component.InitContext context) { }
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context)
 		{
-			// Clean up the temporary friction joint we have created
-			if (this.frictionJoint != null)
+			if (context == ShutdownContext.Deactivate)
 			{
-				this.frictionJoint.ParentBody.RemoveJoint(this.frictionJoint);
-				this.frictionJoint = null;
+				// Clean up the temporary friction joint we have created
+				if (this.frictionJoint != null)
+				{
+					this.frictionJoint.ParentBody.RemoveJoint(this.frictionJoint);
+					this.frictionJoint = null;
+				}
 			}
 		}
 

@@ -38,9 +38,9 @@ namespace DualStickSpaceShooter
 
 			body.LinearVelocity = direction * blueprint.LaunchSpeed + sourceDragVel;
 			transform.Pos = new Vector3(position, 0.0f);
-			transform.MoveBy(body.LinearVelocity * Time.TimeMult);
+			transform.MoveByAbs(body.LinearVelocity * Time.TimeMult);
 			transform.Angle = angle;
-			sprite.DepthOffset = 0.1f;
+			sprite.Offset = 1;
 
 			if (owner != null)
 			{
@@ -53,7 +53,7 @@ namespace DualStickSpaceShooter
 		
 		void ICmpUpdatable.OnUpdate()
 		{
-			this.lifetime -= Time.MillisecondsPerFrame * Time.TimeMult;
+			this.lifetime -= Time.MsPFMult * Time.TimeMult;
 			if (this.lifetime <= 0.0f) this.GameObj.DisposeLater();
 		}
 		void ICmpCollisionListener.OnCollisionBegin(Component sender, CollisionEventArgs args)

@@ -335,7 +335,7 @@ namespace Duality.Cloning
 			
 			// Determine the object Type and early-out if it's just plain old data
 			if (typeData == null) typeData = GetCloneType(source.GetType());
-			if (typeData.IsCopyByAssignment) return;
+			if (typeData.IsPlainOldData) return;
 			if (typeData.Type.IsValueType && !typeData.InvestigateOwnership) return;
 			
 			// Determine cloning behavior for this object
@@ -463,7 +463,7 @@ namespace Duality.Cloning
 		{
 			// Determine the object Type and early-out if it's just plain old data
 			if (typeData == null) typeData = GetCloneType(typeof(T));
-			if (typeData.IsCopyByAssignment) return;
+			if (typeData.IsPlainOldData) return;
 			if (!typeData.InvestigateOwnership) return;
 
 			object lastObject = this.currentObject;
@@ -518,7 +518,7 @@ namespace Duality.Cloning
 				customSource.CopyDataTo(target, this);
 			}
 			// Otherwise, traverse its child objects using default behavior
-			else if (!typeData.IsCopyByAssignment)
+			else if (!typeData.IsPlainOldData)
 			{
 				this.PerformCopyChildObject(source, target, typeData);
 			}
@@ -537,7 +537,7 @@ namespace Duality.Cloning
 				CloneType sourceElementType = typeData.ElementType;
 
 				// If the array contains plain old data, no further handling is required
-				if (sourceElementType.IsCopyByAssignment)
+				if (sourceElementType.IsPlainOldData)
 				{
 					sourceArray.CopyTo(targetArray, 0);
 				}
@@ -608,7 +608,7 @@ namespace Duality.Cloning
 					{
 						if ((typeData.FieldData[i].Flags & CloneFieldFlags.IdentityRelevant) != CloneFieldFlags.None && this.context.PreserveIdentity)
 							continue;
-						this.PerformCopyField(source, target, typeData.FieldData[i].Field, typeData.FieldData[i].FieldType.IsCopyByAssignment);
+						this.PerformCopyField(source, target, typeData.FieldData[i].Field, typeData.FieldData[i].FieldType.IsPlainOldData);
 					}
 				}
 			}
@@ -671,7 +671,7 @@ namespace Duality.Cloning
 			this.currentObject = source;
 			this.currentCloneType = typeData;
 			
-			if (typeData.IsCopyByAssignment)
+			if (typeData.IsPlainOldData)
 			{
 				target = source;
 			}
@@ -815,7 +815,7 @@ namespace Duality.Cloning
 			bool calledFromUserCode = this.currentObject is ICloneExplicit || this.currentCloneType.Surrogate != null;
 			if (object.ReferenceEquals(source, this.currentObject) && calledFromUserCode)
 			{
-				if (!this.currentCloneType.IsCopyByAssignment)
+				if (!this.currentCloneType.IsPlainOldData)
 				{
 					this.PerformCopyChildObject(source, target, this.currentCloneType);
 				}

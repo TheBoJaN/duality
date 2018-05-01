@@ -14,13 +14,17 @@ using Duality.Editor.Plugins.Tilemaps.Properties;
 namespace Duality.Editor.Plugins.Tilemaps.EditorActions
 {
 	/// <summary>
-	/// Opens a user dialog that helps you quickly create a set of layered Tilemaps.
+	/// Opens a setup dialog that allows to configure the selected tilemaps.
 	/// </summary>
 	public class OpenTilemapSetupDialog : EditorAction<Tilemap>
 	{
 		public override string Name
 		{
 			get { return TilemapsRes.ActionName_SetupTilemap; }
+		}
+		public override string Description
+		{
+			get { return TilemapsRes.ActionDesc_SetupTilemap; }
 		}
 		public override Image Icon
 		{

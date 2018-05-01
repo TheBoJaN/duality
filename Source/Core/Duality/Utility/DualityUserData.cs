@@ -11,48 +11,66 @@ namespace Duality
 	/// </summary>
 	public class DualityUserData
 	{
-		private Point2      windowSize          = new Point2(800, 600);
-		private ScreenMode  windowMode          = ScreenMode.Window;
-		private RefreshMode windowRefreshMode   = RefreshMode.AdaptiveVSync;
-		private AAQuality   antialiasingQuality = AAQuality.High;
-		private float       soundEffectVol      = 1.0f;
-		private float       soundSpeechVol      = 1.0f;
-		private float       soundMusicVol       = 1.0f;
-		private float       soundMasterVol      = 1.0f;
+		private string      userName            = "Unknown";
+		private int         gfxWidth            = 800;
+		private int         gfxHeight           = 600;
+		private ScreenMode  gfxMode             = ScreenMode.Window;
+		private AAQuality   gfxAAQuality        = AAQuality.High;
+		private RefreshMode gfxRefreshMode      = RefreshMode.AdaptiveVSync;
+		private float       sfxEffectVol        = 1.0f;
+		private float       sfxSpeechVol        = 1.0f;
+		private float       sfxMusicVol         = 1.0f;
+		private float       sfxMasterVol        = 1.0f;
 		private bool        systemCursorVisible = false;
 		private object      customData          = null;
 
 		/// <summary>
-		/// [GET / SET] Size of the game's display area when in windowed mode.
+		/// [GET / SET] The player's name. This may be his main character's name or simply remain unused.
 		/// </summary>
-		public Point2 WindowSize
+		public string UserName
 		{
-			get { return this.windowSize; }
-			set { this.windowSize = value; }
+			get { return this.userName; }
+			set { this.userName = value; }
 		}
 		/// <summary>
-		/// [GET / SET] Describes the way the game window is set up with regard to the screen on which the game runs.
+		/// [GET / SET] Width of the game's display area.
 		/// </summary>
-		public ScreenMode WindowMode
+		public int GfxWidth
 		{
-			get { return this.windowMode; }
-			set { this.windowMode = value; }
+			get { return this.gfxWidth; }
+			set { this.gfxWidth = value; }
+		}
+		/// <summary>
+		/// [GET / SET] Height of the game's display area.
+		/// </summary>
+		public int GfxHeight
+		{
+			get { return this.gfxHeight; }
+			set { this.gfxHeight = value; }
+		}
+		/// <summary>
+		/// [GET / SET] Describes the way the game window is set up.
+		/// </summary>
+		public ScreenMode GfxMode
+		{
+			get { return this.gfxMode; }
+			set { this.gfxMode = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Specifies the quality of anti-aliasing used in rendering.
 		/// </summary>
 		public AAQuality AntialiasingQuality
 		{
-			get { return this.antialiasingQuality; }
-			set { this.antialiasingQuality = value; }
+			get { return this.gfxAAQuality; }
+			set { this.gfxAAQuality = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Specifies the way in which Duality switches and refreshes visual and update frames.
 		/// </summary>
-		public RefreshMode WindowRefreshMode
+		public RefreshMode RefreshMode
 		{
-			get { return this.windowRefreshMode; }
-			set { this.windowRefreshMode = value; }
+			get { return this.gfxRefreshMode; }
+			set { this.gfxRefreshMode = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Determines whether or not the system cursor should be visible in windowed mode.
@@ -65,34 +83,34 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] Volume factor of sound effects. This is applied automatically by the <see cref="Duality.Audio.SoundDevice"/> based on the <see cref="Duality.Audio.SoundType"/>.
 		/// </summary>
-		public float SoundEffectVol
+		public float SfxEffectVol
 		{
-			get { return this.soundEffectVol; }
-			set { this.soundEffectVol = value; }
+			get { return this.sfxEffectVol; }
+			set { this.sfxEffectVol = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Volume factor of speech / vocals. This is applied automatically by the <see cref="Duality.Audio.SoundDevice"/> based on the <see cref="Duality.Audio.SoundType"/>.
 		/// </summary>
-		public float SoundSpeechVol
+		public float SfxSpeechVol
 		{
-			get { return this.soundSpeechVol; }
-			set { this.soundSpeechVol = value; }
+			get { return this.sfxSpeechVol; }
+			set { this.sfxSpeechVol = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Volume factor of music. This is applied automatically by the <see cref="Duality.Audio.SoundDevice"/> based on the <see cref="Duality.Audio.SoundType"/>.
 		/// </summary>
-		public float SoundMusicVol
+		public float SfxMusicVol
 		{
-			get { return this.soundMusicVol; }
-			set { this.soundMusicVol = value; }
+			get { return this.sfxMusicVol; }
+			set { this.sfxMusicVol = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Volume master factor for sound in general. This is applied automatically by the <see cref="Duality.Audio.SoundDevice"/>.
 		/// </summary>
-		public float SoundMasterVol
+		public float SfxMasterVol
 		{
-			get { return this.soundMasterVol; }
-			set { this.soundMasterVol = value; }
+			get { return this.sfxMasterVol; }
+			set { this.sfxMasterVol = value; }
 		}
 		/// <summary>
 		/// [GET / SET] Use this property to store custom user data.

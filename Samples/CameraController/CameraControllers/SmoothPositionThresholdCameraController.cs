@@ -61,7 +61,7 @@ namespace CameraController
 			Vector3 targetVelocity = posDiff * 0.1f * MathF.Pow(2.0f, -this.smoothness);
 
 			// Move the camera
-			transform.MoveBy(targetVelocity * Time.TimeMult);
+			transform.MoveByAbs(targetVelocity * Time.TimeMult);
 		}
 	}
 }

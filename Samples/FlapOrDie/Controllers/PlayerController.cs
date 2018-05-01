@@ -4,9 +4,8 @@ using System.Linq;
 
 using Duality;
 using Duality.Input;
-using Duality.Drawing;
-using Duality.Resources;
 using Duality.Components.Physics;
+using Duality.Resources;
 using Duality.Components.Renderers;
 
 namespace FlapOrDie.Controllers
@@ -14,9 +13,9 @@ namespace FlapOrDie.Controllers
     [RequiredComponent(typeof(RigidBody))]
     public class PlayerController : Component, ICmpUpdatable, ICmpCollisionListener
     {
-        private SpriteRenderer bodyRenderer;
-        private SpriteRenderer frontWingRenderer;
-        private SpriteRenderer backWingRenderer;
+        private AnimSpriteRenderer bodyRenderer;
+        private AnimSpriteRenderer frontWingRenderer;
+        private AnimSpriteRenderer backWingRenderer;
         private float impulseStrength;
         private ContentRef<Scene> menuScene;
 
@@ -25,17 +24,17 @@ namespace FlapOrDie.Controllers
         [DontSerialize] private float flapTime;
         [DontSerialize] private bool isDead;
 
-        public SpriteRenderer Body
+        public AnimSpriteRenderer Body
         {
             get { return this.bodyRenderer; }
             set { this.bodyRenderer = value; }
         }
-        public SpriteRenderer FrontWing
+        public AnimSpriteRenderer FrontWing
         {
             get { return this.frontWingRenderer; }
             set { this.frontWingRenderer = value; }
         }
-        public SpriteRenderer BackWing
+        public AnimSpriteRenderer BackWing
         {
             get { return this.backWingRenderer; }
             set { this.backWingRenderer = value; }
@@ -68,12 +67,12 @@ namespace FlapOrDie.Controllers
 			this.GameObj.GetComponent<RigidBody>().LinearVelocity = Vector2.Zero;
 			this.GameObj.GetComponent<RigidBody>().AngularVelocity = 0;
             
-            this.Body.SpriteIndex = 0;
+            Body.AnimFirstFrame = 1;
         }
 
         void ICmpUpdatable.OnUpdate()
         {
-            float lastDelta = Time.MillisecondsPerFrame * Time.TimeMult / 1000;
+            float lastDelta = Time.MsPFMult * Time.TimeMult / 1000;
             if (this.rigidBody == null) this.rigidBody = this.GameObj.GetComponent<RigidBody>();
 
             if (!this.isDead)
@@ -81,7 +80,7 @@ namespace FlapOrDie.Controllers
                 if (DualityApp.Keyboard.KeyHit(Key.Space))
                 {
                     this.rigidBody.ApplyLocalImpulse(-Vector2.UnitY * this.impulseStrength);
-                    flapTime = (Time.MillisecondsPerFrame / 1000 * 3);
+                    flapTime = (Time.MsPFMult / 1000 * 3);
                 }
             }
 
@@ -117,7 +116,7 @@ namespace FlapOrDie.Controllers
             {
                 // otherwise, you're dead!
                 this.isDead = true;
-                this.Body.SpriteIndex = 1;
+                Body.AnimFirstFrame = 2;
             }
         }
         void ICmpCollisionListener.OnCollisionEnd(Component sender, CollisionEventArgs args)

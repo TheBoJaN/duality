@@ -13,14 +13,15 @@ using Duality.Editor.UndoRedoActions;
 
 namespace Duality.Editor.Plugins.Base.EditorActions
 {
-	/// <summary>
-	/// Creates a new Material Resource based on the Texture.
-	/// </summary>
 	public class TextureToMaterial : EditorSingleAction<Texture>
 	{
 		public override string Name
 		{
 			get { return EditorBaseRes.ActionName_CreateMaterial; }
+		}
+		public override string Description
+		{
+			get { return EditorBaseRes.ActionDesc_CreateMaterial; }
 		}
 		public override Image Icon
 		{
@@ -30,7 +31,7 @@ namespace Duality.Editor.Plugins.Base.EditorActions
 		public override void Perform(Texture obj)
 		{
 			string resPath = PathHelper.GetFreePath(obj.FullName, Resource.GetFileExtByType<Material>());
-			Material res = new Material(DrawTechnique.Mask, obj);
+			Material res = new Material(DrawTechnique.Mask, ColorRgba.White, obj);
 			res.Save(resPath);
 		}
 	}

@@ -10,18 +10,22 @@ namespace DualStickSpaceShooter
 {
 	public class GameOverScreen : Component, ICmpRenderer, ICmpUpdatable
 	{
-		private ContentRef<Font>     font                     = null;
-		private BatchInfo            blendMaterial            = null;
-		private ContentRef<Material> controlInfoMouseKeyboard = null;
-		private ContentRef<Material> controlInfoGamepad       = null;
+		private ContentRef<Font>		font						= null;
+		private	BatchInfo				blendMaterial				= null;
+		private ContentRef<Material>	controlInfoMouseKeyboard	= null;
+		private ContentRef<Material>	controlInfoGamepad			= null;
 		
-		[DontSerialize] private bool   gameStarted      = false;
-		[DontSerialize] private bool   gameOver         = false;
-		[DontSerialize] private bool   gameWin          = false;
-		[DontSerialize] private float  lastTimeAnyAlive = 0.0f;
-		[DontSerialize] private Canvas canvas           = null;
+		[DontSerialize] private	bool			gameStarted			= false;
+		[DontSerialize] private	bool			gameOver			= false;
+		[DontSerialize] private	bool			gameWin				= false;
+		[DontSerialize] private float			lastTimeAnyAlive	= 0.0f;
+		[DontSerialize] private CanvasBuffer	buffer				= null;
 
 
+		float ICmpRenderer.BoundRadius
+		{
+			get { return float.MaxValue; }
+		}
 		public ContentRef<Font> Font
 		{
 			get { return this.font; }
@@ -73,21 +77,21 @@ namespace DualStickSpaceShooter
 				}
 			}
 		}
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			// Only render when in screen overlay mode and the visibility mask is non-empty.
+			return 
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			// Create a Canvas for high-level drawing commands.
-			// We'll re-use this to keep performance high and allocations low.
-			if (this.canvas == null) this.canvas = new Canvas();
+			// Create a buffer to cache and re-use vertices. Not required, but will boost performance.
+			if (this.buffer == null) this.buffer = new CanvasBuffer();
 
-			// Prepare the canvas for drawing
-			this.canvas.Begin(device);
-			this.canvas.State.TextFont = this.font;
+			// Create a Canvas to auto-generate vertices from high-level drawing commands.
+			Canvas canvas = new Canvas(device, this.buffer);
+			canvas.State.TextFont = this.font;
 
 			// If the game is over or won, display "game over" screen
 			if (this.gameOver || this.gameWin)
@@ -106,48 +110,48 @@ namespace DualStickSpaceShooter
 
 				if (this.blendMaterial != null && blendAnimProgress > 0.0f)
 				{
-					this.canvas.PushState();
+					canvas.PushState();
 
 					if (this.gameOver)
 					{
 						// Set up our special blending Material and specify the threshold to blend to
-						this.blendMaterial.SetValue("threshold", 1.0f - blendAnimProgress);
-						this.canvas.State.SetMaterial(this.blendMaterial);
-						this.canvas.State.ColorTint = ColorRgba.Black;
+						this.blendMaterial.SetUniform("threshold", 1.0f - blendAnimProgress);
+						canvas.State.SetMaterial(this.blendMaterial);
+						canvas.State.ColorTint = ColorRgba.Black;
 
 						// Specify a texture coordinate rect so it spans the entire screen repeating itself, instead of being stretched
 						if (this.blendMaterial.MainTexture != null)
 						{
 							Random rnd = new Random((int)this.lastTimeAnyAlive);
-							Vector2 randomTranslate = rnd.NextVector2(0.0f, 0.0f, this.canvas.State.TextureBaseSize.X, this.canvas.State.TextureBaseSize.Y);
-							this.canvas.State.TextureCoordinateRect = new Rect(
+							Vector2 randomTranslate = rnd.NextVector2(0.0f, 0.0f, canvas.State.TextureBaseSize.X, canvas.State.TextureBaseSize.Y);
+							canvas.State.TextureCoordinateRect = new Rect(
 								randomTranslate.X, 
 								randomTranslate.Y, 
-								device.TargetSize.X / this.canvas.State.TextureBaseSize.X, 
-								device.TargetSize.Y / this.canvas.State.TextureBaseSize.Y);
+								device.TargetSize.X / canvas.State.TextureBaseSize.X, 
+								device.TargetSize.Y / canvas.State.TextureBaseSize.Y);
 						}
 					}
 					else
 					{
 						// If we won, simply fade to white
-						this.canvas.State.SetMaterial(DrawTechnique.Add);
-						this.canvas.State.ColorTint = ColorRgba.White.WithAlpha(blendAnimProgress);
+						canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Add, ColorRgba.White));
+						canvas.State.ColorTint = ColorRgba.White.WithAlpha(blendAnimProgress);
 					}
 
 					// Fill the screen with a rect of our Material
-					this.canvas.FillRect(0, 0, device.TargetSize.X, device.TargetSize.Y);
+					canvas.FillRect(0, 0, device.TargetSize.X, device.TargetSize.Y);
 
-					this.canvas.PopState();
+					canvas.PopState();
 				}
 
 				if (this.font != null && textAnimProgress > 0.0f)
 				{
-					this.canvas.PushState();
+					canvas.PushState();
 
 					// Determine which text to draw to screen and where to draw it
 					string gameOverText = this.gameWin ? "is it over..?" : "darkness...";
-					Vector2 fullTextSize = this.canvas.MeasureText(gameOverText);
-					Vector2 textPos = (Vector2)device.TargetSize * 0.5f - fullTextSize * 0.5f;
+					Vector2 fullTextSize = canvas.MeasureText(gameOverText);
+					Vector2 textPos = device.TargetSize * 0.5f - fullTextSize * 0.5f;
 					gameOverText = gameOverText.Substring(0, MathF.RoundToInt(gameOverText.Length * textAnimProgress));
 
 					// Make sure not to draw inbetween pixels, so the text is perfectly sharp.
@@ -155,51 +159,49 @@ namespace DualStickSpaceShooter
 					textPos.Y = MathF.Round(textPos.Y);
 
 					// Draw the text to screen
-					this.canvas.State.ColorTint = this.gameWin ? ColorRgba.Black : ColorRgba.White;
-					this.canvas.DrawText(gameOverText, textPos.X, textPos.Y);
+					canvas.State.ColorTint = this.gameWin ? ColorRgba.Black : ColorRgba.White;
+					canvas.DrawText(gameOverText, textPos.X, textPos.Y);
 
-					this.canvas.PopState();
+					canvas.PopState();
 				}
 
 				if (controlInfoAnimProgress > 0.0f)
 				{
-					Vector2 infoBasePos = (Vector2)device.TargetSize * 0.5f + new Vector2(0.0f, device.TargetSize.Y * 0.25f);
+					Vector2 infoBasePos = device.TargetSize * 0.5f + new Vector2(0.0f, device.TargetSize.Y * 0.25f);
 					if (this.controlInfoMouseKeyboard != null)
 					{
-						this.canvas.PushState();
+						canvas.PushState();
 
-						Vector2 texSize = (Vector2)this.controlInfoMouseKeyboard.Res.MainTexture.Res.Size * 0.5f;
+						Vector2 texSize = this.controlInfoMouseKeyboard.Res.MainTexture.Res.Size * 0.5f;
 
-						this.canvas.State.SetMaterial(this.controlInfoMouseKeyboard);
-						this.canvas.State.ColorTint = ColorRgba.White.WithAlpha(controlInfoAnimProgress);
-						this.canvas.FillRect(
+						canvas.State.SetMaterial(this.controlInfoMouseKeyboard);
+						canvas.State.ColorTint = ColorRgba.White.WithAlpha(controlInfoAnimProgress);
+						canvas.FillRect(
 							infoBasePos.X - texSize.X * 0.5f,
 							infoBasePos.Y - texSize.Y - 10,
 							texSize.X,
 							texSize.Y);
 
-						this.canvas.PopState();
+						canvas.PopState();
 					}
 					if (this.controlInfoGamepad != null)
 					{
-						this.canvas.PushState();
+						canvas.PushState();
 
-						Vector2 texSize = (Vector2)this.controlInfoGamepad.Res.MainTexture.Res.Size * 0.5f;
+						Vector2 texSize = this.controlInfoGamepad.Res.MainTexture.Res.Size * 0.5f;
 
-						this.canvas.State.SetMaterial(this.controlInfoGamepad);
-						this.canvas.State.ColorTint = ColorRgba.White.WithAlpha(controlInfoAnimProgress);
-						this.canvas.FillRect(
+						canvas.State.SetMaterial(this.controlInfoGamepad);
+						canvas.State.ColorTint = ColorRgba.White.WithAlpha(controlInfoAnimProgress);
+						canvas.FillRect(
 							infoBasePos.X - texSize.X * 0.5f,
 							infoBasePos.Y + 10,
 							texSize.X,
 							texSize.Y);
 
-						this.canvas.PopState();
+						canvas.PopState();
 					}
 				}
 			}
-
-			this.canvas.End();
 		}
 	}
 }

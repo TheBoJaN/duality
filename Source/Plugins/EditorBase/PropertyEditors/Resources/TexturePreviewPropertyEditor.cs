@@ -70,7 +70,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				return PreviewProvider.GetPreviewImage(
 					this.value, 
 					this.ClientRectangle.Width - 2, 
-					Math.Min(BigHeight - 2, this.value.ContentHeight), 
+					Math.Min(BigHeight - 2, this.value.PixelHeight), 
 					PreviewSizeMode.FixedHeight);
 			}
 			else
@@ -116,33 +116,33 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				this.rectLabelHeight, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				this.value != null ? this.value.ContentWidth.ToString() : " - ", 
+				this.value != null ? this.value.PixelWidth.ToString() : " - ", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelWidthVal, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				this.value != null ? this.value.ContentHeight.ToString() : " - ", 
+				this.value != null ? this.value.PixelHeight.ToString() : " - ", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelHeightVal, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				"TexWidth:", 
+				"OglWidth:", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelOglWidth, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				"TexHeight:", 
+				"OglHeight:", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelOglHeight, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				this.value != null ? this.value.InternalWidth.ToString() : " - ", 
+				this.value != null ? this.value.TexelWidth.ToString() : " - ", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelOglWidthVal, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);
 			ControlRenderer.DrawStringLine(e.Graphics, 
-				this.value != null ? this.value.InternalHeight.ToString() : " - ", 
+				this.value != null ? this.value.TexelHeight.ToString() : " - ", 
 				SystemFonts.DefaultFont, 
 				this.rectLabelOglHeightVal, 
 				!this.Enabled ? ControlRenderer.ColorGrayText : ControlRenderer.ColorText);

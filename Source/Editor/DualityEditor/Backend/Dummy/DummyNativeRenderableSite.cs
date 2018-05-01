@@ -22,10 +22,6 @@ namespace Duality.Editor.Backend.Dummy
 			this.control = dummyControl;
 		}
 
-		AAQuality INativeRenderableSite.AntialiasingQuality
-		{
-			get { return AAQuality.Off; }
-		}
 		Control INativeRenderableSite.Control
 		{
 			get { return this.control; }

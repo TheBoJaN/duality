@@ -126,7 +126,7 @@ namespace DualStickSpaceShooter
 				{
 					if (this.moveSoundInst == null)
 					{
-						this.moveSoundInst = DualityApp.Sound.PlaySound3D(this.moveSound, this.doorPanel.GameObj, false);
+						this.moveSoundInst = DualityApp.Sound.PlaySound3D(this.moveSound, this.doorPanel.GameObj);
 						this.moveSoundInst.FadeIn(0.5f);
 						this.moveSoundInst.Looped = true;
 					}
@@ -134,13 +134,16 @@ namespace DualStickSpaceShooter
 				}
 			}
 		}
-		void ICmpInitializable.OnActivate() {}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnInit(Component.InitContext context) {}
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context)
 		{
-			if (this.moveSoundInst != null)
+			if (context == ShutdownContext.Deactivate)
 			{
-				this.moveSoundInst.Dispose();
-				this.moveSoundInst = null;
+				if (this.moveSoundInst != null)
+				{
+					this.moveSoundInst.Dispose();
+					this.moveSoundInst = null;
+				}
 			}
 		}
 	}

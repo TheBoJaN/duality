@@ -13,7 +13,7 @@ namespace Duality.Tests
 
 		public static string EmbeddedResourcesDir
 		{
-			get { return Path.Combine("..", "..", "Test", "Core", "EmbeddedResources"); }
+			get { return Path.Combine("..", "EmbeddedResources"); }
 		}
 		public static string LocalTestMemoryFilePath
 		{

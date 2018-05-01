@@ -13,7 +13,7 @@ namespace Duality.Plugins.Tilemaps
 	/// </summary>
 	[EditorHintCategory(TilemapsResNames.CategoryTilemaps)]
 	[EditorHintImage(TilemapsResNames.ImageTilemap)]
-	public class Tilemap : Component, ICmpSerializeListener
+	public class Tilemap : Component, ICmpInitializable
 	{
 		private ContentRef<Tileset> tileset  = null;
 		private TilemapData         tileData = new TilemapData();
@@ -202,11 +202,13 @@ namespace Duality.Plugins.Tilemaps
 			this.OnTilesChanged(0, 0, this.tileData.Tiles.Width, this.tileData.Tiles.Height);
 		}
 
-		void ICmpSerializeListener.OnLoaded()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			this.ResolveTileIndices(0, 0, this.tileData.Size.X, this.tileData.Size.Y);
+			if (context == InitContext.Loaded)
+			{
+				this.ResolveTileIndices(0, 0, this.tileData.Size.X, this.tileData.Size.Y);
+			}
 		}
-		void ICmpSerializeListener.OnSaved() { }
-		void ICmpSerializeListener.OnSaving() { }
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) { }
 	}
 }

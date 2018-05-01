@@ -217,7 +217,7 @@ namespace DualStickSpaceShooter
 				else if (hasInputMethod && Player.IsAnyPlayerAlive && !this.hasReachedGoal)
 				{
 					// Respawn when possible
-					this.respawnTime += Time.MillisecondsPerFrame * Time.TimeMult;
+					this.respawnTime += Time.MsPFMult * Time.TimeMult;
 					if (this.respawnTime > RespawnDelay)
 					{
 						// Move near alive player

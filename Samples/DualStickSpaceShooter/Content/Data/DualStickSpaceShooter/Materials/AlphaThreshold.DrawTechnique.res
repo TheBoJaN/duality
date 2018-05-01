@@ -1,12 +1,9 @@
 ﻿<root dataType="Struct" type="Duality.Resources.DrawTechnique" id="129723834">
-  <assetInfo />
   <blendType dataType="Enum" type="Duality.Drawing.BlendMode" name="Alpha" value="3" />
-  <fragmentShader dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.FragmentShader]]">
-    <contentPath dataType="String">Data\DualStickSpaceShooter\Materials\AlphaThreshold.FragmentShader.res</contentPath>
-  </fragmentShader>
-  <prefType />
-  <vertexShader dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.VertexShader]]">
-    <contentPath dataType="String">Default:VertexShader:Minimal</contentPath>
-  </vertexShader>
+  <formatPref dataType="Int">-1</formatPref>
+  <shader dataType="Struct" type="Duality.ContentRef`1[[Duality.Resources.ShaderProgram]]">
+    <contentPath dataType="String">Data\DualStickSpaceShooter\Materials\AlphaThresholdProgram.ShaderProgram.res</contentPath>
+  </shader>
+  <sourcePath />
 </root>
 <!-- XmlFormatterBase Document Separator -->

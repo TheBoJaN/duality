@@ -39,12 +39,17 @@ namespace AudioHandling
 			set { this.soundsInside = value ?? new ContentRef<Sound>[0]; }
 		}
 
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		float ICmpRenderer.BoundRadius
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			get { return float.MaxValue; }
 		}
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
+		{
+			return 
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None;
+		}
+
 		void ICmpUpdatable.OnUpdate()
 		{
 			// Allow the user to input where to go
@@ -86,8 +91,7 @@ namespace AudioHandling
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			Canvas canvas = new Canvas();
-			canvas.Begin(device);
+			Canvas canvas = new Canvas(device);
 			
 			Vector2 screenSize = device.TargetSize;
 
@@ -114,8 +118,6 @@ namespace AudioHandling
 			canvas.State.ColorTint = ColorRgba.White;
 			canvas.DrawText(this.stateText, 10, screenSize.Y - 10, 0.0f, null, Alignment.BottomLeft, true);
 			canvas.DrawText(string.Format("{0:F}", this.inside), 250, screenSize.Y - 10, 0.0f, Alignment.BottomLeft, true);
-
-			canvas.End();
 		}
 
 		private void SyncSounds(IList<ContentRef<Sound>> sounds, ref SoundInstance[] playing)

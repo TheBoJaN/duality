@@ -52,8 +52,7 @@
     <string>DualityEditor.xml</string>
     <string>DualityLauncher.*</string>
     <string>DualityUpdater.*</string>
-    <string>DualityPhysics.pdb</string>
-    <string>DualityPhysics.xml</string>
+    <string>FarseerDuality.*</string>
     <string>Ionic.Zip.*</string>
     <string>NVorbis.*</string>
     <string>OpenALSoft32.*</string>

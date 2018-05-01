@@ -381,7 +381,10 @@ namespace Duality.Tests.Components
 			
 			// Check iteration order
 			List<TestComponent> iterateOrder = new List<TestComponent>();
-			root.GetComponents(iterateOrder);
+			root.IterateComponents<TestComponent>(component => 
+			{
+				iterateOrder.Add(component);
+			});
 			this.AssertComponentOrder(iterateOrder, 5, Component.ExecOrder, false);
 		}
 		[Test] public void EnforceOrderGameObjectIterateLoadedScene()
@@ -411,7 +414,10 @@ namespace Duality.Tests.Components
 			
 			// Check iteration order
 			List<TestComponent> iterateOrder = new List<TestComponent>();
-			root.GetComponents(iterateOrder);
+			root.IterateComponents<TestComponent>(component => 
+			{
+				iterateOrder.Add(component);
+			});
 			this.AssertComponentOrder(iterateOrder, 5, Component.ExecOrder, false);
 		}
 		[Test] public void EnforceOrderGameObjectIterateLoadedPrefab()
@@ -441,7 +447,10 @@ namespace Duality.Tests.Components
 			
 			// Check iteration order
 			List<TestComponent> iterateOrder = new List<TestComponent>();
-			root.GetComponents(iterateOrder);
+			root.IterateComponents<TestComponent>(component => 
+			{
+				iterateOrder.Add(component);
+			});
 			this.AssertComponentOrder(iterateOrder, 5, Component.ExecOrder, false);
 		}
 
@@ -492,7 +501,7 @@ namespace Duality.Tests.Components
 			// If there is a loop in the execution order requirements, make sure
 			// a log informs the user about this.
 			TestingLogOutput logWatcher = new TestingLogOutput();
-			Logs.AddGlobalOutput(logWatcher);
+			Log.AddGlobalOutput(logWatcher);
 
 			ComponentExecutionOrder order = new ComponentExecutionOrder();
 
@@ -509,7 +518,7 @@ namespace Duality.Tests.Components
 			logWatcher.AssertNoErrors();
 			logWatcher.AssertWarning();
 
-			Logs.RemoveGlobalOutput(logWatcher);
+			Log.RemoveGlobalOutput(logWatcher);
 		}
 		[Test] public void ExecOrderBaseTypeRule()
 		{
@@ -661,11 +670,9 @@ namespace Duality.Tests.Components
 
 		private void ShuffleComponentOrder(GameObject obj)
 		{
-			Random rnd = new Random(1);
 			FieldInfo field = typeof(GameObject).GetField("compList", BindingFlags.NonPublic | BindingFlags.Instance);
 			List<Component> list = (List<Component>)field.GetValue(obj);
-			rnd.Shuffle(list);
-			Component[] shuffled = list.ToArray();
+			Component[] shuffled = list.Shuffle(new Random(1)).ToArray();
 			list.Clear();
 			list.AddRange(shuffled);
 		}
@@ -677,8 +684,7 @@ namespace Duality.Tests.Components
 			if (includeRoot)
 			{
 				objectCount--;
-				rnd.Shuffle(componentTypes);
-				foreach (Type type in componentTypes)
+				foreach (Type type in componentTypes.Shuffle(rnd))
 					root.AddComponent(type);
 			}
 
@@ -686,8 +692,7 @@ namespace Duality.Tests.Components
 			for (int i = 0; i < obj.Length; i++)
 			{
 				obj[i] = new GameObject(string.Format("Object #{0}", i));
-				rnd.Shuffle(componentTypes);
-				foreach (Type type in componentTypes)
+				foreach (Type type in componentTypes.Shuffle(rnd))
 					obj[i].AddComponent(type);
 
 				if ((i % 2) == 0)
@@ -705,8 +710,7 @@ namespace Duality.Tests.Components
 			for (int i = 0; i < obj.Length; i++)
 			{
 				obj[i] = new GameObject(string.Format("Object #{0}", i));
-				rnd.Shuffle(componentTypes);
-				foreach (Type type in componentTypes)
+				foreach (Type type in componentTypes.Shuffle(rnd))
 				{
 					obj[i].AddComponent(type);
 				}

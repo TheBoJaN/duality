@@ -99,14 +99,14 @@ namespace FlapOrDie.Controllers
             this.scoreText.Text.SourceText = String.Format("Score: {0} {1}", player.Points, highschore);
 
             deltaPos.X = this.baseSpeed + (player.Points * this.pointsMultiplier);
-            deltaPos.X *= Time.MillisecondsPerFrame * Time.TimeMult / 1000;
+            deltaPos.X *= Time.MsPFMult * Time.TimeMult / 1000;
 
 			this.bgScroller.Update(deltaPos.X);
 
             IEnumerable<GameObject> obstacles = this.GameObj.ParentScene.FindGameObjects<Tags.Obstacle>();
             foreach(GameObject obstacle in obstacles)
             {
-                obstacle.Transform.MoveByLocal(-this.deltaPos);
+                obstacle.Transform.MoveBy(-this.deltaPos);
                 if (obstacle.Transform.Pos.X < -FlapOrDieCorePlugin.HalfWidth - 50)
                 {
                     obstacle.DisposeLater();
@@ -140,6 +140,10 @@ namespace FlapOrDie.Controllers
             Vector3 startPosition = new Vector3(FlapOrDieCorePlugin.HalfWidth + 50, MathF.Rnd.NextFloat(-variance, variance), 0);
             GameObject newObstacle = this.obstaclePrefab.Res.Instantiate();
             newObstacle.Transform.Pos = startPosition;
+			foreach(AnimSpriteRenderer asr in newObstacle.GetComponentsInChildren<AnimSpriteRenderer>())
+			{
+				asr.AnimFirstFrame = MathF.Rnd.Next(asr.SharedMaterial.Res.MainTexture.Res.BasePixmap.Res.AnimFrames) + 1;
+			}
 
             this.GameObj.ParentScene.AddObject(newObstacle);
         }

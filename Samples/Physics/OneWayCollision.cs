@@ -40,15 +40,21 @@ namespace Duality.Samples.Physics
 			return true;
 		}
 
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			RigidBody body = this.GameObj.GetComponent<RigidBody>();
-			body.CollisionFilter += this.CollisionFilter;
+			if (context == InitContext.Activate)
+			{
+				RigidBody body = this.GameObj.GetComponent<RigidBody>();
+				body.CollisionFilter += this.CollisionFilter;
+			}
 		}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context)
 		{
-			RigidBody body = this.GameObj.GetComponent<RigidBody>();
-			body.CollisionFilter -= this.CollisionFilter;
+			if (context == ShutdownContext.Deactivate)
+			{
+				RigidBody body = this.GameObj.GetComponent<RigidBody>();
+				body.CollisionFilter -= this.CollisionFilter;
+			}
 		}
 	}
 }

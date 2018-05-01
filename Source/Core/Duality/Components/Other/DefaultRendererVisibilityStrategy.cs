@@ -19,75 +19,38 @@ namespace Duality.Components
 		[DontSerialize]
 		[CloneField(CloneFieldFlags.DontSkip)]
 		private Dictionary<Type,RawList<ICmpRenderer>> renderersByType = new Dictionary<Type,RawList<ICmpRenderer>>();
-		[DontSerialize]
-		private RawList<CullingInfo> cullingInfo = new RawList<CullingInfo>();
-		[DontSerialize]
-		private RawList<ICmpRenderer> cullingRenderers = new RawList<ICmpRenderer>();
 
 		public bool IsRendererQuerySorted
 		{
 			get { return true; }
 		}
 
-		public void QueryVisibleRenderers(DrawDevice device, RawList<ICmpRenderer> visibleRenderers)
+		public void QueryVisibleRenderers(IDrawDevice device, RawList<ICmpRenderer> targetList)
 		{
-			int activeCount = this.cullingInfo.Count;
-			CullingInfo[] cullingData = this.cullingInfo.Data;
-			ICmpRenderer[] rendererData = this.cullingRenderers.Data;
+			// Empty the cached list of visible renderers
+			targetList.Count = 0;
+			targetList.Reserve(this.totalRendererCount);
 
-			visibleRenderers.Clear();
-			visibleRenderers.Reserve(activeCount);
-
-			ICmpRenderer[] visibleRendererData = visibleRenderers.Data;
+			// Copy references to all renderers that are visible to the target device
 			int visibleCount = 0;
-
-			VisibilityFlag mask = device.VisibilityMask;
-			for (int i = 0; i < activeCount; i++)
-			{
-				// Check group and overlay / world visibility
-				if ((cullingData[i].Visibility & VisibilityFlag.AllGroups & mask) == VisibilityFlag.None) continue;
-				if ((cullingData[i].Visibility & VisibilityFlag.ScreenOverlay) != (mask & VisibilityFlag.ScreenOverlay)) continue;
-
-				// Check spatial visibility
-				if (!device.IsSphereInView(cullingData[i].Position, cullingData[i].Radius)) continue;
-
-				// Add renderer to visible result list
-				visibleRendererData[visibleCount] = rendererData[i];
-				visibleCount++;
-			}
-
-			visibleRenderers.Count = visibleCount;
-		}
-		public void Update()
-		{
-			// Clear previous data and allocate space for the update
-			this.cullingInfo.Clear();
-			this.cullingInfo.Reserve(this.totalRendererCount);
-			this.cullingRenderers.Clear();
-			this.cullingRenderers.Reserve(this.totalRendererCount);
-
-			// Retrieve culling data for all currently active renderers, sorted by type
-			int activeCount = 0;
-			CullingInfo[] cullingData = this.cullingInfo.Data;
-			ICmpRenderer[] rendererData = this.cullingRenderers.Data;
+			ICmpRenderer[] targetData = targetList.Data;
 			foreach (var pair in this.renderersByType)
 			{
-				ICmpRenderer[] renderers = pair.Value.Data;
-				for (int i = 0; i < renderers.Length; i++)
+				ICmpRenderer[] data = pair.Value.Data;
+				for (int i = 0; i < data.Length; i++)
 				{
 					if (i >= pair.Value.Count) break;
-					if (!(renderers[i] as Component).Active) continue;
 
-					rendererData[activeCount] = renderers[i];
-					renderers[i].GetCullingInfo(out cullingData[activeCount]);
-					activeCount++;
+					if ((data[i] as Component).Active && data[i].IsVisible(device))
+					{
+						targetData[visibleCount] = data[i];
+						visibleCount++;
+					}
 				}
 			}
-
-			// Adjust item count to match the active renderers
-			this.cullingInfo.Count = activeCount;
-			this.cullingRenderers.Count = activeCount;
+			targetList.Count = visibleCount;
 		}
+		public void Update() { }
 
 		public void AddRenderer(ICmpRenderer renderer)
 		{

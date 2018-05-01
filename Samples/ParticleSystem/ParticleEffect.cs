@@ -114,8 +114,8 @@ namespace ParticleSystem
 		}
 		private Texture RetrieveTexture()
 		{
-			if (this.material.IsAvailable && this.material.Res.MainTexture.IsAvailable)
-				return this.material.Res.MainTexture.Res;
+			if (material.IsAvailable && material.Res.MainTexture.IsAvailable)
+				return material.Res.MainTexture.Res;
 			else
 				return null;
 		}
@@ -167,6 +167,8 @@ namespace ParticleSystem
 
 				float particleAngle = objAngle + particleData[i].Angle;
 				float particleScale = objScale;
+
+				device.PreprocessCoords(ref particlePos, ref particleScale);
 
 				Vector2 xDot, yDot;
 				MathF.GetTransformDotVec(particleAngle, particleScale, out xDot, out yDot);
@@ -220,7 +222,7 @@ namespace ParticleSystem
 			if (this.particles != null)
 			{
 				float timeMult = Time.TimeMult;
-				float timePassed = Time.MillisecondsPerFrame * timeMult;
+				float timePassed = Time.MsPFMult * timeMult;
 				
 				Particle[] particleData = this.particles.Data;
 				int particleCount = this.particles.Count;
@@ -246,11 +248,14 @@ namespace ParticleSystem
 			// Update particle emission
 			this.UpdateEmitters();
 		}
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			// When activating, directly update particle emitters once, so there is already something to see.
-			this.UpdateEmitters();
+			if (context == InitContext.Activate)
+			{
+				// When activating, directly update particle emitters once, so there is already something to see.
+				this.UpdateEmitters();
+			}
 		}
-		void ICmpInitializable.OnDeactivate() {}
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) {}
 	}
 }

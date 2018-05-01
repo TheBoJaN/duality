@@ -72,13 +72,16 @@ namespace DualStickSpaceShooter
 				}
 			}
 		}
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			if (this.index == lastVisitedIndex || this.activated)
+			if (context == InitContext.Activate)
 			{
-				this.ChangeParticleEffect();
+				if (this.index == lastVisitedIndex || this.activated)
+				{
+					this.ChangeParticleEffect();
+				}
 			}
 		}
-		void ICmpInitializable.OnDeactivate() {}
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) {}
 	}
 }

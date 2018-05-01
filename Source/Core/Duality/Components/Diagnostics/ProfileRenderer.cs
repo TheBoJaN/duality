@@ -38,7 +38,6 @@ namespace Duality.Components.Diagnostics
 		private Key                  keyToggleGraph    = Key.F4;
 		private Key                  keyResetCounters  = Key.F5;
 
-		[DontSerialize] private Canvas           canvas             = new Canvas();
 		[DontSerialize] private FormattedText    textReport         = null;
 		[DontSerialize] private VertexC1P3T2[]   textReportIconVert = null;
 		[DontSerialize] private VertexC1P3T2[][] textReportTextVert = null;
@@ -46,6 +45,10 @@ namespace Duality.Components.Diagnostics
 		[DontSerialize] private Dictionary<string,GraphCacheEntry> graphCache = new Dictionary<string,GraphCacheEntry>();
 
 
+		float ICmpRenderer.BoundRadius
+		{
+			get { return float.MaxValue; }
+		}
 		/// <summary>
 		/// [GET / SET] Whether or not a text report of the current time profiling results is drawn.
 		/// </summary>
@@ -128,19 +131,18 @@ namespace Duality.Components.Diagnostics
 		}
 
 
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			return 
+				DualityApp.ExecContext == DualityApp.ExecutionContext.Game &&
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			if (DualityApp.ExecContext != DualityApp.ExecutionContext.Game) return;
-
 			Profile.BeginMeasure(@"ProfileRenderer");
-			this.canvas.Begin(device);
-			this.canvas.State.SetMaterial(DrawTechnique.Alpha);
+			Canvas canvas = new Canvas(device);
+			canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, ColorRgba.White, null));
 			
 			bool anyTextReport = this.textReportPerf || this.textReportStat;
 			bool anyGraph = this.drawGraphs && this.counterGraphs.Count > 0;
@@ -185,7 +187,7 @@ namespace Duality.Components.Diagnostics
 				}
 
 				// Draw Report
-				this.canvas.DrawText(textReport, ref textReportTextVert, ref textReportIconVert, textReportRect.X, textReportRect.Y, drawBackground: true);
+				canvas.DrawText(textReport, ref textReportTextVert, ref textReportIconVert, textReportRect.X, textReportRect.Y, drawBackground: true);
 			}
 
 			// Counter Graphs
@@ -223,13 +225,13 @@ namespace Duality.Components.Diagnostics
 						int cursorPos = timeCounter.ValueGraphCursor;
 						for (int i = Math.Max(cursorPos - 1, 0); i <= Math.Min(cursorPos, ProfileCounter.ValueHistoryLen - 1); i++)
 						{
-							float factor = timeCounter.ValueGraph[i] / Time.MillisecondsPerFrame;
+							float factor = timeCounter.ValueGraph[i] / Time.MsPFMult;
 							cache.GraphValues[i] = factor * 0.75f;
 							cache.GraphColors[i] = ColorRgba.Lerp(ColorRgba.White, ColorRgba.Red, factor);
 						}
-						this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-						this.canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
-						this.canvas.State.ColorTint = ColorRgba.White;
+						canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+						canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
+						canvas.State.ColorTint = ColorRgba.White;
 						this.DrawHorizontalGraph(canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
 						cursorRatio = (float)cursorPos / (float)ProfileCounter.ValueHistoryLen;
 					}
@@ -242,15 +244,15 @@ namespace Duality.Components.Diagnostics
 							cache.GraphValues[i] = (float)(statCounter.ValueGraph[i] - statCounter.MinValue) / statCounter.MaxValue;
 							cache.GraphColors[i] = ColorRgba.White;
 						}
-						this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-						this.canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
-						this.canvas.State.ColorTint = ColorRgba.White;
-						this.DrawHorizontalGraph(this.canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
+						canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+						canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
+						canvas.State.ColorTint = ColorRgba.White;
+						this.DrawHorizontalGraph(canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
 						cursorRatio = (float)cursorPos / (float)ProfileCounter.ValueHistoryLen;
 					}
 					
-					this.canvas.DrawText(new string[] { counter.FullName }, ref cache.VertText, graphRect.X, graphY);
-					this.canvas.DrawLine(graphRect.X + graphRect.W * cursorRatio, graphY, graphRect.X + graphRect.W * cursorRatio, graphY + graphH);
+					canvas.DrawText(new string[] { counter.FullName }, ref cache.VertText, graphRect.X, graphY);
+					canvas.DrawLine(graphRect.X + graphRect.W * cursorRatio, graphY, graphRect.X + graphRect.W * cursorRatio, graphY + graphH);
 
 					graphY += graphH + space;
 				}
@@ -269,7 +271,6 @@ namespace Duality.Components.Diagnostics
 				}
 			}
 
-			this.canvas.End();
 			Profile.EndMeasure(@"ProfileRenderer");
 		}
 		void ICmpUpdatable.OnUpdate()
@@ -291,7 +292,7 @@ namespace Duality.Components.Diagnostics
 			
 			IDrawDevice device = canvas.DrawDevice;
 
-			ColorRgba baseColor = canvas.State.ColorTint;
+			ColorRgba baseColor = canvas.State.ColorTint * canvas.State.MaterialDirect.MainColor;
 			float sampleXRatio = w / (float)(values.Length - 1);
 			
 			if (vertices == null)

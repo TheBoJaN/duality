@@ -132,10 +132,10 @@ namespace Duality.Editor.PackageManagement
 					}
 					catch (Exception e)
 					{
-						Logs.Editor.WriteError(
+						Log.Editor.WriteError(
 							"Failed to load PackageManager config file '{0}': {1}",
 							configFilePath,
-							LogFormat.Exception(e));
+							Log.Exception(e));
 					}
 				}
 			}
@@ -282,8 +282,8 @@ namespace Duality.Editor.PackageManagement
 				return;
 			}
 
-			Logs.Editor.Write("Installing package '{0}'...", packageName);
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Installing package '{0}'...", packageName);
+			Log.Editor.PushIndent();
 			try
 			{
 				// Request NuGet to install the package
@@ -291,7 +291,7 @@ namespace Duality.Editor.PackageManagement
 			}
 			finally
 			{
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 		}
 		/// <summary>
@@ -304,8 +304,8 @@ namespace Duality.Editor.PackageManagement
 		}
 		private void UninstallPackage(PackageName packageName, bool force)
 		{
-			Logs.Editor.Write("Uninstalling package '{0}'...", packageName);
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Uninstalling package '{0}'...", packageName);
+			Log.Editor.PushIndent();
 			try
 			{
 				// Find the local package that we'll uninstall
@@ -368,7 +368,7 @@ namespace Duality.Editor.PackageManagement
 			}
 			finally
 			{
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 		}
 		/// <summary>
@@ -414,11 +414,11 @@ namespace Duality.Editor.PackageManagement
 				throw new InvalidOperationException(string.Format(
 					"Can't update package '{0}', because it is not installed.",
 					packageName));
-		}
+			}
 
 			NuGet.IPackage latestPackage = this.cache.GetNuGetPackage(packageName.VersionInvariant);
 			if (latestPackage == null)
-		{
+			{
 				throw new InvalidOperationException(string.Format(
 					"Unable to update package '{0}', because no matching package could be found.",
 					packageName));
@@ -430,15 +430,15 @@ namespace Duality.Editor.PackageManagement
 				return;
 			}
 			
-			Logs.Editor.Write("Updating package '{0}'...", packageName);
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Updating package '{0}'...", packageName);
+			Log.Editor.PushIndent();
 			try
 			{
 				this.manager.UpdatePackage(latestPackage, true, false);
 			}
 			finally
 			{
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 		}
 
@@ -454,29 +454,29 @@ namespace Duality.Editor.PackageManagement
 		{
 			if (!File.Exists(this.env.UpdateFilePath)) return false;
 
-			Logs.Editor.Write("Applying package update...");
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Applying package update...");
+			Log.Editor.PushIndent();
 			try
 			{
 				// Manually perform update operations on the updater itself
 				try
 				{
-					Logs.Editor.Write("Preparing updater...");
+					Log.Editor.Write("Preparing updater...");
 					PackageUpdateSchedule schedule = this.PrepareUpdateSchedule();
 					schedule.ApplyUpdaterChanges(this.env.UpdaterExecFilePath);
 					this.SaveUpdateSchedule(schedule);
 				}
 				catch (Exception e)
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"Can't update '{0}', because an error occurred: {1}", 
 						this.env.UpdaterExecFilePath, 
-						LogFormat.Exception(e));
+						Log.Exception(e));
 					return false;
 				}
 
 				// Run the updater application
-				Logs.Editor.Write("Running updater...");
+				Log.Editor.Write("Running updater...");
 				Process.Start(this.env.UpdaterExecFilePath, string.Format("\"{0}\" \"{1}\" \"{2}\"",
 					this.env.UpdateFilePath,
 					restartEditor ? typeof(DualityEditorApp).Assembly.Location : "",
@@ -484,7 +484,7 @@ namespace Duality.Editor.PackageManagement
 			}
 			finally
 			{
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 
 			return true;
@@ -690,7 +690,7 @@ namespace Duality.Editor.PackageManagement
 			}
 			catch (UriFormatException)
 			{
-				Logs.Editor.WriteError("NuGet repository URI '{0}' has an incorrect format and will be skipped.", repositoryUrl);
+				Log.Editor.WriteError("NuGet repository URI '{0}' has an incorrect format and will be skipped.", repositoryUrl);
 				return null;
 			}
 
@@ -768,9 +768,9 @@ namespace Duality.Editor.PackageManagement
 				catch (Exception exception)
 				{
 					updateSchedule = null;
-					Logs.Editor.WriteError("Error parsing existing package update schedule '{0}': {1}", 
+					Log.Editor.WriteError("Error parsing existing package update schedule '{0}': {1}", 
 						Path.GetFileName(updateFilePath), 
-						LogFormat.Exception(exception));
+						Log.Exception(exception));
 				}
 			}
 
@@ -861,7 +861,7 @@ namespace Duality.Editor.PackageManagement
 		
 		private void manager_PackageUninstalled(object sender, PackageOperationEventArgs e)
 		{
-			Logs.Editor.Write("Integrating uninstall of package '{0} {1}'...", e.Package.Id, e.Package.Version);
+			Log.Editor.Write("Integrating uninstall of package '{0} {1}'...", e.Package.Id, e.Package.Version);
 
 			// Determine all files that are referenced by a package, and the ones referenced by this one
 			IEnumerable<string> localFiles = this.CreateFileMapping(e.Package).Select(p => p.Key);
@@ -925,12 +925,12 @@ namespace Duality.Editor.PackageManagement
 				else if (package.Version > e.Package.Version)
 				{
 					e.Cancel = true;
+				}
 			}
-		}
 		}
 		private void manager_PackageInstalled(object sender, PackageOperationEventArgs e)
 		{
-			Logs.Editor.Write("Integrating install of package '{0} {1}'...", e.Package.Id, e.Package.Version);
+			Log.Editor.Write("Integrating install of package '{0} {1}'...", e.Package.Id, e.Package.Version);
 			
 			// Update package entries from local config
 			PackageInfo packageInfo = this.GetPackage(new PackageName(e.Package.Id, e.Package.Version.Version));

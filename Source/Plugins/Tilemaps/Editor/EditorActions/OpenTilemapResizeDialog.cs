@@ -15,13 +15,17 @@ using Duality.Editor.Plugins.Tilemaps.Properties;
 namespace Duality.Editor.Plugins.Tilemaps.EditorActions
 {
 	/// <summary>
-	/// Opens a user dialog that allows to resize the selected Tilemaps. If no tilemaps are selected, it will resize all currently active, non-hidden tilemaps in the current scene.
+	/// Opens a setup dialog that allows to configure the selected tilemaps.
 	/// </summary>
 	public class OpenTilemapResizeDialog : EditorAction<Tilemap>
 	{
 		public override string Name
 		{
 			get { return TilemapsRes.ActionName_ResizeTilemap; }
+		}
+		public override string Description
+		{
+			get { return TilemapsRes.ActionDesc_ResizeTilemap; }
 		}
 		public override Image Icon
 		{

@@ -650,7 +650,7 @@ namespace Duality.Editor
 
 					if (resType == null)
 					{
-						Logs.Editor.WriteWarning("Could not determine Resource type for File '{0}' using file name only. Skipping it during rename.", file);
+						Log.Editor.WriteWarning("Could not determine Resource type for File '{0}' using file name only. Skipping it during rename.", file);
 						continue;
 					}
 

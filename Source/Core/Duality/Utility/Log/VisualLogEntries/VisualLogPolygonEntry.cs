@@ -49,7 +49,9 @@ namespace Duality
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.pos.Z + basePos.Z);
+				float scale = 1.0f;
+				Vector3 posTemp = this.pos + basePos;
+				target.DrawDevice.PreprocessCoords(ref posTemp, ref scale);
 				borderRadius /= scale;
 				if (this.invariantScale) polyScale /= scale;
 			}
@@ -68,7 +70,7 @@ namespace Duality
 				circlePos.X, 
 				circlePos.Y, 
 				circlePos.Z);
-			target.State.DepthOffset -= 0.01f;
+			if (target.DrawDevice.DepthWrite) target.State.ZOffset -= 0.1f;
 			target.State.ColorTint *= ColorRgba.Black;
 			target.FillPolygonOutline(
 				this.vertices,

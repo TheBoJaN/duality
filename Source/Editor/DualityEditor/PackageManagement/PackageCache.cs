@@ -237,7 +237,7 @@ namespace Duality.Editor.PackageManagement
 			}
 			catch (Exception e)
 			{
-				Logs.Editor.WriteWarning("Error querying NuGet package repository: {0}", LogFormat.Exception(e));
+				Log.Editor.WriteWarning("Error querying NuGet package repository: {0}", Log.Exception(e));
 				return null;
 			}
 		}

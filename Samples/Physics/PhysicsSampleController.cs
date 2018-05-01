@@ -49,6 +49,10 @@ namespace Duality.Samples.Physics
 			get { return this.interactionColor; }
 			set { this.interactionColor = value; }
 		}
+		float ICmpRenderer.BoundRadius
+		{
+			get { return float.MaxValue; }
+		}
 
 
 		private void SwitchToSample(int index)
@@ -67,29 +71,26 @@ namespace Duality.Samples.Physics
 		}
 
 
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			return 
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
+			Canvas canvas = new Canvas(device);
 			Vector2 mousePos = DualityApp.Mouse.Pos;
 
-			Canvas canvas = new Canvas();
-			canvas.Begin(device);
-
 			// Make sure we'll draw below the sample info text
-			canvas.State.DepthOffset = 1.0f;
+			canvas.State.ZOffset = 1.0f;
 
 			// Draw drag anchor markers when dragging an object
 			if (this.dragObj != null)
 			{
-				Camera mainCam = this.GameObj.ParentScene.FindComponent<Camera>();
 				Transform dragTransform = this.dragObj.GameObj.Transform;
 				Vector2 worldAnchor = dragTransform.GetWorldPoint(this.dragAnchor);
-				Vector2 screenAnchor = mainCam.GetScreenPos(worldAnchor);
+				Vector2 screenAnchor = device.GetScreenCoord(worldAnchor).Xy;
 				canvas.State.ColorTint = this.interactionColor;
 				if ((screenAnchor - mousePos).Length < 10.0f)
 					canvas.DrawLine(mousePos.X, mousePos.Y, screenAnchor.X, screenAnchor.Y);
@@ -118,8 +119,6 @@ namespace Duality.Samples.Physics
 					2.0f);
 				canvas.State.ColorTint = this.defaultColor;
 			}
-
-			canvas.End();
 		}
 
 		void ICmpUpdatable.OnUpdate()
@@ -127,7 +126,7 @@ namespace Duality.Samples.Physics
 			// Determine the world position of the cursor
 			Camera mainCamera = this.GameObj.ParentScene.FindComponent<Camera>();
 			Vector2 screenMousePos = DualityApp.Mouse.Pos;
-			Vector3 worldMousePos = mainCamera.GetWorldPos(screenMousePos);
+			Vector3 worldMousePos = mainCamera.GetSpaceCoord(screenMousePos);
 
 			// Pressing the right mouse button: Starting a camera drag
 			if (DualityApp.Mouse.ButtonHit(MouseButton.Right))
@@ -140,7 +139,7 @@ namespace Duality.Samples.Physics
 			if (DualityApp.Mouse[MouseButton.Right])
 			{
 				Vector3 cameraMovement = new Vector3(this.cameraDragScreenAnchor - screenMousePos);
-				mainCamera.GameObj.Transform.MoveTo(this.cameraDragWorldAnchor + cameraMovement);
+				mainCamera.GameObj.Transform.MoveToAbs(this.cameraDragWorldAnchor + cameraMovement);
 			}
 
 			// Pressing the left mouse button: Picking up an object
@@ -213,13 +212,14 @@ namespace Duality.Samples.Physics
 			}
 		}
 
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			if (DualityApp.ExecContext != DualityApp.ExecutionContext.Game) return;
-
-			// Retrieve a list of all available scenes to cycle through.
-			this.sampleScenes = ContentProvider.GetAvailableContent<Scene>();
+			if (context == InitContext.Activate && DualityApp.ExecContext == DualityApp.ExecutionContext.Game)
+			{
+				// Retrieve a list of all available scenes to cycle through.
+				this.sampleScenes = ContentProvider.GetAvailableContent<Scene>();
+			}
 		}
-		void ICmpInitializable.OnDeactivate() { }
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) { }
 	}
 }

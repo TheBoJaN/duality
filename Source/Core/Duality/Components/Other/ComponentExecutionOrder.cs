@@ -395,11 +395,11 @@ namespace Duality
 				// If the loops weakest link was an explicit constraint, log a warning
 				if ((int)weakestLink.Priority >= (int)ConstraintPriority.ExplicitWeak)
 				{
-					Logs.Core.WriteWarning(
+					Log.Core.WriteWarning(
 						"Found a loop in the component execution order constraint graph. Ignoring the weakest constraint " + 
 						"({0} must be executed before {1}). Please check your ExecutionOrder attributes.",
-						LogFormat.Type(weakestLink.FirstType),
-						LogFormat.Type(weakestLink.LastType));
+						Log.Type(weakestLink.FirstType),
+						Log.Type(weakestLink.LastType));
 				}
 
 				// Remove the weakest link

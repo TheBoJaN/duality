@@ -70,8 +70,8 @@ namespace Duality.Serialization.Surrogates
 			if (values != null)
 			{
 				hashSet.Clear();
-				TypeInfo keyTypeInfo = typeof(T).GetTypeInfo();
-				foreach (T obj in values)
+				var keyTypeInfo = typeof(T).GetTypeInfo();
+				foreach (var obj in values)
 				{
 					if (!CheckValueType(keyTypeInfo, obj)) continue;
 					hashSet.Add(obj);
@@ -95,11 +95,11 @@ namespace Duality.Serialization.Surrogates
 		{
 			if (!valueTypeInfo.IsInstanceOfType(value) && value != null)
 			{
-				Logs.Core.WriteWarning(
+				Log.Core.WriteWarning(
 					"Actual Type '{0}' of value in hashset field '{1}' does not match reflected hashset field type '{2}'. Skipping value.",
-					LogFormat.Type(value.GetType()),
+					Log.Type(value.GetType()),
 					value,
-					LogFormat.Type(valueTypeInfo));
+					Log.Type(valueTypeInfo));
 				return false;
 			}
 			return true;

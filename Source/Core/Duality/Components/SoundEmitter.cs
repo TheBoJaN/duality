@@ -14,7 +14,6 @@ namespace Duality.Components
 	/// Provides functionality to emit sound.
 	/// </summary>
 	[RequiredComponent(typeof(Transform))]
-	[RequiredComponent(typeof(VelocityTracker))]
 	[EditorHintCategory(CoreResNames.CategorySound)]
 	[EditorHintImage(CoreResNames.ImageSoundEmitter)]
 	public sealed class SoundEmitter : Component, ICmpUpdatable, ICmpInitializable
@@ -163,7 +162,7 @@ namespace Duality.Components
 					if (!this.looped && this.hasBeenPlayed) return false;
 
 					// Play the sound
-					this.instance = DualityApp.Sound.PlaySound3D(this.sound, emitter.GameObj, true);
+					this.instance = DualityApp.Sound.PlaySound3D(this.sound, emitter.GameObj);
 					this.instance.Pos = this.offset;
 					this.instance.Looped = this.looped;
 					this.instance.Volume = this.volume;
@@ -212,13 +211,16 @@ namespace Duality.Components
 					this.sources.RemoveAt(i);
 			}
 		}
-		void ICmpInitializable.OnActivate() {}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnInit(InitContext context) {}
+		void ICmpInitializable.OnShutdown(ShutdownContext context)
 		{
-			for (int i = this.sources.Count - 1; i >= 0; i--)
+			if (context == ShutdownContext.Deactivate)
 			{
-				if (this.sources[i].Instance != null)
-					this.sources[i].Instance.Stop();
+				for (int i = this.sources.Count - 1; i >= 0; i--)
+				{
+					if (this.sources[i].Instance != null)
+						this.sources[i].Instance.Stop();
+				}
 			}
 		}
 	}

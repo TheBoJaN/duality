@@ -67,18 +67,18 @@ namespace Duality
 		public static void InitDefaultContent()
 		{
 			if (defaultContentInitialized) return;
-			Logs.Core.Write("Initializing default content...");
-			Logs.Core.PushIndent();
+			Log.Core.Write("Initializing default content...");
+			Log.Core.PushIndent();
 
 			var oldResLib = resLibrary.Values.ToArray();
 
 			VertexShader.InitDefaultContent();
 			FragmentShader.InitDefaultContent();
+			ShaderProgram.InitDefaultContent();
 			DrawTechnique.InitDefaultContent();
 			Pixmap.InitDefaultContent();
 			Texture.InitDefaultContent();
 			Material.InitDefaultContent();
-			RenderSetup.InitDefaultContent();
 			Font.InitDefaultContent();
 			AudioData.InitDefaultContent();
 			Sound.InitDefaultContent();
@@ -91,8 +91,8 @@ namespace Duality
 			}
 
 			defaultContentInitialized = true;
-			Logs.Core.Write("...done!");
-			Logs.Core.PopIndent();
+			Log.Core.Write("...done!");
+			Log.Core.PopIndent();
 		}
 		/// <summary>
 		/// Initializes Dualitys embedded default content.
@@ -100,8 +100,8 @@ namespace Duality
 		public static void DisposeDefaultContent()
 		{
 			if (!defaultContentInitialized) return;
-			Logs.Core.Write("Disposing default content..");
-			Logs.Core.PushIndent();
+			Log.Core.Write("Disposing default content..");
+			Log.Core.PushIndent();
 
 			foreach (Resource r in defaultContent.ToArray())
 			{
@@ -111,8 +111,8 @@ namespace Duality
 			defaultContent.Clear();
 
 			defaultContentInitialized = false;
-			Logs.Core.PopIndent();
-			Logs.Core.Write("..done");
+			Log.Core.PopIndent();
+			Log.Core.Write("..done");
 		}
 		/// <summary>
 		/// Returns whether or not the specified path points to Duality default content.
@@ -218,8 +218,8 @@ namespace Duality
 		/// <param name="content">The Resource to register.</param>
 		public static void AddContent(string path, Resource content)
 		{
-			if (string.IsNullOrEmpty(path)) return;
-			if (string.IsNullOrEmpty(content.Path)) content.Path = path;
+			if (String.IsNullOrEmpty(path)) return;
+			if (String.IsNullOrEmpty(content.Path)) content.Path = path;
 			resLibrary[path] = content;
 		}
 		/// <summary>
@@ -229,7 +229,7 @@ namespace Duality
 		/// <returns>True, if there is content available for that path key, false if not.</returns>
 		public static bool HasContent(string path)
 		{
-			if (string.IsNullOrEmpty(path)) return false;
+			if (String.IsNullOrEmpty(path)) return false;
 			Resource res;
 			return resLibrary.TryGetValue(path, out res) && !res.Disposed;
 		}
@@ -262,7 +262,7 @@ namespace Duality
 		/// <returns>True, if the content has been found and successfully removed. False, if no</returns>
 		public static bool RemoveContent(string path, bool dispose = true)
 		{
-			if (string.IsNullOrEmpty(path)) return false;
+			if (String.IsNullOrEmpty(path)) return false;
 			if (IsDefaultContentPath(path)) return false;
 
 			Resource res;
@@ -283,7 +283,7 @@ namespace Duality
 		/// <param name="dispose">If true, unregistered content is also disposed.</param>
 		public static void RemoveContentTree(string dir, bool dispose = true)
 		{
-			if (string.IsNullOrEmpty(dir)) return;
+			if (String.IsNullOrEmpty(dir)) return;
 
 			List<string> unregisterList = new List<string>(
 				from p in resLibrary.Keys
@@ -332,7 +332,7 @@ namespace Duality
 		/// <returns>True, if the renaming operation was successful. False, if not.</returns>
 		public static bool RenameContent(string path, string newPath)
 		{
-			if (string.IsNullOrEmpty(path)) return false;
+			if (String.IsNullOrEmpty(path)) return false;
 
 			Resource res;
 			if (resLibrary.TryGetValue(path, out res))
@@ -353,7 +353,7 @@ namespace Duality
 		/// <param name="newDir">The Resources new directory</param>
 		public static void RenameContentTree(string dir, string newDir)
 		{
-			if (string.IsNullOrEmpty(dir)) return;
+			if (String.IsNullOrEmpty(dir)) return;
 
 			// Assure we're ending with directory separator chars.
 			if (dir[dir.Length - 1] == PathOp.AltDirectorySeparatorChar) dir = dir.Remove(dir.Length - 1, 1);
@@ -385,7 +385,7 @@ namespace Duality
 		/// <returns>A <see cref="ContentRef{T}"/> to the requested Resource.</returns>
 		public static ContentRef<T> RequestContent<T>(string path) where T : Resource
 		{
-			if (string.IsNullOrEmpty(path)) return null;
+			if (String.IsNullOrEmpty(path)) return null;
 
 			// Return cached content
 			Resource res;
@@ -422,7 +422,7 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-				Logs.Core.WriteError("An error occurred in custom ResourceResolve code: {0}", LogFormat.Exception(e));
+				Log.Core.WriteError("An error occurred in custom ResourceResolve code: {0}", Log.Exception(e));
 			}
 
 			if (args.Handled)
@@ -444,8 +444,8 @@ namespace Duality
 			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) return null;
 			if (string.IsNullOrEmpty(path) || IsDefaultContentPath(path) || !FileOp.Exists(path)) return null;
 
-			Logs.Core.Write("Loading Resource '{0}'", path);
-			Logs.Core.PushIndent();
+			Log.Core.Write("Loading Resource '{0}'", path);
+			Log.Core.PushIndent();
 
 			// Load the Resource and register it
 			Resource res = Resource.Load<Resource>(path, r => 
@@ -456,7 +456,7 @@ namespace Duality
 				if (r != null) AddContent(path, r);
 			});
 
-			Logs.Core.PopIndent();
+			Log.Core.PopIndent();
 			return res;
 		}
 	}

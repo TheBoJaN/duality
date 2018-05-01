@@ -64,14 +64,14 @@ namespace Duality.Tests.Resources
 			// Since the texture that was rendered to is still alive, this should work.
 			using (Texture texture = new Texture(8, 8, TextureSizeMode.NonPowerOfTwo, TextureMagFilter.Nearest, TextureMinFilter.Nearest))
 			{
-				using (RenderTarget renderTarget = new RenderTarget(AAQuality.High, false, texture))
+				using (RenderTarget renderTarget = new RenderTarget(AAQuality.High, texture))
 				using (DrawDevice device = new DrawDevice())
 				{
-					device.Projection = ProjectionMode.Screen;
+					device.Perspective = PerspectiveMode.Flat;
 					device.VisibilityMask = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+					device.RenderMode = RenderMatrix.OrthoScreen;
 					device.Target = renderTarget;
-					device.TargetSize = renderTarget.Size;
-					device.ViewportRect = new Rect(renderTarget.Size);
+					device.ViewportRect = new Rect(renderTarget.Width, renderTarget.Height);
 
 					device.PrepareForDrawcalls();
 					device.AddVertices(Material.SolidWhite, VertexMode.Quads,
@@ -79,7 +79,7 @@ namespace Duality.Tests.Resources
 						new VertexC1P3 { Pos = new Vector3(0, device.TargetSize.Y, 0), Color = ColorRgba.Red },
 						new VertexC1P3 { Pos = new Vector3(device.TargetSize.X, device.TargetSize.Y, 0), Color = ColorRgba.Red },
 						new VertexC1P3 { Pos = new Vector3(device.TargetSize.X, 0, 0), Color = ColorRgba.Red });
-					device.Render();
+					device.Render(ClearFlag.All, ColorRgba.TransparentBlack, 1.0f);
 				}
 
 				pixelData = texture.GetPixelData();
@@ -102,18 +102,18 @@ namespace Duality.Tests.Resources
 			PixelData pixelData;
 
 			using (Texture texture = new Texture(width, height, TextureSizeMode.NonPowerOfTwo, TextureMagFilter.Nearest, TextureMinFilter.Nearest))
-			using (RenderTarget renderTarget = new RenderTarget(antialiasing, false, texture))
+			using (RenderTarget renderTarget = new RenderTarget(antialiasing, texture))
 			using (DrawDevice device = new DrawDevice())
 			{
-				device.Projection = ProjectionMode.Screen;
+				device.Perspective = PerspectiveMode.Flat;
 				device.VisibilityMask = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+				device.RenderMode = RenderMatrix.OrthoScreen;
 				device.Target = renderTarget;
-				device.TargetSize = renderTarget.Size;
-				device.ViewportRect = new Rect(renderTarget.Size);
+				device.ViewportRect = new Rect(renderTarget.Width, renderTarget.Height);
 
 				device.PrepareForDrawcalls();
 				renderMethod(device);
-				device.Render();
+				device.Render(ClearFlag.All, ColorRgba.TransparentBlack, 1.0f);
 
 				pixelData = renderTarget.GetPixelData();
 			}

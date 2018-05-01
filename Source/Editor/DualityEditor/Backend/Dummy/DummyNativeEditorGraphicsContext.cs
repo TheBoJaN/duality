@@ -16,7 +16,8 @@ namespace Duality.Editor.Backend.Dummy
 			// Since the graphics backend probably needs some kind of graphics context, create an invisible dummy window.
 			this.dummyWindow = DualityApp.GraphicsBackend.CreateWindow(new WindowOptions
 			{
-				Size = new Point2(640, 480),
+				Width = 640,
+				Height = 480,
 				ScreenMode = ScreenMode.Window,
 				RefreshMode = RefreshMode.NoSync
 			});

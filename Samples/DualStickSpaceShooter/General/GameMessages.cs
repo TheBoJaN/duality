@@ -35,11 +35,9 @@ namespace DualStickSpaceShooter
 
 			// Send the message to all the interested Components from the target object.
 			message.Sender = source;
-			foreach (ICmpMessageListener listener in target.GetComponents<ICmpMessageListener>())
-			{
-				if (!(listener as Component).Active) continue;
-				listener.OnMessage(message);
-			}
+			target.IterateComponents<ICmpMessageListener>(
+				l => l.OnMessage(message),
+				l => (l as Component).Active);
 		}
 	}
 

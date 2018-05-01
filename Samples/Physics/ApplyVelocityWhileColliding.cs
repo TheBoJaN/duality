@@ -33,7 +33,7 @@ namespace Duality.Samples.Physics
 				body.AngularVelocity = 0.05f;
 
 				// Display a log to note that we did so
-				VisualLogs.Default.DrawVector(new Vector3(applyWorldPos), velocityDirection * 15.0f);
+				VisualLog.Default.DrawVector(new Vector3(applyWorldPos), velocityDirection * 15.0f);
 			}
 		}
 

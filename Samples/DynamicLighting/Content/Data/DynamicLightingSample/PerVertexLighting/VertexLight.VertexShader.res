@@ -1,21 +1,15 @@
 ﻿<root dataType="Struct" type="Duality.Resources.VertexShader" id="129723834">
-  <assetInfo />
-  <source dataType="String">in vec3 vertexPos;
-in vec4 vertexColor;
-in vec2 vertexTexCoord;
-in float vertexDepthOffset;
-in vec4 vertexLightingParam;
+  <source dataType="String">attribute vec4 lightAttrib;
 
-out vec4 programColor;
-out vec2 programTexCoord;
-out vec3 lightIntensity;
+varying vec3 lightIntensity;
 
 void main()
 {
-	gl_Position = TransformVertexDefault(vertexPos, vertexDepthOffset);
-	programTexCoord = vertexTexCoord;
-	programColor = vertexColor;
-	lightIntensity = vertexLightingParam.xyz;
+	gl_Position = ftransform();
+	gl_TexCoord[0] = gl_MultiTexCoord0;
+	gl_FrontColor = gl_Color;
+	lightIntensity = lightAttrib.xyz;
 }</source>
+  <sourcePath dataType="String">Source\Media\DynamicLightingSample\PerVertexLighting\VertexLight.vert</sourcePath>
 </root>
 <!-- XmlFormatterBase Document Separator -->

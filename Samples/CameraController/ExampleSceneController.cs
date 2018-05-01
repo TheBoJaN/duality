@@ -74,7 +74,18 @@ namespace CameraController
 				}
 			}
 		}
-		
+
+		float ICmpRenderer.BoundRadius
+		{
+			get { return float.MaxValue; }
+		}
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
+		{
+			return 
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None;
+		}
+
 		void ICmpUpdatable.OnUpdate()
 		{
 			// Prepare a list of camera controllers, if we don't already have one
@@ -118,19 +129,19 @@ namespace CameraController
 			// Every 100 ms, draw one visual log entry to document movement
 			if (this.movementHistoryActive)
 			{
-				this.movementHistoryTimer += Time.MillisecondsPerFrame * Time.TimeMult;
+				this.movementHistoryTimer += Time.MsPFMult * Time.TimeMult;
 				if (this.movementHistoryTimer > 100.0f)
 				{
 					this.movementHistoryTimer -= 100.0f;
 					Vector2 targetPos = this.targetObj.Transform.Pos.Xy;
 					Vector2 cameraPos = this.mainCameraObj.Transform.Pos.Xy;
-					VisualLogs.Default.DrawPoint(
+					VisualLog.Default.DrawPoint(
 						targetPos.X,
 						targetPos.Y,
 						0.0f)
 						.WithColor(new ColorRgba(255, 128, 0))
 						.KeepAlive(3000.0f);
-					VisualLogs.Default.DrawPoint(
+					VisualLog.Default.DrawPoint(
 						cameraPos.X,
 						cameraPos.Y,
 						0.0f)
@@ -139,20 +150,12 @@ namespace CameraController
 				}
 			}
 		}
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
-		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
-		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			Canvas canvas = new Canvas();
-			canvas.Begin(device);
+			Canvas canvas = new Canvas(device);
 			
 			Vector2 screenSize = device.TargetSize;
 			ICameraController activeController = this.mainCameraObj.GetComponent<ICameraController>();
-			VelocityTracker camTracker = this.mainCameraObj.GetComponent<VelocityTracker>();
 			Transform camTransform = this.mainCameraObj.Transform;
 			Transform targetTransform = this.targetObj.Transform;
 
@@ -173,8 +176,8 @@ namespace CameraController
 			canvas.DrawLine(
 				screenSize.X * 0.5f, 
 				screenSize.Y * 0.5f, 
-				screenSize.X * 0.5f + camTracker.Vel.X / Time.SecondsPerFrame,
-				screenSize.Y * 0.5f + camTracker.Vel.Y / Time.SecondsPerFrame);
+				screenSize.X * 0.5f + camTransform.Vel.X / Time.SPFMult, 
+				screenSize.Y * 0.5f + camTransform.Vel.Y / Time.SPFMult);
 
 			// Draw some info text
 			if (this.infoText == null)
@@ -199,13 +202,11 @@ namespace CameraController
 				"Camera Distance: {0:F}/n" +
 				"Camera Velocity: {1:F}, {2:F}",
 				camDist,
-				camTracker.Vel.X,
-				camTracker.Vel.Y);
+				camTransform.Vel.X,
+				camTransform.Vel.Y);
 
 			canvas.State.ColorTint = ColorRgba.White;
 			canvas.DrawText(this.stateText, 10, screenSize.Y - 10, 0.0f, null, Alignment.BottomLeft, true);
-
-			canvas.End();
 		}
 	}
 }

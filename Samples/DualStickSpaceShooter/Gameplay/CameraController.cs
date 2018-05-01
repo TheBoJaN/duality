@@ -65,7 +65,7 @@ namespace DualStickSpaceShooter
 
 		private void AdjustToScreenSize()
 		{
-			Vector2 screenSize = DualityApp.TargetViewSize;
+			Vector2 screenSize = DualityApp.TargetResolution;
 			Camera camera = this.GameObj.GetComponent<Camera>();
 			camera.FocusDist = ReferenceFocusDist * screenSize.Length * this.zoomFactor / ReferenceScreenDiameter;
 		}
@@ -125,7 +125,7 @@ namespace DualStickSpaceShooter
 
 				// Move the camera so it can most likely see all of the required objects
 				Vector3 targetPos = focusPos + this.GetTargetOffset(maxDistFromCenter);
-				transform.MoveBy((targetPos - transform.Pos) * MathF.Pow(10.0f, -this.softness) * Time.TimeMult);
+				transform.MoveByAbs((targetPos - transform.Pos) * MathF.Pow(10.0f, -this.softness) * Time.TimeMult);
 			}
 
 			// Apply new screen shake offset
@@ -137,14 +137,17 @@ namespace DualStickSpaceShooter
 				this.microphone.Pos = new Vector3(this.microphone.Pos.Xy, 0.0f);
 			}
 		}
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			this.AdjustToScreenSize();
+			if (context == InitContext.Activate)
+			{
+				this.AdjustToScreenSize();
 
-			// Move near initial spawn point
-			Transform transform = this.GameObj.Transform;
-			transform.MoveTo(SpawnPoint.SpawnPos + this.GetTargetOffset(0.0f));
+				// Move near initial spawn point
+				Transform transform = this.GameObj.Transform;
+				transform.MoveToAbs(SpawnPoint.SpawnPos + this.GetTargetOffset(0.0f));
+			}
 		}
-		void ICmpInitializable.OnDeactivate() {}
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) {}
 	}
 }

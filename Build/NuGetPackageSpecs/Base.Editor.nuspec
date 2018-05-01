@@ -23,6 +23,5 @@
   <files>
     <file src="..\Output\Plugins\EditorBase.editor.dll" target="lib" />
     <file src="..\Output\Plugins\EditorBase.editor.pdb" target="lib" />
-    <file src="..\Output\Plugins\EditorBase.editor.xml" target="lib" />
   </files>
 </package>

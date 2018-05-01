@@ -36,27 +36,27 @@ namespace Duality.Samples.Physics
 			// Display a visual log with the raycast results
 			if (hitAnything)
 			{
-				VisualLogs.Default
+				VisualLog.Default
 					.DrawCircle(Vector3.Zero, nearestHit.Body.BoundRadius)
 					.AnchorAt(nearestHit.GameObj)
 					.WithColor(ColorRgba.Green.WithAlpha(128));
 
 				Rect hitShapeRect = nearestHit.Shape.AABB;
-				VisualLogs.Default
+				VisualLog.Default
 					.DrawCircle(new Vector3(hitShapeRect.Center), hitShapeRect.BoundingRadius - hitShapeRect.Center.Length)
 					.AnchorAt(nearestHit.GameObj)
 					.WithColor(ColorRgba.Blue.WithAlpha(128));
 
-				VisualLogs.Default
+				VisualLog.Default
 					.DrawConnection(new Vector3(startPos), nearestHit.Pos)
 					.WithColor(ColorRgba.Red);
-				VisualLogs.Default
+				VisualLog.Default
 					.DrawVector(new Vector3(nearestHit.Pos), nearestHit.Normal * 25)
 					.WithColor(ColorRgba.Red);
 			}
 			else
 			{
-				VisualLogs.Default.DrawConnection(new Vector3(startPos), endPos);
+				VisualLog.Default.DrawConnection(new Vector3(startPos), endPos);
 			}
 		}
 	}

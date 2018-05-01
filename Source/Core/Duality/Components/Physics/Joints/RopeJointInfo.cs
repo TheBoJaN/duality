@@ -49,11 +49,11 @@ namespace Duality.Components.Physics
 		}
 
 
-		protected override Joint CreateJoint(World world, Body bodyA, Body bodyB)
+		protected override Joint CreateJoint(Body bodyA, Body bodyB)
 		{
 			if (bodyA == null || bodyB == null) return null;
 			RopeJoint joint = new RopeJoint(bodyA, bodyB, Vector2.Zero, Vector2.Zero);
-			world.AddJoint(joint);
+			Scene.PhysicsWorld.AddJoint(joint);
 			return joint;
 		}
 		internal override void UpdateJoint()

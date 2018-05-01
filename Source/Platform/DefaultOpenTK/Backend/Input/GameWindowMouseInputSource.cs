@@ -19,13 +19,24 @@ namespace Duality.Backend.DefaultOpenTK
 		{
 			get { return this.window != null && this.window.Mouse != null && this.cursorInView; }
 		}
-		public Point2 Pos
+		public int X
 		{
-			get { return new Point2(this.window.Mouse.X, this.window.Mouse.Y); }
+			get { return this.window.Mouse.X; }
 			set
 			{
-				System.Drawing.Point screenPoint = this.window.PointToScreen(new System.Drawing.Point(value.X, value.Y));
-				OpenTK.Input.Mouse.SetPosition(screenPoint.X, screenPoint.Y);
+				OpenTK.Input.MouseState state = OpenTK.Input.Mouse.GetCursorState();
+				System.Drawing.Point screenPoint = this.window.PointToScreen(new System.Drawing.Point(value, 0));
+				OpenTK.Input.Mouse.SetPosition(screenPoint.X, state.Y);
+			}
+		}
+		public int Y
+		{
+			get { return this.window.Mouse.Y; }
+			set
+			{
+				OpenTK.Input.MouseState state = OpenTK.Input.Mouse.GetCursorState();
+				System.Drawing.Point screenPoint = this.window.PointToScreen(new System.Drawing.Point(0, value));
+				OpenTK.Input.Mouse.SetPosition(state.X, screenPoint.Y);
 			}
 		}
 		public float Wheel

@@ -207,8 +207,7 @@ namespace Duality.Tests.Cloning
 			GameObject source = new GameObject("ObjectA");
 			source.AddComponent(new TestComponent(rnd));
 			GameObject target = new GameObject("ObjectB");
-			TestComponent targetComponent = new TestComponent(rnd);
-			target.AddComponent(targetComponent);
+			TestComponent targetComponent = target.AddComponent(new TestComponent(rnd));
 
 			source.DeepCopyTo(target);
 
@@ -323,14 +322,14 @@ namespace Duality.Tests.Cloning
 				Vector3 parentPosAbs = rnd.NextVector3();
 				Vector3 childPosRel = rnd.NextVector3();
 				parent.Pos = parentPosAbs;
-				child.LocalPos = childPosRel;
+				child.RelativePos = childPosRel;
 
 				Assert.AreEqual(parentPosAbs.X + childPosRel.X, child.Pos.X, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Y + childPosRel.Y, child.Pos.Y, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Z + childPosRel.Z, child.Pos.Z, 0.000001f);
 
 				childPosRel = rnd.NextVector3();
-				child.LocalPos = childPosRel;
+				child.RelativePos = childPosRel;
 
 				Assert.AreEqual(parentPosAbs.X + childPosRel.X, child.Pos.X, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Y + childPosRel.Y, child.Pos.Y, 0.000001f);
@@ -339,7 +338,7 @@ namespace Duality.Tests.Cloning
 
 			// Clone the object hierarchy
 			GameObject targetParentObj = sourceParentObj.DeepClone();
-			GameObject targetChildObj = targetParentObj.GetChildByName("Child");
+			GameObject targetChildObj = targetParentObj.ChildByName("Child");
 			Transform targetParentTransform = targetParentObj.Transform;
 			Transform targetChildTransform = targetChildObj.Transform;
 
@@ -350,14 +349,14 @@ namespace Duality.Tests.Cloning
 				Vector3 parentPosAbs = rnd.NextVector3();
 				Vector3 childPosRel = rnd.NextVector3();
 				parent.Pos = parentPosAbs;
-				child.LocalPos = childPosRel;
+				child.RelativePos = childPosRel;
 
 				Assert.AreEqual(parentPosAbs.X + childPosRel.X, child.Pos.X, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Y + childPosRel.Y, child.Pos.Y, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Z + childPosRel.Z, child.Pos.Z, 0.000001f);
 
 				childPosRel = rnd.NextVector3();
-				child.LocalPos = childPosRel;
+				child.RelativePos = childPosRel;
 
 				Assert.AreEqual(parentPosAbs.X + childPosRel.X, child.Pos.X, 0.000001f);
 				Assert.AreEqual(parentPosAbs.Y + childPosRel.Y, child.Pos.Y, 0.000001f);
@@ -382,7 +381,7 @@ namespace Duality.Tests.Cloning
 
 			// Clone the object hierarchy
 			GameObject targetA = sourceA.DeepClone();
-			GameObject targetB = targetA.Children[0];
+			GameObject targetB = targetA.ChildAtIndex(0);
 			RigidBody targetBodyA = targetA.GetComponent<RigidBody>();
 			RigidBody targetBodyB = targetB.GetComponent<RigidBody>();
 

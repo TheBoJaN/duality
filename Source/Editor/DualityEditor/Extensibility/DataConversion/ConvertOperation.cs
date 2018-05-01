@@ -228,7 +228,7 @@ namespace Duality.Editor
 			Type originalType = target;
 			target = ResTypeFromRefType(target);
 
-			//Logs.Editor.Write("Convert to {0}", target.Name);
+			//Log.Editor.Write("Convert to {0}", target.Name);
 			bool fittingDataFound = false;
 
 			// Check if there already is fitting data available
@@ -279,24 +279,24 @@ namespace Duality.Editor
 				// Perform conversion
 				try
 				{
-				converters.StableSort((c1, c2) => (c2.Converter.Priority - c1.Converter.Priority) * 10000 + (c1.Complexity - c2.Complexity));
-				foreach (var c in converters)
-				{
-					this.usedConverters.Add(c.Converter);
-					bool handled = c.Converter.Convert(this);
-					this.usedConverters.Remove(c.Converter);
-					if (handled) break;
+					converters.StableSort((c1, c2) => (c2.Converter.Priority - c1.Converter.Priority) * 10000 + (c1.Complexity - c2.Complexity));
+					foreach (var c in converters)
+					{
+						this.usedConverters.Add(c.Converter);
+						bool handled = c.Converter.Convert(this);
+						this.usedConverters.Remove(c.Converter);
+						if (handled) break;
+					}
 				}
-			}
 				// Since convert operations are often performed in dragdrop handlers (which internally catch all exceptions),
 				// we should do some basic error logging in here to make sure users won't end up without explanation for
 				// their operation not performing correctly or at all.
 				catch (Exception e)
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"There was an error trying to convert data to target type {0}: {1}", 
-						LogFormat.Type(target), 
-						LogFormat.Exception(e));
+						Log.Type(target), 
+						Log.Exception(e));
 				}
 			}
 

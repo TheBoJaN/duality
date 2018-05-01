@@ -9,9 +9,6 @@ using Duality.Editor.Plugins.PackageManagerFrontend.Properties;
 
 namespace Duality.Editor.Plugins.PackageManagerFrontend.EditorActions.FirstSession
 {
-	/// <summary>
-	/// Download example projects to see Duality in action.
-	/// </summary>
 	public class BrowseSamplePackages : EditorAction<object>
 	{
 		public override Image Icon
@@ -21,6 +18,10 @@ namespace Duality.Editor.Plugins.PackageManagerFrontend.EditorActions.FirstSessi
 		public override string Name
 		{
 			get { return PackageManagerFrontendRes.ActionName_BrowseSamplePackages; }
+		}
+		public override string Description
+		{
+			get { return PackageManagerFrontendRes.ActionDesc_BrowseSamplePackages; }
 		}
 
 		public override void Perform(IEnumerable<object> objEnum)

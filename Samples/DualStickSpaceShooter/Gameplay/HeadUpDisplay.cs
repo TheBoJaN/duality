@@ -10,33 +10,37 @@ namespace DualStickSpaceShooter
 {
 	public class HeadUpDisplay : Component, ICmpRenderer
 	{
-		private ContentRef<Font>       font      = null;
-		[DontSerialize] private Player playerOne = null;
-		[DontSerialize] private Player playerTwo = null;
-		[DontSerialize] private Canvas canvas    = null;
+		private ContentRef<Font>		font						= null;
+		[DontSerialize] private Player			playerOne			= null;
+		[DontSerialize] private Player			playerTwo			= null;
+		[DontSerialize] private CanvasBuffer	buffer				= null;
 
 		public ContentRef<Font> Font
 		{
 			get { return this.font; }
 			set { this.font = value; }
 		}
-
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		float ICmpRenderer.BoundRadius
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			get { return float.MaxValue; }
+		}
+
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
+		{
+			// Only render when in screen overlay mode and the visibility mask is non-empty.
+			return 
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			// Create a Canvas for high-level drawing commands.
-			// We'll re-use this to keep performance high and allocations low.
-			if (this.canvas == null) this.canvas = new Canvas();
+			// Create a buffer to cache and re-use vertices. Not required, but will boost performance.
+			if (this.buffer == null) this.buffer = new CanvasBuffer();
 
-			// Prepare the canvas for drawing
-			this.canvas.Begin(device);
-			this.canvas.State.SetMaterial(DrawTechnique.Alpha);
-			this.canvas.State.TextFont = this.font;
+			// Create a Canvas to auto-generate vertices from high-level drawing commands.
+			Canvas canvas = new Canvas(device, this.buffer);
+			canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, ColorRgba.White));
+			canvas.State.TextFont = this.font;
 
 			// Retrieve players
 			if (this.playerOne == null)
@@ -47,7 +51,7 @@ namespace DualStickSpaceShooter
 			// Is someone playing using mouse / keyboard? Display a mouse cursor then
 			if (Player.AlivePlayers.Any(p => p.InputMethod == InputMethod.MouseAndKeyboard))
 			{
-				this.canvas.FillCircle(DualityApp.Mouse.Pos.X, DualityApp.Mouse.Pos.Y, 2.0f);
+				canvas.FillCircle(DualityApp.Mouse.X, DualityApp.Mouse.Y, 2.0f);
 			}
 
 			// Is any player alive? Keep that value in mind, won't change here anyway.
@@ -63,12 +67,12 @@ namespace DualStickSpaceShooter
 					// Draw a health bar when alive
 					float health = playerShip.Hitpoints;
 
-					this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-					this.canvas.FillRect(12 - 1, device.TargetSize.Y - 10 - 198 - 1, 16 + 2, 196 + 2);
+					canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+					canvas.FillRect(12 - 1, device.TargetSize.Y - 10 - 198 - 1, 16 + 2, 196 + 2);
 
-					this.canvas.State.ColorTint = this.playerOne.Color;
-					this.canvas.DrawRect(10, device.TargetSize.Y - 10 - 200, 20, 200);
-					this.canvas.FillRect(12, device.TargetSize.Y - 10 - health * 198.0f, 16, health * 196.0f);
+					canvas.State.ColorTint = this.playerOne.Color;
+					canvas.DrawRect(10, device.TargetSize.Y - 10 - 200, 20, 200);
+					canvas.FillRect(12, device.TargetSize.Y - 10 - health * 198.0f, 16, health * 196.0f);
 				}
 				else if (isAnyPlayerAlive && !this.playerOne.HasReachedGoal)
 				{
@@ -77,13 +81,13 @@ namespace DualStickSpaceShooter
 					string respawnText = string.Format("Respawn in {0:F1}", (Player.RespawnDelay - this.playerOne.RespawnTime) / 1000.0f);
 					Vector2 textSize = canvas.MeasureText(string.Format("Respawn in {0:F1}", 0.0f));
 
-					this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-					this.canvas.FillRect(10 - 1, device.TargetSize.Y - 10 - textSize.Y - 2, textSize.X + 5, textSize.Y + 8);
+					canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+					canvas.FillRect(10 - 1, device.TargetSize.Y - 10 - textSize.Y - 2, textSize.X + 5, textSize.Y + 8);
 
-					this.canvas.State.ColorTint = this.playerOne.Color;
-					this.canvas.DrawText(respawnText, 10, device.TargetSize.Y - 10, 0.0f, Alignment.BottomLeft);
-					this.canvas.FillRect(10, device.TargetSize.Y - 10 - textSize.Y, textSize.X * respawnPercentage, 3);
-					this.canvas.FillRect(10, device.TargetSize.Y - 10, textSize.X * respawnPercentage, 3);
+					canvas.State.ColorTint = this.playerOne.Color;
+					canvas.DrawText(respawnText, 10, device.TargetSize.Y - 10, 0.0f, Alignment.BottomLeft);
+					canvas.FillRect(10, device.TargetSize.Y - 10 - textSize.Y, textSize.X * respawnPercentage, 3);
+					canvas.FillRect(10, device.TargetSize.Y - 10, textSize.X * respawnPercentage, 3);
 				}
 			}
 
@@ -97,12 +101,12 @@ namespace DualStickSpaceShooter
 					// Draw a health bar when alive
 					float health = playerShip.Hitpoints;
 
-					this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-					this.canvas.FillRect(device.TargetSize.X - 12 - 16 - 1, device.TargetSize.Y - 10 - 198 - 1, 16 + 2, 196 + 2);
+					canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+					canvas.FillRect(device.TargetSize.X - 12 - 16 - 1, device.TargetSize.Y - 10 - 198 - 1, 16 + 2, 196 + 2);
 
-					this.canvas.State.ColorTint = this.playerTwo.Color;
-					this.canvas.DrawRect(device.TargetSize.X - 10 - 20, device.TargetSize.Y - 10 - 200, 20, 200);
-					this.canvas.FillRect(device.TargetSize.X - 12 - 16, device.TargetSize.Y - 10 - health * 198.0f, 16, health * 196.0f);
+					canvas.State.ColorTint = this.playerTwo.Color;
+					canvas.DrawRect(device.TargetSize.X - 10 - 20, device.TargetSize.Y - 10 - 200, 20, 200);
+					canvas.FillRect(device.TargetSize.X - 12 - 16, device.TargetSize.Y - 10 - health * 198.0f, 16, health * 196.0f);
 				}
 				else if (isAnyPlayerAlive && !this.playerTwo.HasReachedGoal)
 				{
@@ -111,17 +115,15 @@ namespace DualStickSpaceShooter
 					string respawnText = string.Format("{0:F1} to Respawn", (Player.RespawnDelay - this.playerTwo.RespawnTime) / 1000.0f);
 					Vector2 textSize = canvas.MeasureText(string.Format("{0:F1} to Respawn", 0.0f));
 
-					this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
-					this.canvas.FillRect(device.TargetSize.X - 10 - textSize.X - 3, device.TargetSize.Y - 10 - textSize.Y - 2, textSize.X + 2, textSize.Y + 10);
+					canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
+					canvas.FillRect(device.TargetSize.X - 10 - textSize.X - 3, device.TargetSize.Y - 10 - textSize.Y - 2, textSize.X + 2, textSize.Y + 10);
 
-					this.canvas.State.ColorTint = this.playerTwo.Color;
-					this.canvas.DrawText(respawnText, device.TargetSize.X - 10, device.TargetSize.Y - 10, 0.0f, Alignment.BottomRight);
-					this.canvas.FillRect(device.TargetSize.X - 10 - textSize.X * respawnPercentage, device.TargetSize.Y - 10 - textSize.Y, textSize.X * respawnPercentage, 3);
-					this.canvas.FillRect(device.TargetSize.X - 10 - textSize.X * respawnPercentage, device.TargetSize.Y - 10, textSize.X * respawnPercentage, 3);
+					canvas.State.ColorTint = this.playerTwo.Color;
+					canvas.DrawText(respawnText, device.TargetSize.X - 10, device.TargetSize.Y - 10, 0.0f, Alignment.BottomRight);
+					canvas.FillRect(device.TargetSize.X - 10 - textSize.X * respawnPercentage, device.TargetSize.Y - 10 - textSize.Y, textSize.X * respawnPercentage, 3);
+					canvas.FillRect(device.TargetSize.X - 10 - textSize.X * respawnPercentage, device.TargetSize.Y - 10, textSize.X * respawnPercentage, 3);
 				}
 			}
-
-			this.canvas.End();
 		}
 
 		private bool IsPlayerActive(Player player)

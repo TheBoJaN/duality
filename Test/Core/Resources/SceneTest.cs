@@ -346,8 +346,8 @@ namespace Duality.Tests.Resources
 			void ICmpUpdatable.OnUpdate()
 			{
 				Scene last = Scene.Current;
-				Scene.SwitchTo(this.Target);
-				this.Switched = (last != Scene.Current && Scene.Current == this.Target);
+				Scene.SwitchTo(Target);
+				this.Switched = (last != Scene.Current && Scene.Current == Target);
 			}
 		}
 		private class UpdateReloadSceneComponent : Component, ICmpUpdatable
@@ -361,24 +361,30 @@ namespace Duality.Tests.Resources
 		{
 			public ContentRef<Scene> Target { get; set; }
 			public bool Switched { get; private set; }
-			void ICmpInitializable.OnActivate()
+			void ICmpInitializable.OnInit(InitContext context)
 			{
-				Scene last = Scene.Current;
-				Scene.SwitchTo(this.Target);
-				this.Switched = (last != Scene.Current && Scene.Current == this.Target);
+				if (context == InitContext.Activate)
+				{
+					Scene last = Scene.Current;
+					Scene.SwitchTo(Target);
+					this.Switched = (last != Scene.Current && Scene.Current == Target);
+				}
 			}
-			void ICmpInitializable.OnDeactivate() {}
+			void ICmpInitializable.OnShutdown(ShutdownContext context) {}
 		}
 		private class ShutdownSwitchToSceneComponent : Component, ICmpInitializable
 		{
 			public ContentRef<Scene> Target { get; set; }
 			public bool Switched { get; private set; }
-			void ICmpInitializable.OnActivate() {}
-			void ICmpInitializable.OnDeactivate()
+			void ICmpInitializable.OnInit(InitContext context) {}
+			void ICmpInitializable.OnShutdown(ShutdownContext context)
 			{
-				Scene last = Scene.Current;
-				Scene.SwitchTo(this.Target);
-				this.Switched = (last != Scene.Current && Scene.Current == this.Target);
+				if (context == ShutdownContext.Deactivate)
+				{
+					Scene last = Scene.Current;
+					Scene.SwitchTo(Target);
+					this.Switched = (last != Scene.Current && Scene.Current == Target);
+				}
 			}
 		}
 	}

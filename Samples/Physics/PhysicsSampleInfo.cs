@@ -71,6 +71,10 @@ namespace Duality.Samples.Physics
 			get { return this.generalControls; }
 			set { this.generalControls = value; this.UpdateText(); }
 		}
+		float ICmpRenderer.BoundRadius
+		{
+			get { return float.MaxValue; }
+		}
 
 
 		private void UpdateText()
@@ -89,31 +93,30 @@ namespace Duality.Samples.Physics
 				this.generalControls);
 		}
 
-		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
+		bool ICmpRenderer.IsVisible(IDrawDevice device)
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
-			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
+			return 
+				(device.VisibilityMask & VisibilityFlag.ScreenOverlay) != VisibilityFlag.None &&
+				(device.VisibilityMask & VisibilityFlag.AllGroups) != VisibilityFlag.None;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
 		{
-			Canvas canvas = new Canvas();
-			canvas.Begin(device);
+			Canvas canvas = new Canvas(device);
 
 			Vector2 textBlockSize = this.text.TextMetrics.Size;
-			canvas.State.SetMaterial(DrawTechnique.Alpha);
 			canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.75f);
 			canvas.FillRect(10, 10, textBlockSize.X + this.margin.X * 2, textBlockSize.Y + this.margin.Y * 2);
 
 			canvas.State.ColorTint = ColorRgba.White;
 			canvas.DrawText(this.text, 10 + this.margin.X, 10 + this.margin.Y);
-
-			canvas.End();
 		}
-		void ICmpInitializable.OnActivate()
+		void ICmpInitializable.OnInit(Component.InitContext context)
 		{
-			this.UpdateText();
+			if (context == InitContext.Activate)
+			{
+				this.UpdateText();
+			}
 		}
-		void ICmpInitializable.OnDeactivate() { }
+		void ICmpInitializable.OnShutdown(Component.ShutdownContext context) { }
 	}
 }

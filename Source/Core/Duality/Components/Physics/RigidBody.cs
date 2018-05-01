@@ -54,7 +54,7 @@ namespace Duality.Components.Physics
 		private bool     fixedAngle      = false;
 		private bool     ignoreGravity   = false;
 		private bool     allowParent     = false;
-		private bool     useCCD          = false;
+		private bool     continous       = false;
 		private Vector2  linearVel       = Vector2.Zero;
 		private float    angularVel      = 0.0f;
 		private float    revolutions     = 0.0f;
@@ -66,8 +66,6 @@ namespace Duality.Components.Physics
 		private List<ShapeInfo>   shapes    = null;
 		private List<JointInfo>   joints    = null;
 
-		[DontSerialize] private Vector2   lastPos               = Vector2.Zero;
-		[DontSerialize] private float     lastAngle             = 0.0f;
 		[DontSerialize] private float     lastScale             = 1.0f;
 		[DontSerialize] private InitState bodyInitState         = InitState.Disposed;
 		[DontSerialize] private bool      schedUpdateBody       = false;
@@ -76,7 +74,6 @@ namespace Duality.Components.Physics
 		[DontSerialize] private bool      isProcessingEvents    = false;
 		[DontSerialize] private Body      body                  = null;
 		[DontSerialize] private List<ColEvent> eventBuffer      = new List<ColEvent>();
-		[DontSerialize] private List<ICmpCollisionListener> cachedListeners = new List<ICmpCollisionListener>();
 
 
 		internal Body PhysicsBody
@@ -169,11 +166,11 @@ namespace Duality.Components.Physics
 		/// </summary>
 		public bool ContinousCollision
 		{
-			get { return this.useCCD; }
+			get { return this.continous; }
 			set 
 			{
 				if (this.body != null) this.body.IsBullet = value;
-				this.useCCD = value;
+				this.continous = value;
 			}
 		}
 		/// <summary>
@@ -713,6 +710,19 @@ namespace Duality.Components.Physics
 		/// intersect the specified world coordinate.
 		/// </summary>
 		/// <param name="worldCoord"></param>
+		/// <returns></returns>
+		[Obsolete("Use the overload that accepts a pre-existing list.")]
+		public List<ShapeInfo> PickShapes(Vector2 worldCoord)
+		{
+			List<ShapeInfo> picked = new List<ShapeInfo>();
+			this.PickShapes(worldCoord, picked);
+			return picked;
+		}
+		/// <summary>
+		/// Performs a physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
+		/// intersect the specified world coordinate.
+		/// </summary>
+		/// <param name="worldCoord"></param>
 		/// <param name="pickedShapes">
 		/// A list that will be filled with all shapes that were found. 
 		/// The list will not be cleared before adding items.
@@ -735,6 +745,20 @@ namespace Duality.Components.Physics
 			}
 
 			return pickedShapes.Count > oldCount;
+		}
+		/// <summary>
+		/// Performs a physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
+		/// intersect the specified world coordinate area.
+		/// </summary>
+		/// <param name="worldCoord"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		[Obsolete("Use the overload that accepts a pre-existing list.")]
+		public List<ShapeInfo> PickShapes(Vector2 worldCoord, Vector2 size)
+		{
+			List<ShapeInfo> picked = new List<ShapeInfo>();
+			this.PickShapes(worldCoord, size, picked);
+			return picked;
 		}
 		/// <summary>
 		/// Performs a physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
@@ -767,7 +791,6 @@ namespace Duality.Components.Physics
 		private bool PickShapes(PolygonShape boxShape, FarseerPhysics.Common.Transform boxTransform, List<ShapeInfo> pickedShapes)
 		{			
 			Manifold manifold = new Manifold();
-
 			FarseerPhysics.Common.Transform bodyTransform;
 			this.body.GetTransform(out bodyTransform);
 
@@ -880,84 +903,6 @@ namespace Duality.Components.Physics
 			if (this.explicitInertia > 0.0f) this.body.Inertia = PhysicsUnit.InertiaToPhysical * this.explicitInertia;
 		}
 
-		private void UpdateBodyFromTransform()
-		{
-			Transform transform = this.GameObj.Transform;
-
-			Vector2 pos = transform.Pos.Xy;
-			if (this.lastPos != pos)
-			{
-				this.lastPos = pos;
-				this.body.Position = PhysicsUnit.LengthToPhysical * pos;
-				this.body.Awake = true;
-			}
-
-			float angle = transform.Angle;
-			if (this.lastAngle != angle)
-			{
-				this.lastAngle = angle;
-				this.body.Rotation = PhysicsUnit.AngleToPhysical * angle;
-				this.body.Awake = true;
-			}
-
-			float scale = transform.Scale;
-			if (this.lastScale != scale)
-			{
-				bool updateScale = false;
-				if (scale == 0.0f || this.lastScale == 0.0f)
-				{
-					updateScale = true;
-				}
-				else
-				{
-					const float pixelLimit = 2;
-					float boundRadius = this.BoundRadius;
-					float upper = (boundRadius + pixelLimit) / boundRadius;
-					float lower = (boundRadius - pixelLimit) / boundRadius;
-					if (scale / this.lastScale >= upper || scale / this.lastScale <= lower)
-					{
-						updateScale = true;
-					}
-				}
-				if (updateScale)
-				{
-					this.lastScale = scale;
-
-					// Flag the body for a shape update and destroy all active shapes to
-					// force a full re-creation of shapes with the new scale value.
-					this.FlagBodyShape();
-					if (this.shapes != null)
-					{
-						foreach (ShapeInfo info in this.shapes)
-							info.DestroyInternalShape();
-					}
-				}
-			}
-		}
-		private void UpdateTransformFromBody()
-		{
-			Transform transform = this.gameobj.Transform;
-
-			// The current PhysicsAlpha interpolation probably isn't the best one. Maybe replace later.
-			Vector2 bodyVel = this.body.LinearVelocity;
-			Vector2 bodyPos = this.body.Position - bodyVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
-			float bodyAngleVel = this.body.AngularVelocity;
-			float bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
-
-			// Unless allowed explicitly, ignore the transform hierarchy, so nested RigidBodies don't clash
-			if (!this.allowParent)
-				transform.IgnoreParent = true;
-
-			transform.MoveTo(new Vector3(
-				PhysicsUnit.LengthToDuality * bodyPos.X,
-				PhysicsUnit.LengthToDuality * bodyPos.Y,
-				transform.Pos.Z));
-			transform.TurnTo(PhysicsUnit.AngleToDuality * bodyAngle);
-
-			this.lastPos = transform.Pos.Xy;
-			this.lastAngle = transform.Angle;
-		}
-
 		private void CleanupBody()
 		{
 			if (this.body == null) return;
@@ -995,7 +940,7 @@ namespace Duality.Components.Physics
 		private void InitBody()
 		{
 			if (this.body != null) this.CleanupBody();
-			Transform transform = this.GameObj != null ? this.GameObj.Transform : null;
+			Transform t = this.GameObj != null ? this.GameObj.Transform : null;
 
 			// Create body and determine its enabled state
 			this.body = new Body(Scene.PhysicsWorld, this);
@@ -1020,20 +965,17 @@ namespace Duality.Components.Physics
 			this.body.AngularDamping = this.angularDamp;
 			this.body.FixedRotation = this.fixedAngle;
 			this.body.IgnoreGravity = this.ignoreGravity;
-			this.body.IsBullet = this.useCCD;
+			this.body.IsBullet = this.continous;
 			this.body.CollisionCategories = (Category)this.colCat;
 			this.body.CollidesWith = (Category)this.colWith;
 
 			this.UpdateBodyShape();
 
-			if (transform != null)
+			if (t != null)
 			{
-				this.body.SetTransform(PhysicsUnit.LengthToPhysical * transform.Pos.Xy, PhysicsUnit.AngleToPhysical * transform.Angle);
+				this.body.SetTransform(PhysicsUnit.LengthToPhysical * t.Pos.Xy, PhysicsUnit.AngleToPhysical * t.Angle);
 				this.body.LinearVelocity = PhysicsUnit.VelocityToPhysical * this.linearVel;
 				this.body.AngularVelocity = PhysicsUnit.AngularVelocityToPhysical * this.angularVel;
-				this.lastPos = transform.Pos.Xy;
-				this.lastAngle = transform.Angle;
-				this.lastScale = transform.Scale;
 			}
 
 			this.body.Collision += this.body_OnCollision;
@@ -1067,6 +1009,10 @@ namespace Duality.Components.Physics
 			if (this.bodyInitState != InitState.Disposed) return;
 			this.bodyInitState = InitState.Initializing;
 
+			// Register for tranformation changes to keep the RigidBody in sync. Make sure to register only once.
+			this.GameObj.Transform.EventTransformChanged -= this.OnTransformChanged;
+			this.GameObj.Transform.EventTransformChanged += this.OnTransformChanged;
+
 			// Initialize body and joints
 			this.InitBody();
 			if (this.joints != null)
@@ -1084,6 +1030,9 @@ namespace Duality.Components.Physics
 			// Clean up body and joints
 			this.CleanupJoints();
 			this.CleanupBody();
+
+			// Unregister for transformation change events.
+			this.GameObj.Transform.EventTransformChanged -= this.OnTransformChanged;
 
 			// Finally process all collision events we didn't get around to yet.
 			this.ProcessCollisionEvents();
@@ -1133,11 +1082,7 @@ namespace Duality.Components.Physics
 			if (this.isProcessingEvents) return;
 			this.isProcessingEvents = true;
 			{
-				// Retrieve a list of event listeners to deliver to
-				this.cachedListeners.Clear();
-				this.gameobj.GetComponents(this.cachedListeners);
-
-				// Don't use foreach here in case someone decides to add something at the end while iterating.
+				// Don't use foreach here in case someone decides to add something at the end while iterating..
 				for (int i = 0; i < this.eventBuffer.Count; i++)
 				{
 					this.ProcessSingleCollisionEvent(this.eventBuffer[i]);
@@ -1160,19 +1105,32 @@ namespace Duality.Components.Physics
 				colEvent.Data,
 				colEvent.FixtureA.UserData as ShapeInfo,
 				colEvent.FixtureB.UserData as ShapeInfo);
-			
-			for (int i = 0; i < this.cachedListeners.Count; i++)
-			{
-				ICmpCollisionListener listener = this.cachedListeners[i];
-				if (!(listener as Component).ActiveSingle) continue;
 
-				if (colEvent.Type == ColEvent.EventType.Collision)
-					listener.OnCollisionBegin(this, args);
-				else if (colEvent.Type == ColEvent.EventType.Separation)
-					listener.OnCollisionEnd(this, args);
-				else if (colEvent.Type == ColEvent.EventType.PostSolve)
-					listener.OnCollisionSolve(this, args);
-			}
+			if (colEvent.Type == ColEvent.EventType.Collision)
+				this.NotifyCollisionBegin(args);
+			else if (colEvent.Type == ColEvent.EventType.Separation)
+				this.NotifyCollisionEnd(args);
+			else if (colEvent.Type == ColEvent.EventType.PostSolve)
+				this.NotifyCollisionSolve(args);
+		}
+		
+		private void NotifyCollisionBegin(CollisionEventArgs args)
+		{
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionBegin(this, args), 
+				l => (l as Component).Active);
+		}
+		private void NotifyCollisionEnd(CollisionEventArgs args)
+		{
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionEnd(this, args), 
+				l => (l as Component).Active);
+		}
+		private void NotifyCollisionSolve(CollisionEventArgs args)
+		{
+			this.gameobj.IterateComponents<ICmpCollisionListener>(
+				l => l.OnCollisionSolve(this, args), 
+				l => (l as Component).Active);
 		}
 
 		void ICmpUpdatable.OnUpdate()
@@ -1183,13 +1141,7 @@ namespace Duality.Components.Physics
 			this.RemoveDisposedJoints();
 			this.SynchronizeBodyShape();
 
-			// Update the physics body from Transform changes
-			if (this.body != null)
-			{
-				this.UpdateBodyFromTransform();
-			}
-
-			// Update velocity and Transform values from physics simulation
+			// Update velocity and transform values
 			if (this.body != null)
 			{
 				this.linearVel = PhysicsUnit.VelocityToDuality * this.body.LinearVelocity;
@@ -1198,7 +1150,27 @@ namespace Duality.Components.Physics
 
 				if (this.bodyType != BodyType.Static && this.body.Awake)
 				{
-					this.UpdateTransformFromBody();
+					Transform transform = this.gameobj.Transform;
+
+					// Make sure we're not overwriting any previously occuring changes
+					transform.CommitChanges();
+
+					// The current PhysicsAlpha interpolation probably isn't the best one. Maybe replace later.
+					Vector2 bodyVel = this.body.LinearVelocity;
+					Vector2 bodyPos = this.body.Position - bodyVel * (1.0f - Scene.PhysicsAlpha) * Time.SPFMult;
+					float bodyAngleVel = this.body.AngularVelocity;
+					float bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SPFMult;
+
+					// Unless allowed explicitly, ignore the transform hierarchy, so nested RigidBodies don't clash
+					if (!this.allowParent)
+						transform.IgnoreParent = true;
+
+					transform.MoveToAbs(new Vector3(
+						PhysicsUnit.LengthToDuality * bodyPos.X, 
+						PhysicsUnit.LengthToDuality * bodyPos.Y, 
+						transform.Pos.Z));
+					transform.TurnToAbs(bodyAngle);
+					transform.CommitChanges(this);
 				}
 			}
 
@@ -1215,25 +1187,79 @@ namespace Duality.Components.Physics
 			this.RemoveDisposedJoints();
 			this.SynchronizeBodyShape();
 
-			// Update the body from Transform changes
-			if (this.body != null)
-			{
-				this.UpdateBodyFromTransform();
-			}
-
 			this.CheckValidTransform();
 		}
-		
-		void ICmpInitializable.OnActivate()
+
+		private void OnTransformChanged(object sender, TransformChangedEventArgs e)
 		{
-			// Do some cleanup before updating again
-			this.RemoveDisposedJoints();
-			// Initialize the backing Farseer objects upon activation
-			this.Initialize();
+			// Don't react to events triggered by this Component, or while no physics body is available
+			if (sender == this) return;
+			if (this.body == null) return;
+
+			// Apply transform changes to the physics body
+			Transform t = e.Component as Transform;
+			if ((e.Changes & Transform.DirtyFlags.Pos) != Transform.DirtyFlags.None)
+			{
+				this.body.Position = PhysicsUnit.LengthToPhysical * t.Pos.Xy;
+			}
+			if ((e.Changes & Transform.DirtyFlags.Angle) != Transform.DirtyFlags.None)
+			{
+				this.body.Rotation = t.Angle;
+			}
+			if ((e.Changes & Transform.DirtyFlags.Scale) != Transform.DirtyFlags.None)
+			{
+				bool updateShape = false;
+				float scale = t.Scale;
+				if (scale == 0.0f || this.lastScale == 0.0f)
+				{
+					updateShape = true;
+				}
+				else
+				{
+					const float pixelLimit = 2;
+					float boundRadius = this.BoundRadius;
+					float upper = (boundRadius + pixelLimit) / boundRadius;
+					float lower = (boundRadius - pixelLimit) / boundRadius;
+					if (scale / this.lastScale >= upper || scale / this.lastScale <= lower)
+					{
+						updateShape = true;
+					}
+				}
+				if (updateShape)
+				{
+					// Flag the body for a shape update and destroy all active shapes to
+					// force a full re-creation of shapes with the new scale value.
+					this.FlagBodyShape();
+					if (this.shapes != null)
+					{
+						foreach (ShapeInfo info in this.shapes)
+							info.DestroyInternalShape();
+					}
+				}
+			}
+
+			// Make sure we're simulating this body, if something has changed
+			if (e.Changes != Transform.DirtyFlags.None)
+			{
+				this.body.Awake = true;
+			}
 		}
-		void ICmpInitializable.OnDeactivate()
+		void ICmpInitializable.OnInit(InitContext context)
 		{
-			this.Shutdown();
+			if (context == InitContext.Activate)
+			{
+				// Do some cleanup before updating again
+				this.RemoveDisposedJoints();
+				// Initialize the backing Farseer objects upon activation
+				this.Initialize();
+			}
+		}
+		void ICmpInitializable.OnShutdown(ShutdownContext context)
+		{
+			if (context == ShutdownContext.Deactivate)
+				this.Shutdown();
+			else if (context == ShutdownContext.Saving)
+				this.RemoveDisposedJoints();
 		}
 
 		protected override void OnSetupCloneTargets(object targetObj, ICloneTargetSetup setup)
@@ -1276,7 +1302,7 @@ namespace Duality.Components.Physics
 			target.fixedAngle    = this.fixedAngle;
 			target.ignoreGravity = this.ignoreGravity;
 			target.allowParent   = this.allowParent;
-			target.useCCD        = this.useCCD;
+			target.continous     = this.continous;
 			target.linearVel     = this.linearVel;
 			target.angularVel    = this.angularVel;
 			target.revolutions   = this.revolutions;
@@ -1392,6 +1418,22 @@ namespace Duality.Components.Physics
 		/// The callback that is invoked for each hit on the raycast. Note that the order in which each hit occurs isn't deterministic
 		/// and may appear random. Return -1 to ignore the curret shape, 0 to terminate the raycast, data.Fraction to clip the ray for current hit, or 1 to continue.
 		/// </param>
+		/// <param name="hits">Returns a list of all occurred hits, ordered by their Fraction value.</param>
+		[Obsolete("Use the non-out parameter overload that accepts a pre-existing list.")]
+		public static void RayCast(Vector2 start, Vector2 end, RayCastCallback callback, out RawList<RayCastData> hits)
+		{
+			hits = new RawList<RayCastData>();
+			RayCast(start, end, callback, hits);
+		}
+		/// <summary>
+		/// Performs a 2d physical raycast in world coordinates.
+		/// </summary>
+		/// <param name="start">The starting point in world coordinates.</param>
+		/// <param name="end">The desired end point in world coordinates.</param>
+		/// <param name="callback">
+		/// The callback that is invoked for each hit on the raycast. Note that the order in which each hit occurs isn't deterministic
+		/// and may appear random. Return -1 to ignore the curret shape, 0 to terminate the raycast, data.Fraction to clip the ray for current hit, or 1 to continue.
+		/// </param>
 		/// <param name="hits">
 		/// A list that will be filled with all hits that were registered, ordered by their Fraction value. 
 		/// The list will not be cleared before adding items.
@@ -1494,6 +1536,19 @@ namespace Duality.Components.Physics
 		/// intersect the specified world coordinate.
 		/// </summary>
 		/// <param name="worldCoord"></param>
+		/// <returns></returns>
+		[Obsolete("Use the overload that accepts a pre-existing list.")]
+		public static List<ShapeInfo> PickShapesGlobal(Vector2 worldCoord)
+		{
+			List<ShapeInfo> shapes = new List<ShapeInfo>();
+			PickShapesGlobal(worldCoord, shapes);
+			return shapes;
+		}
+		/// <summary>
+		/// Performs a global physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
+		/// intersect the specified world coordinate.
+		/// </summary>
+		/// <param name="worldCoord"></param>
 		/// <param name="pickedShapes">
 		/// A list that will be filled with all shapes that were found. 
 		/// The list will not be cleared before adding items.
@@ -1513,9 +1568,23 @@ namespace Duality.Components.Physics
 				if (shape == null) continue;
 
 				pickedShapes.Add(shape);
-		}
+			}
 
 			return pickedShapes.Count > oldResultCount;
+		}
+		/// <summary>
+		/// Performs a global physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
+		/// intersect the specified world coordinate area.
+		/// </summary>
+		/// <param name="worldCoord"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		[Obsolete("Use the overload that accepts a pre-existing list.")]
+		public static List<ShapeInfo> PickShapesGlobal(Vector2 worldCoord, Vector2 size)
+		{
+			List<ShapeInfo> picked = new List<ShapeInfo>();
+			PickShapesGlobal(worldCoord, size, picked);
+			return picked;
 		}
 		/// <summary>
 		/// Performs a global physical picking operation and returns the <see cref="ShapeInfo">shapes</see> that
@@ -1552,6 +1621,20 @@ namespace Duality.Components.Physics
 			}
 
 			return pickedShapes.Count > oldResultCount;
+		}
+		/// <summary>
+		/// Performs a global physical AABB query and returns the <see cref="RigidBody">bodies</see> that
+		/// might be roughly contained or intersected by the specified region.
+		/// </summary>
+		/// <param name="worldCoord"></param>
+		/// <param name="size"></param>
+		/// <returns></returns>
+		[Obsolete("Use the overload that accepts a pre-existing list.")]
+		public static List<RigidBody> QueryRectGlobal(Vector2 worldCoord, Vector2 size)
+		{
+			List<RigidBody> bodies = new List<RigidBody>();
+			QueryRectGlobal(worldCoord, size, bodies);
+			return bodies;
 		}
 		/// <summary>
 		/// Performs a global physical AABB query and returns the <see cref="RigidBody">bodies</see> that
