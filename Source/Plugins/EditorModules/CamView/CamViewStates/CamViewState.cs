@@ -544,10 +544,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					moveVec = new Vector3(moveVec.Xy * 0.5f * this.GetScaleAtZ(refZ), moveVec.Z);
 				}
 				
-				if (this.View.PerspectiveMode == PerspectiveMode.Parallax)
-					moveVec *= Math.Max(1, Math.Abs(camObj.Transform.Pos.Z)) / 10000;
+				if (this.View.PerspectiveMode == ProjectionMode.Perspective)
+					moveVec *= Math.Max(1, Math.Abs(camObj.Transform.Pos.Z)) / 1000;
 				else
 					moveVec /= this.View.FocusDist / 100f;
+
 				this.camVel = moveVec;
 				this.camTransformChanged = true;
 			}
@@ -564,14 +565,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			if (this.camTransformChanged)
 			{
-<<<<<<< HEAD
 				camObj.Transform.MoveByLocal(this.camVel * unscaledTimeMult);
-=======
-				camObj.Transform.MoveBy(this.camVel * unscaledTimeMult);
-				if (camObj.Transform.Pos.Z > -1)
-					camObj.Transform.Pos = new Vector3(camObj.Transform.Pos.X, camObj.Transform.Pos.Y, -1);
+				//camObj.Transform.MoveBy(this.camVel * unscaledTimeMult);
+				//if (camObj.Transform.Pos.Z > -1)
+				//	camObj.Transform.Pos = new Vector3(camObj.Transform.Pos.X, camObj.Transform.Pos.Y, -1);
 
->>>>>>> bojan-develop
 				this.View.OnCamTransformChanged();
 				this.Invalidate();
 			}
