@@ -51,7 +51,8 @@ namespace Duality
 		private EventHandler<ComponentEventArgs>				eventComponentAdded		= null;
 		[DontSerialize]
 		private EventHandler<ComponentEventArgs>				eventComponentRemoving	= null;
-
+		[DontSerialize]
+		private EventHandler<GameObjectEventArgs>				eventDisposing			= null;
 
 		/// <summary>
 		/// [GET / SET] This GameObject's parent object in the scene graph.
@@ -279,6 +280,15 @@ namespace Duality
 		{
 			add { this.eventComponentRemoving += value; }
 			remove { this.eventComponentRemoving -= value; }
+		}
+
+		/// <summary>
+		/// Fired when a Component is about to be removed from the GameObject
+		/// </summary>
+		public event EventHandler<GameObjectEventArgs> EventDisposing
+		{
+			add { this.eventDisposing += value; }
+			remove { this.eventDisposing -= value; }
 		}
 
 
@@ -726,13 +736,15 @@ namespace Duality
 
 				// Don't bother disposing Components - they inherit the Disposed state 
 				// from their GameObject and receive a Deactivate event due to the objects
-				// removel from Scene anyway.
+				// removal from Scene anyway.
 				/*
 				for (int i = this.compList.Count - 1; i >= 0; i--)
 				{
 					this.compList[i].Dispose(false);
 				}
 				*/
+				if (this.eventDisposing != null)
+					this.eventDisposing.Invoke(this, new GameObjectEventArgs(this));
 
 				// Dispose child objects
 				if (this.children != null)
