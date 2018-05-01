@@ -633,6 +633,14 @@ namespace Duality.Components
 					new TransformChangedEventArgs(this, this.changes));
 			}
 			this.changes = DirtyFlags.None;
+
+			foreach (GameObject obj in this.gameobj.Children)
+			{
+				Transform t = obj.Transform;
+				if (t == null) continue;
+				if (!t.ignoreParent)
+					obj.Transform.CommitChanges(sender);
+			}
 		}
 
 		void ICmpUpdatable.OnUpdate()
