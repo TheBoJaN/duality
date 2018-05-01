@@ -503,7 +503,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			float unscaledTimeMult = Time.TimeMult / Time.TimeScale;
 
 			this.camTransformChanged = false;
-			
+
 			if (this.camAction == CameraAction.DragScene)
 			{
 				Vector2 curPos = new Vector2(cursorPos.X, cursorPos.Y);
@@ -514,8 +514,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				if (camObj.Transform.Pos.Z >= refZ - cam.NearZ)
 					refZ = camObj.Transform.Pos.Z + MathF.Abs(cam.FocusDist);
 
-				Vector2 targetOff = (-(curPos - lastPos) / this.GetScaleAtZ(refZ));
+				Vector2 targetOff = -((curPos - lastPos) / this.GetScaleAtZ(refZ));
 				Vector2 targetVel = targetOff / unscaledTimeMult;
+
 				MathF.TransformCoord(ref targetVel.X, ref targetVel.Y, camObj.Transform.Angle);
 				this.camVel.Z *= MathF.Pow(0.9f, unscaledTimeMult);
 				this.camVel += (new Vector3(targetVel, this.camVel.Z) - this.camVel) * unscaledTimeMult;
@@ -526,7 +527,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				Vector3 moveVec = new Vector3(
 					cursorPos.X - this.camActionBeginLoc.X,
 					cursorPos.Y - this.camActionBeginLoc.Y,
-					this.camVel.Z);
+					0);
 
 				const float BaseSpeedCursorLen = 25.0f;
 				const float BaseSpeed = 3.0f;
@@ -540,9 +541,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					float refZ = (this.HasCameraFocusPosition && camObj.Transform.Pos.Z < this.CameraFocusPosition.Z - cam.NearZ) ? this.CameraFocusPosition.Z : 0.0f;
 					if (camObj.Transform.Pos.Z >= refZ - cam.NearZ)
 						refZ = camObj.Transform.Pos.Z + MathF.Abs(cam.FocusDist);
-					moveVec = new Vector3(moveVec.Xy * 0.5f / this.GetScaleAtZ(refZ), moveVec.Z);
+					moveVec = new Vector3(moveVec.Xy * 0.5f * this.GetScaleAtZ(refZ), moveVec.Z);
 				}
-
+				
+				if (this.View.PerspectiveMode == PerspectiveMode.Parallax)
+					moveVec *= Math.Max(1, Math.Abs(camObj.Transform.Pos.Z)) / 10000;
+				else
+					moveVec /= this.View.FocusDist / 100f;
 				this.camVel = moveVec;
 				this.camTransformChanged = true;
 			}
@@ -556,9 +561,17 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.camTransformChanged = this.camTransformChanged || (this.camVel != Vector3.Zero);
 				this.camVel = Vector3.Zero;
 			}
+
 			if (this.camTransformChanged)
 			{
+<<<<<<< HEAD
 				camObj.Transform.MoveByLocal(this.camVel * unscaledTimeMult);
+=======
+				camObj.Transform.MoveBy(this.camVel * unscaledTimeMult);
+				if (camObj.Transform.Pos.Z > -1)
+					camObj.Transform.Pos = new Vector3(camObj.Transform.Pos.X, camObj.Transform.Pos.Y, -1);
+
+>>>>>>> bojan-develop
 				this.View.OnCamTransformChanged();
 				this.Invalidate();
 			}
@@ -861,7 +874,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				}
 				else
 				{
-					this.View.FocusDist = this.View.FocusDist + this.View.FocusDistIncrement * e.Delta / 40;
+					this.View.FocusDist += ((float)e.Delta / 1000f) * Math.Max(this.View.FocusDist, 0.1f);
 				}
 			}
 

@@ -509,6 +509,18 @@ namespace Duality.Components
 				else
 					this.gameobj.Parent.EventComponentRemoving += this.Parent_EventComponentRemoving;
 			}
+<<<<<<< HEAD
+=======
+			this.changes = DirtyFlags.None;
+
+			foreach (GameObject obj in this.gameobj.Children)
+			{
+				Transform t = obj.Transform;
+				if (t == null) continue;
+				if (!t.ignoreParent)
+					obj.Transform.CommitChanges(sender);
+			}
+>>>>>>> bojan-develop
 		}
 		private void UnsubscribeParentEvents()
 		{
