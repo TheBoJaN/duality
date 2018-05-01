@@ -133,22 +133,22 @@ namespace Duality.Editor.UndoRedoActions
 				if (e is TargetInvocationException) e = e.InnerException;
 				if (indices != null && indices.Length > 0)
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"An error occurred trying to set property {0}.{1}[{2}] with value '{3}': {4}", 
-						LogFormat.Type(this.targetProperty.DeclaringType),
+						Log.Type(this.targetProperty.DeclaringType),
 						this.targetProperty.Name, 
 						indices.ToString(", "),
 						value,
-						LogFormat.Exception(e));
+						Log.Exception(e));
 				}
 				else
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"An error occurred trying to set property {0}.{1} with value '{2}': {3}", 
-						LogFormat.Type(this.targetProperty.DeclaringType),
+						Log.Type(this.targetProperty.DeclaringType),
 						this.targetProperty.Name, 
 						value,
-						LogFormat.Exception(e));
+						Log.Exception(e));
 				}
 				return false;
 			}
@@ -165,20 +165,20 @@ namespace Duality.Editor.UndoRedoActions
 				if (e is TargetInvocationException) e = e.InnerException;
 				if (indices != null && indices.Length > 0)
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"An error occurred trying to get property {0}.{1}[{2}]: {3}", 
-						LogFormat.Type(this.targetProperty.DeclaringType),
+						Log.Type(this.targetProperty.DeclaringType),
 						this.targetProperty.Name, 
 						indices.ToString(", "),
-						LogFormat.Exception(e));
+						Log.Exception(e));
 				}
 				else
 				{
-					Logs.Editor.WriteError(
+					Log.Editor.WriteError(
 						"An error occurred trying to get property {0}.{1}: {2}", 
-						LogFormat.Type(this.targetProperty.DeclaringType),
+						Log.Type(this.targetProperty.DeclaringType),
 						this.targetProperty.Name, 
-						LogFormat.Exception(e));
+						Log.Exception(e));
 				}
 				value = null;
 				return false;

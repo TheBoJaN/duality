@@ -12,11 +12,21 @@ namespace Duality
 	/// </summary>
 	public struct LogEntry
 	{
+		private Log            source;
 		private LogMessageType type;
 		private string         message;
+		private object         context;
 		private DateTime       timeStamp;
 		private int            frameStamp;
+		private int            indent;
 
+		/// <summary>
+		/// [GET] The <see cref="Log"/> from which this entry originates.
+		/// </summary>
+		public Log Source
+		{
+			get { return this.source; }
+		}
 		/// <summary>
 		/// [GET] The messages type.
 		/// </summary>
@@ -32,7 +42,14 @@ namespace Duality
 			get { return this.message; }
 		}
 		/// <summary>
-		/// [GET] The messages timestamp in UTC.
+		/// [GET] The context in which this log was written. Usually the primary object the log entry is associated with.
+		/// </summary>
+		public object Context
+		{
+			get { return this.context; }
+		}
+		/// <summary>
+		/// [GET] The messages timestamp.
 		/// </summary>
 		public DateTime TimeStamp
 		{
@@ -45,12 +62,22 @@ namespace Duality
 		{
 			get { return this.frameStamp; }
 		}
-
-		public LogEntry(LogMessageType type, string msg)
+		/// <summary>
+		/// [GET] The desired indentation level for this log message when displaying it.
+		/// </summary>
+		public int Indent
 		{
+			get { return this.indent; }
+		}
+
+		public LogEntry(Log source, LogMessageType type, string msg, object context)
+		{
+			this.source = source;
 			this.type = type;
 			this.message = msg;
-			this.timeStamp = DateTime.UtcNow;
+			this.context = context;
+			this.indent = source.Indent;
+			this.timeStamp = DateTime.Now;
 			this.frameStamp = Time.FrameCount;
 		}
 

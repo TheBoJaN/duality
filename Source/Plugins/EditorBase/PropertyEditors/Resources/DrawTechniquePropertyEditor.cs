@@ -27,7 +27,8 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 					if (vertexType.IsAbstract) continue;
 					if (vertexType.IsInterface) continue;
 
-					vertexTypes.Add(VertexDeclaration.Get(vertexType.AsType()));
+					IVertexData vertex = vertexType.CreateInstanceOf() as IVertexData;
+					vertexTypes.Add(vertex.Declaration);
 				}
 
 				ObjectSelectorPropertyEditor e = new ObjectSelectorPropertyEditor();

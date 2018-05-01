@@ -6,6 +6,7 @@ using FarseerPhysics.Dynamics;
 using FarseerPhysics.Collision.Shapes;
 
 using Duality.Editor;
+using FarseerPhysics.Collision;
 
 namespace Duality.Components.Physics
 {
@@ -65,6 +66,7 @@ namespace Duality.Components.Physics
 				this.fixture.Body.DestroyFixture(this.fixture);
 			this.fixture = null;
 		}
+
 		protected override void SyncFixtures()
 		{
 			if (!this.EnsureFixtures()) return;
@@ -74,7 +76,7 @@ namespace Duality.Components.Physics
 			this.fixture.Friction = this.friction;
 
 			CircleShape circle = this.fixture.Shape as CircleShape;
-			circle.Density = this.density * PhysicsUnit.DensityToPhysical / (10.0f * 10.0f);
+			circle.Density = this.density;
 		}
 
 		private bool EnsureFixtures()

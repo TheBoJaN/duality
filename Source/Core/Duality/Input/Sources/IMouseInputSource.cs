@@ -8,9 +8,13 @@ namespace Duality.Input
 	public interface IMouseInputSource : IUserInputSource
 	{
 		/// <summary>
-		/// [GET / SET] The current window-local cursor X position in native window coordinates.
+		/// [GET / SET] The current viewport-local cursor X position.
 		/// </summary>
-		Point2 Pos { get; set; }
+		int X { get; set; }
+		/// <summary>
+		/// [GET / SET] The current viewport-local cursor Y position.
+		/// </summary>
+		int Y { get; set; }
 		/// <summary>
 		/// [GET] The current mouse wheel value
 		/// </summary>

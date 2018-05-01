@@ -10,7 +10,7 @@ using Duality;
 
 namespace Duality.Editor
 {
-	public class HelpInfo : IReadOnlyHelpInfo
+	public class HelpInfo : IHelpInfoReader
 	{
 		private	string	id;
 		private	string	topic;

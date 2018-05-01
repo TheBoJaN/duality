@@ -41,7 +41,9 @@ namespace Duality
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.posA.Z + basePos.Z);
+				float scale = 1.0f;
+				Vector3 posTemp = this.posA + basePos;
+				target.DrawDevice.PreprocessCoords(ref posTemp, ref scale);
 				originRadius /= scale;
 				borderRadius /= scale;
 				vectorThickness /= scale;
@@ -76,7 +78,7 @@ namespace Duality
 				originPos.X, 
 				originPos.Y, 
 				originPos.Z);
-			target.State.DepthOffset -= 0.01f;
+			if (target.DrawDevice.DepthWrite) target.State.ZOffset -= 0.1f;
 			target.State.ColorTint = outlineColor;
 			target.FillPolygonOutline(
 				connection, 
@@ -86,7 +88,7 @@ namespace Duality
 				originPos.Z);
 
 			// Draw connection points and outline
-			target.State.DepthOffset -= 0.01f;
+			if (target.DrawDevice.DepthWrite) target.State.ZOffset -= 0.1f;
 			target.State.ColorTint = areaColor;
 			target.FillCircle(
 				originPos.X, 
@@ -98,7 +100,7 @@ namespace Duality
 				targetPos.Y, 
 				targetPos.Z, 
 				originRadius - borderRadius * 0.5f);
-			target.State.DepthOffset -= 0.01f;
+			if (target.DrawDevice.DepthWrite) target.State.ZOffset -= 0.1f;
 			target.State.ColorTint = outlineColor;
 			target.FillCircleSegment(
 				originPos.X, 

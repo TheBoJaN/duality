@@ -11,11 +11,13 @@ using Duality.Editor.UndoRedoActions;
 
 namespace Duality.Editor.Plugins.Base.EditorActions
 {
-	/// <summary>
-	/// Open the Scene.
-	/// </summary>
 	public class OpenScene : EditorSingleAction<Scene>
 	{
+		public override string Description
+		{
+			get { return EditorBaseRes.ActionDesc_OpenScene; }
+		}
+
 		public override void Perform(Scene scene)
 		{
 			string lastPath = Scene.CurrentPath;
@@ -25,8 +27,8 @@ namespace Duality.Editor.Plugins.Base.EditorActions
 			}
 			catch (Exception exception)
 			{
-				Logs.Editor.WriteError("An error occurred while switching from Scene {1} to Scene {2}: {0}", 
-					LogFormat.Exception(exception),
+				Log.Editor.WriteError("An error occurred while switching from Scene {1} to Scene {2}: {0}", 
+					Log.Exception(exception),
 					lastPath,
 					scene != null ? scene.Path : "null");
 			}

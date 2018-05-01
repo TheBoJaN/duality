@@ -14,7 +14,7 @@ namespace Duality.Components.Renderers
 	[ManuallyCloned]
 	[EditorHintCategory(CoreResNames.CategoryGraphics)]
 	[EditorHintImage(CoreResNames.ImageSpriteRenderer)]
-	public class SpriteRenderer : Renderer, ICmpSpriteRenderer
+	public class SpriteRenderer : Renderer
 	{
 		/// <summary>
 		/// Specifies how the sprites uv-Coordinates are calculated.
@@ -63,22 +63,21 @@ namespace Duality.Components.Renderers
 		}
 
 
-		protected Rect                 rect        = Rect.Align(Alignment.Center, 0, 0, 256, 256);
-		protected ContentRef<Material> sharedMat   = Material.DualityIcon;
-		protected BatchInfo            customMat   = null;
-		protected ColorRgba            colorTint   = ColorRgba.White;
-		protected UVMode               rectMode    = UVMode.Stretch;
-		protected bool                 pixelGrid   = false;
-		protected float                offset      = 0.0f;
-		protected FlipMode             flipMode    = FlipMode.None;
-		protected int                  spriteIndex = -1;
+		protected Rect                 rect      = Rect.Align(Alignment.Center, 0, 0, 256, 256);
+		protected ContentRef<Material> sharedMat = Material.DualityIcon;
+		protected BatchInfo            customMat = null;
+		protected ColorRgba            colorTint = ColorRgba.White;
+		protected UVMode               rectMode  = UVMode.Stretch;
+		protected bool                 pixelGrid = false;
+		protected int                  offset    = 0;
+		protected FlipMode             flipMode  = FlipMode.None;
 		[DontSerialize] protected VertexC1P3T2[] vertices = null;
 
 
 		[EditorHintFlags(MemberFlags.Invisible)]
 		public override float BoundRadius
 		{
-			get { return this.rect.BoundingRadius * this.gameobj.Transform.Scale; }
+			get { return this.rect.Transformed(this.gameobj.Transform.Scale, this.gameobj.Transform.Scale).BoundingRadius; }
 		}
 		/// <summary>
 		/// [GET / SET] The rectangular area the sprite occupies. Relative to the <see cref="GameObject"/>.
@@ -132,13 +131,21 @@ namespace Duality.Components.Renderers
 			set { this.pixelGrid = value; }
 		}
 		/// <summary>
-		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
+		/// [GET / SET] A virtual Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public int Offset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
+		}
+		/// <summary>
+		/// [GET] The internal Z-Offset added to the renderers vertices based on its <see cref="Offset"/> value.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public float VertexZOffset
+		{
+			get { return this.offset * 0.01f; }
 		}
 		/// <summary>
 		/// [GET / SET] Specifies whether the sprite should be flipped on a given axis when redered.
@@ -148,16 +155,15 @@ namespace Duality.Components.Renderers
 			get { return this.flipMode; }
 			set { this.flipMode = value; }
 		}
-		/// <summary>
-		/// [GET / SET] The sprite index that is displayed by this renderer.
-		/// </summary>
-		public int SpriteIndex
+
+
+		public SpriteRenderer() {}
+		public SpriteRenderer(Rect rect, ContentRef<Material> mainMat)
 		{
-			get { return this.spriteIndex; }
-			set { this.ApplySpriteAnimation(value, value, 0.0f); }
+			this.rect = rect;
+			this.sharedMat = mainMat;
 		}
 
-		
 		protected Texture RetrieveMainTex()
 		{
 			if (this.customMat != null)
@@ -166,6 +172,15 @@ namespace Duality.Components.Renderers
 				return this.sharedMat.Res.MainTexture.Res;
 			else
 				return null;
+		}
+		protected ColorRgba RetrieveMainColor()
+		{
+			if (this.customMat != null)
+				return this.customMat.MainColor * this.colorTint;
+			else if (this.sharedMat.IsAvailable)
+				return this.sharedMat.Res.MainColor * this.colorTint;
+			else
+				return this.colorTint;
 		}
 		protected DrawTechnique RetrieveDrawTechnique()
 		{
@@ -179,14 +194,18 @@ namespace Duality.Components.Renderers
 		protected void PrepareVertices(ref VertexC1P3T2[] vertices, IDrawDevice device, ColorRgba mainClr, Rect uvRect)
 		{
 			Vector3 posTemp = this.gameobj.Transform.Pos;
+			float scaleTemp = 1.0f;
+			device.PreprocessCoords(ref posTemp, ref scaleTemp);
 
 			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.gameobj.Transform.Scale, out xDot, out yDot);
+			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, scaleTemp, out xDot, out yDot);
 
-			Vector2 edge1 = this.rect.TopLeft;
-			Vector2 edge2 = this.rect.BottomLeft;
-			Vector2 edge3 = this.rect.BottomRight;
-			Vector2 edge4 = this.rect.TopRight;
+			Rect rectTemp = this.rect.Transformed(this.gameobj.Transform.Scale, this.gameobj.Transform.Scale);
+
+			Vector2 edge1 = rectTemp.TopLeft;
+			Vector2 edge2 = rectTemp.BottomLeft;
+			Vector2 edge3 = rectTemp.BottomRight;
+			Vector2 edge4 = rectTemp.TopRight;
 
 			if ((this.flipMode & FlipMode.Horizontal) != FlipMode.None)
 			{ 
@@ -217,32 +236,28 @@ namespace Duality.Components.Renderers
 
 			vertices[0].Pos.X = posTemp.X + edge1.X;
 			vertices[0].Pos.Y = posTemp.Y + edge1.Y;
-			vertices[0].Pos.Z = posTemp.Z;
-			vertices[0].DepthOffset = this.offset;
+			vertices[0].Pos.Z = posTemp.Z + this.VertexZOffset;
 			vertices[0].TexCoord.X = left;
 			vertices[0].TexCoord.Y = top;
 			vertices[0].Color = mainClr;
 
 			vertices[1].Pos.X = posTemp.X + edge2.X;
 			vertices[1].Pos.Y = posTemp.Y + edge2.Y;
-			vertices[1].Pos.Z = posTemp.Z;
-			vertices[1].DepthOffset = this.offset;
+			vertices[1].Pos.Z = posTemp.Z + this.VertexZOffset;
 			vertices[1].TexCoord.X = left;
 			vertices[1].TexCoord.Y = bottom;
 			vertices[1].Color = mainClr;
 
 			vertices[2].Pos.X = posTemp.X + edge3.X;
 			vertices[2].Pos.Y = posTemp.Y + edge3.Y;
-			vertices[2].Pos.Z = posTemp.Z;
-			vertices[2].DepthOffset = this.offset;
+			vertices[2].Pos.Z = posTemp.Z + this.VertexZOffset;
 			vertices[2].TexCoord.X = right;
 			vertices[2].TexCoord.Y = bottom;
 			vertices[2].Color = mainClr;
 				
 			vertices[3].Pos.X = posTemp.X + edge4.X;
 			vertices[3].Pos.Y = posTemp.Y + edge4.Y;
-			vertices[3].Pos.Z = posTemp.Z;
-			vertices[3].DepthOffset = this.offset;
+			vertices[3].Pos.Z = posTemp.Z + this.VertexZOffset;
 			vertices[3].TexCoord.X = right;
 			vertices[3].TexCoord.Y = top;
 			vertices[3].Color = mainClr;
@@ -276,41 +291,28 @@ namespace Duality.Components.Renderers
 				}
 			}
 		}
-		protected void GetUVRect(Texture mainTex, int spriteIndex, out Rect uvRect)
-		{
-			// Determine the rect area of the texture to be displayed
-			if (mainTex == null)
-				uvRect = new Rect(1.0f, 1.0f);
-			else if (spriteIndex != -1)
-				mainTex.LookupAtlas(spriteIndex, out uvRect);
-			else
-				uvRect = new Rect(mainTex.UVRatio);
 
-			// Determine wrap-around and stretch behavior if the displayed rect size does
-			// not equal the rect size that would be required for a 1:1 display.
-			if (mainTex != null)
-			{
-				Vector2 fullSize = mainTex.ContentSize * (uvRect.Size / mainTex.UVRatio);
-				if ((this.rectMode & UVMode.WrapHorizontal) != 0)
-					uvRect.W *= this.rect.W / fullSize.X;
-				if ((this.rectMode & UVMode.WrapVertical) != 0)
-					uvRect.H *= this.rect.H / fullSize.Y;
-			}
-		}
-
-		/// <inheritdoc/>
-		public virtual void ApplySpriteAnimation(int currentSpriteIndex, int nextSpriteIndex, float progressToNext)
-		{
-			this.spriteIndex = currentSpriteIndex;
-		}
-		/// <inheritdoc/>
 		public override void Draw(IDrawDevice device)
 		{
 			Texture mainTex = this.RetrieveMainTex();
+			ColorRgba mainClr = this.RetrieveMainColor();
 
 			Rect uvRect;
-			this.GetUVRect(mainTex, this.spriteIndex, out uvRect);
-			this.PrepareVertices(ref this.vertices, device, this.colorTint, uvRect);
+			if (mainTex != null)
+			{
+				if (this.rectMode == UVMode.WrapBoth)
+					uvRect = new Rect(mainTex.UVRatio.X * this.rect.W / mainTex.PixelWidth, mainTex.UVRatio.Y * this.rect.H / mainTex.PixelHeight);
+				else if (this.rectMode == UVMode.WrapHorizontal)
+					uvRect = new Rect(mainTex.UVRatio.X * this.rect.W / mainTex.PixelWidth, mainTex.UVRatio.Y);
+				else if (this.rectMode == UVMode.WrapVertical)
+					uvRect = new Rect(mainTex.UVRatio.X, mainTex.UVRatio.Y * this.rect.H / mainTex.PixelHeight);
+				else
+					uvRect = new Rect(mainTex.UVRatio.X, mainTex.UVRatio.Y);
+			}
+			else
+				uvRect = new Rect(1.0f, 1.0f);
+
+			this.PrepareVertices(ref this.vertices, device, mainClr, uvRect);
 			if (this.customMat != null)
 				device.AddVertices(this.customMat, VertexMode.Quads, this.vertices);
 			else

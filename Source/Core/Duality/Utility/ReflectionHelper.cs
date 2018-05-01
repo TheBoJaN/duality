@@ -17,12 +17,6 @@ namespace Duality
 	/// </summary>
 	public static class ReflectionHelper
 	{
-		private static class StaticLookup<T>
-		{
-			public static readonly bool IsDeepCopyByAssignment = typeof(T).GetTypeInfo().IsDeepCopyByAssignment();
-			public static readonly bool IsReferenceOrContainsReferences = typeof(T).GetTypeInfo().IsReferenceOrContainsReferences();
-		}
-		
 		private const char MemberTokenUndefined			= 'U';
 		private const char MemberTokenTypeInfo			= 'T';
 		private const char MemberTokenFieldInfo			= 'F';
@@ -33,8 +27,7 @@ namespace Duality
 
 		private	static	Dictionary<string,Type>				typeResolveCache			= new Dictionary<string,Type>();
 		private	static	Dictionary<string,MemberInfo>		memberResolveCache			= new Dictionary<string,MemberInfo>();
-		private	static	Dictionary<TypeInfo,bool>			deepCopyByAssignmentCache	= new Dictionary<TypeInfo,bool>();
-		private	static	Dictionary<TypeInfo,bool>			isRefOrHasRefCache			= new Dictionary<TypeInfo,bool>();
+		private	static	Dictionary<TypeInfo,bool>			plainOldDataTypeCache		= new Dictionary<TypeInfo,bool>();
 		private	static	Dictionary<MemberInfo,Attribute[]>	customMemberAttribCache		= new Dictionary<MemberInfo,Attribute[]>();
 		private	static	Dictionary<KeyValuePair<Type,Type>,bool>	resRefCache			= new Dictionary<KeyValuePair<Type,Type>,bool>();
 
@@ -399,72 +392,14 @@ namespace Duality
 
 			return result;
 		}
-		
-		/// <summary>
-		/// Returns whether the specified type is a reference or could contain references.
-		/// Types where this is false are completely irrelevant to garbage collection.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static bool IsReferenceOrContainsReferences<T>()
-		{
-			return StaticLookup<T>.IsReferenceOrContainsReferences;
-		}
-		/// <summary>
-		/// Returns whether the specified type is a reference or could contain references.
-		/// Types where this is false are completely irrelevant to garbage collection.
-		/// </summary>
-		/// <param name="typeInfo"></param>
-		/// <returns></returns>
-		public static bool IsReferenceOrContainsReferences(this TypeInfo typeInfo)
-		{
-			// Early-out for some obvious cases
-			if (typeInfo.IsArray) return true;
-			if (typeInfo.IsPrimitive) return false;
-			if (typeInfo.IsEnum) return false;
-			if (typeInfo.IsClass) return true;
-			if (typeInfo.IsInterface) return true;
 
-			// If we have no evidence so far, check the cache and iterate fields
-			bool isRefOrHasRef;
-			if (isRefOrHasRefCache.TryGetValue(typeInfo, out isRefOrHasRef))
-			{
-				return isRefOrHasRef;
-			}
-			else
-			{
-				isRefOrHasRef = true;
-				foreach (FieldInfo field in typeInfo.DeclaredFieldsDeep())
-				{
-					if (field.IsStatic) continue;
-					TypeInfo fieldTypeInfo = field.FieldType.GetTypeInfo();
-					if (!IsReferenceOrContainsReferences(fieldTypeInfo))
-					{
-						isRefOrHasRef = false;
-						break;
-					}
-				}
-				isRefOrHasRefCache[typeInfo] = isRefOrHasRef;
-				return isRefOrHasRef;
-			}
-		}
 		/// <summary>
 		/// Returns whether the specified type is a primitive, enum, string, decimal, or struct that
-		/// consists only of those types, allowing to do a deep-copy by simply assigning it.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <returns></returns>
-		public static bool IsDeepCopyByAssignment<T>()
-		{
-			return StaticLookup<T>.IsDeepCopyByAssignment;
-		}
-		/// <summary>
-		/// Returns whether the specified type is a primitive, enum, string, decimal, or struct that
-		/// consists only of those types, allowing to do a deep-copy by simply assigning it.
+		/// consists only of those types.
 		/// </summary>
 		/// <param name="baseObj"></param>
 		/// <returns></returns>
-		public static bool IsDeepCopyByAssignment(this TypeInfo typeInfo)
+		public static bool IsPlainOldData(this TypeInfo typeInfo)
 		{
 			// Early-out for some obvious cases
 			if (typeInfo.IsArray) return false;
@@ -482,7 +417,7 @@ namespace Duality
 
 			// If we have no evidence so far, check the cache and iterate fields
 			bool isPlainOldData;
-			if (deepCopyByAssignmentCache.TryGetValue(typeInfo, out isPlainOldData))
+			if (plainOldDataTypeCache.TryGetValue(typeInfo, out isPlainOldData))
 			{
 				return isPlainOldData;
 			}
@@ -493,13 +428,13 @@ namespace Duality
 				{
 					if (field.IsStatic) continue;
 					TypeInfo fieldTypeInfo = field.FieldType.GetTypeInfo();
-					if (!IsDeepCopyByAssignment(fieldTypeInfo))
+					if (!IsPlainOldData(fieldTypeInfo))
 					{
 						isPlainOldData = false;
 						break;
 					}
 				}
-				deepCopyByAssignmentCache[typeInfo] = isPlainOldData;
+				plainOldDataTypeCache[typeInfo] = isPlainOldData;
 				return isPlainOldData;
 			}
 		}
@@ -526,7 +461,7 @@ namespace Duality
 			if (memberResolveCache.TryGetValue(memberString, out result)) return result;
 
 			Assembly[] searchAsm = 
-				DualityApp.AssemblyLoader.LoadedAssemblies
+				DualityApp.PluginLoader.LoadedAssemblies
 				.Except(DualityApp.PluginManager.DisposedPlugins)
 				.ToArray();
 
@@ -720,7 +655,7 @@ namespace Duality
 				return result;
 			}
 
-			throw new NotSupportedException(string.Format("Member Type '{0} not supported", LogFormat.Type(member.GetType())));
+			throw new NotSupportedException(string.Format("Member Type '{0} not supported", Log.Type(member.GetType())));
 		}
 
 		/// <summary>
@@ -763,8 +698,7 @@ namespace Duality
 		{
 			typeResolveCache.Clear();
 			memberResolveCache.Clear();
-			deepCopyByAssignmentCache.Clear();
-			isRefOrHasRefCache.Clear();
+			plainOldDataTypeCache.Clear();
 			resRefCache.Clear();
 			customMemberAttribCache.Clear();
 		}
@@ -781,7 +715,7 @@ namespace Duality
 			if (searchAsm == null)
 			{
 				searchAsm = 
-					DualityApp.AssemblyLoader.LoadedAssemblies
+					DualityApp.PluginLoader.LoadedAssemblies
 					.Except(DualityApp.PluginManager.DisposedPlugins)
 					.ToArray();
 			}

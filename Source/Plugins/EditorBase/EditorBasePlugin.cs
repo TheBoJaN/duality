@@ -132,12 +132,12 @@ namespace Duality.Editor.Plugins.Base
 					}
 				}
 			}
-			// If its some kind of shader, update all associated techniques
-			else if (resRef.Is<Shader>())
+			// If its some kind of shader, update all associated ShaderPrograms
+			else if (resRef.Is<AbstractShader>())
 			{
 				ContentRef<FragmentShader> fragRef = resRef.As<FragmentShader>();
 				ContentRef<VertexShader> vertRef = resRef.As<VertexShader>();
-				foreach (ContentRef<DrawTechnique> sp in ContentProvider.GetLoadedContent<DrawTechnique>())
+				foreach (ContentRef<ShaderProgram> sp in ContentProvider.GetLoadedContent<ShaderProgram>())
 				{
 					if (!sp.IsAvailable) continue;
 					if (sp.Res.Fragment == fragRef || sp.Res.Vertex == vertRef)

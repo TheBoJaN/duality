@@ -83,13 +83,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		void SelectTool(Type toolType);
 
 		/// <summary>
-		/// Determines whether a world space sphere with the given radius is visible in the
+		/// Determines whether a world space with the given radius is visible in the
 		/// <see cref="RigidBodyEditorCamViewState"/> view.
 		/// </summary>
 		/// <param name="worldPos"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		bool IsSphereInView(Vector3 worldPos, float radius = 1.0f);
+		bool IsCoordInView(Vector3 worldPos, float radius = 1.0f);
 		/// <summary>
 		/// Determins the view scale at a given world space Z position.
 		/// </summary>
@@ -100,14 +100,14 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		/// Determins the world space position of a given point in screen space.
 		/// The Z coordinate of that point will be evaluated as the assumed Z position.
 		/// </summary>
-		/// <param name="screenPos"></param>
+		/// <param name="screenCoord"></param>
 		/// <returns></returns>
-		Vector3 GetWorldPos(Vector3 screenPos);
+		Vector3 GetSpaceCoord(Vector3 screenCoord);
 		/// <summary>
 		/// Determines the screen space position of a given point in world space.
 		/// </summary>
-		/// <param name="worldPos"></param>
+		/// <param name="spaceCoord"></param>
 		/// <returns></returns>
-		Vector2 GetScreenPos(Vector3 worldPos);
+		Vector3 GetScreenCoord(Vector3 spaceCoord);
 	}
 }

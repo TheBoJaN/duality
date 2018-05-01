@@ -61,12 +61,15 @@ namespace Duality
 		{
 			float borderRadius = DefaultOutlineWidth;
 			float textScale = 1.0f;
-			bool worldSpace = (target.DrawDevice.VisibilityMask & VisibilityFlag.ScreenOverlay) == VisibilityFlag.None;
+			bool worldSpace;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.pos.Z + basePos.Z);
+				float scale = 1.0f;
+				Vector3 posTemp = this.pos + basePos;
+				target.DrawDevice.PreprocessCoords(ref posTemp, ref scale);
+				worldSpace = (posTemp != this.pos + basePos);
 				borderRadius /= scale;
 				textScale /= scale;
 			}
@@ -77,9 +80,11 @@ namespace Duality
 			originPos += basePos;
 
 			// Draw text and background
-			target.State.ColorTint = target.State.ColorTint.WithAlpha(target.State.ColorTint.A * 2.0f / 255.0f);
+			BatchInfo matBoostAlpha = target.State.Material;
+			matBoostAlpha.MainColor = matBoostAlpha.MainColor.WithAlpha(matBoostAlpha.MainColor.A * 2.0f / 255.0f);
+			target.State.SetMaterial(matBoostAlpha);
 			target.State.ColorTint *= this.Color;
-			if (worldSpace) target.State.TransformAngle = target.DrawDevice.ViewerAngle;
+			if (worldSpace) target.State.TransformAngle = target.DrawDevice.RefAngle;
 			target.State.TransformScale = new Vector2(textScale, textScale);
 			target.DrawText(
 				this.lines,

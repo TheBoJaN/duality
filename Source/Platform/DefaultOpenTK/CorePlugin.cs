@@ -17,21 +17,28 @@ namespace Duality.Backend.DefaultOpenTK
 	{
 		private static bool openTKInitialized;
 		private static Thread mainThread;
-		private static double lastInputDeviceUpdate;
+		private double lastInputDeviceUpdate;
 
 		protected override void InitPlugin()
 		{
 			base.InitPlugin();
+
 			mainThread = Thread.CurrentThread;
+
+			// Initialize OpenTK, if not done yet
+			InitOpenTK();
+
+			// Initially check for available input devices
+			this.DetectInputDevices();
 		}
 		protected override void OnAfterUpdate()
 		{
 			base.OnAfterUpdate();
 
 			// Periodically check for global / non-windowbound input devices
-			if (Time.MainTimer.TotalSeconds - lastInputDeviceUpdate > 1.0f)
+			if (Time.MainTimer.TotalSeconds - this.lastInputDeviceUpdate > 1.0f)
 			{
-				DetectInputDevices();
+				this.DetectInputDevices();
 			}
 		}
 		protected override void OnDisposePlugin()
@@ -50,9 +57,9 @@ namespace Duality.Backend.DefaultOpenTK
 			}
 		}
 
-		internal static void DetectInputDevices()
+		private void DetectInputDevices()
 		{
-			lastInputDeviceUpdate = Time.MainTimer.TotalSeconds;
+			this.lastInputDeviceUpdate = Time.MainTimer.TotalSeconds;
 			GlobalGamepadInputSource.UpdateAvailableDecives(DualityApp.Gamepads);
 			GlobalJoystickInputSource.UpdateAvailableDecives(DualityApp.Joysticks);
 		}
@@ -82,9 +89,9 @@ namespace Duality.Backend.DefaultOpenTK
 				EnableHighResolution = !inEditor
 			};
 				
-			Logs.Core.Write("Initializing OpenTK...");
-			Logs.Core.PushIndent();
-			Logs.Core.Write(
+			Log.Core.Write("Initializing OpenTK...");
+			Log.Core.PushIndent();
+			Log.Core.Write(
 				"Platform Backend: {0}" + Environment.NewLine + 
 				"EnableHighResolution: {1}",
 				options.Backend,
@@ -92,7 +99,7 @@ namespace Duality.Backend.DefaultOpenTK
 
 			Toolkit.Init(options);
 
-			Logs.Core.PopIndent();
+			Log.Core.PopIndent();
 		}
 		/// <summary>
 		/// Guards the calling method agains being called from a thread that is not the main thread.
@@ -109,7 +116,7 @@ namespace Duality.Backend.DefaultOpenTK
 			{
 				if (!silent)
 				{
-					Logs.Core.WriteError(
+					Log.Core.WriteError(
 						"Method {0} isn't allowed to be called from a Thread that is not the main Thread.",
 						callerInfoMember);
 				}

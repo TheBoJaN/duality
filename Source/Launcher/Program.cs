@@ -25,7 +25,7 @@ namespace Duality.Launcher
 			if (isDebugging || isRunFromEditor) ShowConsole();
 			
 			// Set up console logging
-			Logs.AddGlobalOutput(new ConsoleLogOutput());
+			Log.AddGlobalOutput(new ConsoleLogOutput());
 
 			// Set up file logging
 			StreamWriter logfileWriter = null;
@@ -35,18 +35,18 @@ namespace Duality.Launcher
 				logfileWriter = new StreamWriter("logfile.txt");
 				logfileWriter.AutoFlush = true;
 				logfileOutput = new TextWriterLogOutput(logfileWriter);
-				Logs.AddGlobalOutput(logfileOutput);
+				Log.AddGlobalOutput(logfileOutput);
 			}
 			catch (Exception e)
 			{
-				Logs.Core.WriteWarning("Text Logfile unavailable: {0}", LogFormat.Exception(e));
+				Log.Core.WriteWarning("Text Logfile unavailable: {0}", Log.Exception(e));
 			}
 
 			// Set up a global exception handler to log errors
 			AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
 			// Write initial log message before actually booting Duality
-			Logs.Core.Write("Running DualityLauncher with flags: {1}{0}", 
+			Log.Core.Write("Running DualityLauncher with flags: {1}{0}", 
 				Environment.NewLine,
 				new[] { isDebugging ? "Debugging" : null, isProfiling ? "Profiling" : null, isRunFromEditor ? "RunFromEditor" : null }.NotNull().ToString(", "));
 
@@ -54,15 +54,16 @@ namespace Duality.Launcher
 			DualityApp.Init(
 				DualityApp.ExecutionEnvironment.Launcher,
 				DualityApp.ExecutionContext.Game,
-				new DefaultAssemblyLoader(),
+				new DefaultPluginLoader(),
 				args);
 			
 			// Open up a new window
 			WindowOptions options = new WindowOptions
 			{
-				Size = DualityApp.UserData.WindowSize,
-				ScreenMode = isDebugging ? ScreenMode.Window : DualityApp.UserData.WindowMode,
-				RefreshMode = (isDebugging || isProfiling) ? RefreshMode.NoSync : DualityApp.UserData.WindowRefreshMode,
+				Width = DualityApp.UserData.GfxWidth,
+				Height = DualityApp.UserData.GfxHeight,
+				ScreenMode = isDebugging ? ScreenMode.Window : DualityApp.UserData.GfxMode,
+				RefreshMode = (isDebugging || isProfiling) ? RefreshMode.NoSync : DualityApp.UserData.RefreshMode,
 				Title = DualityApp.AppData.AppName,
 				SystemCursorVisible = isDebugging || DualityApp.UserData.SystemCursorVisible
 			};
@@ -81,7 +82,7 @@ namespace Duality.Launcher
 			// Clean up the log file
 			if (logfileWriter != null)
 			{
-				Logs.RemoveGlobalOutput(logfileOutput);
+				Log.RemoveGlobalOutput(logfileOutput);
 				logfileWriter.Flush();
 				logfileWriter.Close();
 				logfileWriter = null;
@@ -93,8 +94,8 @@ namespace Duality.Launcher
 		{
 			try
 			{
-				Logs.Core.WriteError(LogFormat.Exception(e.ExceptionObject as Exception));
-		}
+				Log.Core.WriteError(Log.Exception(e.ExceptionObject as Exception));
+			}
 			catch (Exception) { /* Ensure we're not causing any further exception by logging... */ }
 		}
 

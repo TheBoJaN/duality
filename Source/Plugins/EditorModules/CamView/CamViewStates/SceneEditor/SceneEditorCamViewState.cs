@@ -80,7 +80,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			if (this.ObjAction == ObjectEditorAction.None && this.DragMustWait && !this.dragLastLoc.IsEmpty)
 			{
 				canvas.PushState();
-				canvas.State.SetMaterial(DrawTechnique.Alpha);
+				canvas.State.SetMaterial(new BatchInfo(DrawTechnique.Alpha, ColorRgba.White));
 				canvas.State.ColorTint = ColorRgba.White.WithAlpha(this.DragMustWaitProgress);
 				canvas.FillCircle(
 					this.dragLastLoc.X, 
@@ -131,23 +131,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				DualityEditorApp.NotifyObjPropChanged(
 					this,
 					new ObjectSelection(selObjEnum.Select(s => (s.ActualObject as GameObject).Transform)),
-					ReflectionInfo.Property_Transform_LocalPos);
+					ReflectionInfo.Property_Transform_RelativePos);
 			}
 			else if (action == ObjectEditorAction.Rotate)
 			{
 				DualityEditorApp.NotifyObjPropChanged(
 					this,
 					new ObjectSelection(selObjEnum.Select(s => (s.ActualObject as GameObject).Transform)),
-					ReflectionInfo.Property_Transform_LocalPos,
-					ReflectionInfo.Property_Transform_LocalAngle);
+					ReflectionInfo.Property_Transform_RelativePos,
+					ReflectionInfo.Property_Transform_RelativeAngle);
 			}
 			else if (action == ObjectEditorAction.Scale)
 			{
 				DualityEditorApp.NotifyObjPropChanged(
 					this,
 					new ObjectSelection(selObjEnum.Select(s => (s.ActualObject as GameObject).Transform)),
-					ReflectionInfo.Property_Transform_LocalPos,
-					ReflectionInfo.Property_Transform_LocalScale);
+					ReflectionInfo.Property_Transform_RelativePos,
+					ReflectionInfo.Property_Transform_RelativeScale);
 			}
 		}
 
@@ -255,7 +255,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 				bool lockZ = this.CameraComponent.FocusDist <= 0.0f;
 				Point mouseLoc = this.PointToClient(new Point(e.X, e.Y));
-				Vector3 spaceCoord = this.GetWorldPos(new Vector3(
+				Vector3 spaceCoord = this.GetSpaceCoord(new Vector3(
 					mouseLoc.X, 
 					mouseLoc.Y, 
 					lockZ ? 0.0f : this.CameraObj.Transform.Pos.Z + MathF.Abs(this.CameraComponent.FocusDist)));

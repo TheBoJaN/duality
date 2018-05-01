@@ -9,7 +9,11 @@ namespace Duality.Backend.Dummy
 {
 	internal class DummyNativeShaderProgram : INativeShaderProgram
 	{
-		void INativeShaderProgram.LoadProgram(IEnumerable<INativeShaderPart> shaderParts, IEnumerable<ShaderFieldInfo> shaderFields) { }
+		void INativeShaderProgram.LoadProgram(INativeShaderPart vertex, INativeShaderPart fragment) { }
+		ShaderFieldInfo[] INativeShaderProgram.GetFields()
+		{
+			return new ShaderFieldInfo[0];
+		}
 		void IDisposable.Dispose() { }
 	}
 }

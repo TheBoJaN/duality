@@ -216,7 +216,7 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-				Logs.Core.WriteError("OnSaving() of {0} failed: {1}", this, LogFormat.Exception(e));
+				Log.Core.WriteError("OnSaving() of {0} failed: {1}", this, Log.Exception(e));
 				return false;
 			}
 		}
@@ -231,7 +231,7 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-				Logs.Core.WriteError("OnSaved() of {0} failed: {1}", this, LogFormat.Exception(e));
+				Log.Core.WriteError("OnSaved() of {0} failed: {1}", this, Log.Exception(e));
 				return false;
 			}
 		}
@@ -385,9 +385,9 @@ namespace Duality
 		/// <returns>The Resource that has been loaded.</returns>
 		public static T Load<T>(Stream str, string resPath = null, Action<T> loadCallback = null, bool initResource = true) where T : Resource
 		{
-			using (Serializer serializer = Serializer.Create(str))
+			using (var formatter = Serializer.Create(str))
 			{
-				return Load<T>(serializer, resPath, loadCallback, initResource);
+				return Load<T>(formatter, resPath, loadCallback, initResource);
 			}
 		}
 		/// <summary>
@@ -423,10 +423,10 @@ namespace Duality
 			}
 			catch (Exception e)
 			{
-				Logs.Core.WriteError("Can't load {0} from '{1}', because an error occurred: {3}{2}",
-					LogFormat.Type(typeof(T)),
+				Log.Core.WriteError("Can't load {0} from '{1}', because an error occurred: {3}{2}",
+					Log.Type(typeof(T)),
 					resPath ?? formatter.ToString(),
-					LogFormat.Exception(e),
+					Log.Exception(e),
 					Environment.NewLine);
 			}
 
@@ -566,19 +566,15 @@ namespace Duality
 			}
 		}
 
-		internal static Stream GetEmbeddedResourceStream(string name)
+		internal static void InitDefaultContent<T>(string embeddedNameExt, Func<Stream,T> resourceCreator) where T : Resource
 		{
 			string embeddedNameBase = "Duality.EmbeddedResources.";
 			Assembly embeddingAssembly = typeof(Resource).GetTypeInfo().Assembly;
-			return embeddingAssembly.GetManifestResourceStream(embeddedNameBase + name);
-		}
-		internal static void InitDefaultContent<T>(string embeddedNameExt, Func<Stream,T> resourceCreator) where T : Resource
-		{
+
 			InitDefaultContent<T>(name => 
 			{
-				using (Stream stream = GetEmbeddedResourceStream(name + embeddedNameExt))
+				using (Stream stream = embeddingAssembly.GetManifestResourceStream(embeddedNameBase + name + embeddedNameExt))
 				{
-					if (stream == null) return null;
 					return resourceCreator(stream);
 				}
 			});
@@ -594,7 +590,7 @@ namespace Duality
 					return null;
 			});
 		}
-		internal static void InitDefaultContent<T>(Func<string, T> resourceCreator) where T : Resource
+		internal static void InitDefaultContent<T>(Func<string,T> resourceCreator) where T : Resource
 		{
 			string contentPathBase = ContentProvider.VirtualContentPath + typeof(T).Name + ":";
 

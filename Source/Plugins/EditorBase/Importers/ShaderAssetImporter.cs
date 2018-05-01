@@ -61,7 +61,7 @@ namespace Duality.Editor.Plugins.Base
 				// If we successfully acquired one, proceed with the import
 				if (targetRef.IsAvailable)
 				{
-					Shader target = targetRef.Res as Shader;
+					AbstractShader target = targetRef.Res as AbstractShader;
 
 					// Update shader data from the input file
 					target.Source = File.ReadAllText(input.Path);
@@ -76,7 +76,7 @@ namespace Duality.Editor.Plugins.Base
 		public void PrepareExport(IAssetExportEnvironment env)
 		{
 			// We can export any Resource that is a shader
-			if (env.Input is Shader)
+			if (env.Input is AbstractShader)
 			{
 				// Add the file path of the exported output we'll produce.
 				if (env.Input is FragmentShader)
@@ -88,7 +88,7 @@ namespace Duality.Editor.Plugins.Base
 		public void Export(IAssetExportEnvironment env)
 		{
 			// Determine input and output path
-			Shader input = env.Input as Shader;
+			AbstractShader input = env.Input as AbstractShader;
 			string outputPath;
 			if (env.Input is FragmentShader)
 				outputPath = env.AddOutputPath(input.Name + SourceFileExtFragment);

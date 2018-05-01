@@ -66,7 +66,7 @@ namespace Duality.Editor
 		private	static ContentRef<Scene>			lastOpenScene		= null;
 		private	static bool							startWithLastScene	= true;
 		private	static PackageManager				packageManager		= null;
-		private	static EditorLogOutput			memoryLogOutput		= null;
+		private	static InMemoryLogOutput			memoryLogOutput		= null;
 
 
 		public	static	event	EventHandler	Terminating			= null;
@@ -83,7 +83,7 @@ namespace Duality.Editor
 		{
 			get { return pluginManager; }
 		}
-		public static EditorLogOutput GlobalLogData
+		public static InMemoryLogOutput GlobalLogData
 		{
 			get { return memoryLogOutput; }
 		}
@@ -119,6 +119,11 @@ namespace Duality.Editor
 					corePluginReloader.State == ReloadCorePluginDialog.ReloaderState.ReloadPlugins ||
 					corePluginReloader.State == ReloadCorePluginDialog.ReloaderState.RecoverFromRestart;
 			}
+		}
+		[Obsolete("Use DualityEditorApp.PluginManager instead.")]
+		public static IEnumerable<EditorPlugin> Plugins
+		{
+			get { return pluginManager.LoadedPlugins; }
 		}
 		public static IEnumerable<Resource> UnsavedResources
 		{
@@ -179,8 +184,8 @@ namespace Duality.Editor
 			DualityEditorApp.mainForm = mainForm;
 
 			// Set up an in-memory data log so plugins can access the log history when needed
-			memoryLogOutput = new EditorLogOutput();
-			Logs.AddGlobalOutput(memoryLogOutput);
+			memoryLogOutput = new InMemoryLogOutput();
+			Log.AddGlobalOutput(memoryLogOutput);
 
 			// Create working directories, if not existing yet.
 			if (!Directory.Exists(DualityApp.DataDirectory))
@@ -223,11 +228,11 @@ namespace Duality.Editor
 			DualityApp.Init(
 				DualityApp.ExecutionEnvironment.Editor, 
 				DualityApp.ExecutionContext.Editor, 
-				new DefaultAssemblyLoader(), 
+				new DefaultPluginLoader(), 
 				null);
 
 			// Initialize the plugin manager for the editor. We'll use the same loader as the core.
-			pluginManager.Init(DualityApp.PluginManager.AssemblyLoader);
+			pluginManager.Init(DualityApp.PluginManager.PluginLoader);
 			
 			// Need to load editor plugins before initializing the graphics context, so the backend is available
 			pluginManager.LoadPlugins();
@@ -291,7 +296,6 @@ namespace Duality.Editor
 				{
 					GameObject mainCam = new GameObject("MainCamera");
 					mainCam.AddComponent<Transform>().Pos = new Vector3(0, 0, -DrawDevice.DefaultFocusDist);
-					mainCam.AddComponent<VelocityTracker>();
 					mainCam.AddComponent<Camera>();
 					mainCam.AddComponent<SoundListener>();
 					Scene.Current.AddObject(mainCam);
@@ -379,7 +383,7 @@ namespace Duality.Editor
 			// Remove the global in-memory log
 			if (memoryLogOutput != null)
 			{
-				Logs.RemoveGlobalOutput(memoryLogOutput);
+				Log.RemoveGlobalOutput(memoryLogOutput);
 				memoryLogOutput = null; 
 			}
 
@@ -426,8 +430,8 @@ namespace Duality.Editor
 
 		public static void SaveUserData()
 		{
-			Logs.Editor.Write("Saving user data...");
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Saving user data...");
+			Log.Editor.PushIndent();
 
 			using (FileStream str = File.Create(UserDataFile))
 			{
@@ -467,7 +471,7 @@ namespace Duality.Editor
 				mainForm.MainDockPanel.SaveAsXml(str, encoding);
 			}
 
-			Logs.Editor.PopIndent();
+			Log.Editor.PopIndent();
 		}
 		private static void LoadUserData()
 		{
@@ -477,8 +481,8 @@ namespace Duality.Editor
 				if (!File.Exists(UserDataFile)) return;
 			}
 
-			Logs.Editor.Write("Loading user data...");
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Loading user data...");
+			Log.Editor.PushIndent();
 
 			Encoding encoding = Encoding.Default;
 			StringBuilder editorData = new StringBuilder();
@@ -499,8 +503,8 @@ namespace Duality.Editor
 
 			// Load DockPanel Data
 			{
-				Logs.Editor.Write("Loading DockPanel data...");
-				Logs.Editor.PushIndent();
+				Log.Editor.Write("Loading DockPanel data...");
+				Log.Editor.PushIndent();
 				MemoryStream dockPanelDataStream = new MemoryStream(encoding.GetBytes(dockPanelData.ToString()));
 				try
 				{
@@ -508,15 +512,15 @@ namespace Duality.Editor
 				}
 				catch (Exception e)
 				{
-					Logs.Editor.WriteError("Cannot load DockPanel data due to malformed or non-existent Xml: {0}", LogFormat.Exception(e));
+					Log.Editor.WriteError("Cannot load DockPanel data due to malformed or non-existent Xml: {0}", Log.Exception(e));
 				}
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 
 			// Load editor userdata
 			{
-				Logs.Editor.Write("Loading editor user data...");
-				Logs.Editor.PushIndent();
+				Log.Editor.Write("Loading editor user data...");
+				Log.Editor.PushIndent();
 				try
 				{
 					int activeDocumentIndex = 0;
@@ -550,17 +554,17 @@ namespace Duality.Editor
 				}
 				catch (Exception e)
 				{
-					Logs.Editor.WriteError("Error loading editor user data: {0}", LogFormat.Exception(e));
+					Log.Editor.WriteError("Error loading editor user data: {0}", Log.Exception(e));
 				}
-				Logs.Editor.PopIndent();
+				Log.Editor.PopIndent();
 			}
 
-			Logs.Editor.PopIndent();
+			Log.Editor.PopIndent();
 			return;
 		}
 		private static IDockContent DeserializeDockContent(string persistName)
 		{
-			Logs.Editor.Write("Deserializing layout: '" + persistName + "'");
+			Log.Editor.Write("Deserializing layout: '" + persistName + "'");
 			return pluginManager.DeserializeDockContent(persistName);
 		}
 
@@ -573,17 +577,12 @@ namespace Duality.Editor
 
 			try
 			{
-				// Currently bound to game-specific settings. Should be decoupled
-				// from them at some point, so the editor can use independent settings.
-				mainGraphicsContext = graphicsBack.CreateContext(
-					DualityApp.AppData.MultisampleBackBuffer ?
-					DualityApp.UserData.AntialiasingQuality :
-					AAQuality.Off);
+				mainGraphicsContext = graphicsBack.CreateContext();
 			}
 			catch (Exception e)
 			{
 				mainGraphicsContext = null;
-				Logs.Editor.WriteError("Can't create editor graphics context, because an error occurred: {0}", LogFormat.Exception(e));
+				Log.Editor.WriteError("Can't create editor graphics context, because an error occurred: {0}", Log.Exception(e));
 			}
 		}
 		public static void PerformBufferSwap()
@@ -749,7 +748,7 @@ namespace Duality.Editor
 			}
 			catch (Exception e)
 			{
-				Logs.Editor.WriteError("Backup of file '{0}' failed: {1}", path, LogFormat.Exception(e));
+				Log.Editor.WriteError("Backup of file '{0}' failed: {1}", path, Log.Exception(e));
 			}
 		}
 		
@@ -1016,14 +1015,14 @@ namespace Duality.Editor
 		}
 		public static void AnalyzeCorePlugin(CorePlugin plugin)
 		{
-			Logs.Editor.Write("Analyzing Core Plugin: {0}", plugin.AssemblyName);
-			Logs.Editor.PushIndent();
+			Log.Editor.Write("Analyzing Core Plugin: {0}", plugin.AssemblyName);
+			Log.Editor.PushIndent();
 
 			// Query references to other Assemblies
 			var asmRefQuery = from AssemblyName a in plugin.PluginAssembly.GetReferencedAssemblies()
 							  select a.GetShortAssemblyName();
 			string thisAsmName = typeof(DualityEditorApp).Assembly.GetShortAssemblyName();
-			foreach (string asmName in asmRefQuery)
+			foreach (var asmName in asmRefQuery)
 			{
 				bool illegalRef = false;
 
@@ -1036,7 +1035,7 @@ namespace Duality.Editor
 				// Warn about them
 				if (illegalRef)
 				{
-					Logs.Editor.WriteWarning(
+					Log.Editor.WriteWarning(
 						"Found illegally referenced Assembly '{0}'. " + 
 						"CorePlugins should never reference or use DualityEditor or any of its EditorPlugins. Consider moving the critical code to an EditorPlugin.",
 						asmName);
@@ -1051,9 +1050,9 @@ namespace Duality.Editor
 			}
 			catch (Exception e)
 			{
-				Logs.Editor.WriteError(
+				Log.Editor.WriteError(
 					"Unable to analyze exported types because an error occured: {0}",
-					LogFormat.Exception(e));
+					Log.Exception(e));
 				exportedTypes = null;
 			}
 
@@ -1070,16 +1069,16 @@ namespace Duality.Editor
 					FieldInfo[] fields = cmpType.GetFields(BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.Instance);
 					if (fields.Length > 0)
 					{
-						Logs.Editor.WriteWarning(
+						Log.Editor.WriteWarning(
 							"Found public fields in Component class '{0}': {1}. " + 
 							"The usage of public fields is strongly discouraged in Component classes. Consider using properties instead.",
 							cmpType.GetTypeCSCodeName(true),
-							fields.ToString(f => LogFormat.FieldInfo(f, false), ", "));
+							fields.ToString(f => Log.FieldInfo(f, false), ", "));
 					}
 				}
 			}
 
-			Logs.Editor.PopIndent();
+			Log.Editor.PopIndent();
 		}
 
 		public static bool DisplayConfirmDeleteObjects(ObjectSelection obj = null)
@@ -1162,7 +1161,7 @@ namespace Duality.Editor
 		{
 			if (DualityApp.ExecContext == DualityApp.ExecutionContext.Terminated) return;
 
-			//Logs.Editor.Write("OnObjectPropertyChanged: {0}{2}\t{1}", args.PropNames.ToString(", "), args.Objects.Objects.ToString(", "), Environment.NewLine);
+			//Log.Editor.Write("OnObjectPropertyChanged: {0}{2}\t{1}", args.PropNames.ToString(", "), args.Objects.Objects.ToString(", "), Environment.NewLine);
 			if (args.PersistenceCritical)
 			{
 				// If a linked GameObject was modified, update its prefab link changelist
@@ -1309,7 +1308,7 @@ namespace Duality.Editor
 					}
 					catch (Exception exception)
 					{
-						Logs.Editor.WriteError("An error occurred during a core update: {0}", LogFormat.Exception(exception));
+						Log.Editor.WriteError("An error occurred during a core update: {0}", Log.Exception(exception));
 					}
 					OnUpdatingEngine();
 				}
@@ -1397,8 +1396,8 @@ namespace Duality.Editor
 			if (needsRecovery)
 			{
 				needsRecovery = false;
-				Logs.Editor.Write("Recovering from full plugin reload restart...");
-				Logs.Editor.PushIndent();
+				Log.Editor.Write("Recovering from full plugin reload restart...");
+				Log.Editor.PushIndent();
 				corePluginReloader.State = ReloadCorePluginDialog.ReloaderState.RecoverFromRestart;
 			}
 			else if (corePluginReloader.ReloadSchedule.Count > 0)
@@ -1431,7 +1430,7 @@ namespace Duality.Editor
 
 			// Invoke the init event on all gathered components in the right order
 			foreach (ICmpInitializable component in initList)
-				component.OnActivate();
+				component.OnInit(Component.InitContext.Activate);
 		}
 		private static void editorObjects_GameObjectsRemoved(object sender, GameObjectGroupEventArgs e)
 		{
@@ -1454,14 +1453,14 @@ namespace Duality.Editor
 
 			// Invoke the init event on all gathered components in the right order
 			foreach (ICmpInitializable component in initList)
-				component.OnDeactivate();
+				component.OnShutdown(Component.ShutdownContext.Deactivate);
 		}
 		private static void editorObjects_ComponentAdded(object sender, ComponentEventArgs e)
 		{
 			if (e.Component.Active)
 			{
 				ICmpInitializable cInit = e.Component as ICmpInitializable;
-				if (cInit != null) cInit.OnActivate();
+				if (cInit != null) cInit.OnInit(Component.InitContext.Activate);
 			}
 		}
 		private static void editorObjects_ComponentRemoved(object sender, ComponentEventArgs e)
@@ -1469,7 +1468,7 @@ namespace Duality.Editor
 			if (e.Component.Active)
 			{
 				ICmpInitializable cInit = e.Component as ICmpInitializable;
-				if (cInit != null) cInit.OnDeactivate();
+				if (cInit != null) cInit.OnShutdown(Component.ShutdownContext.Deactivate);
 			}
 		}
 

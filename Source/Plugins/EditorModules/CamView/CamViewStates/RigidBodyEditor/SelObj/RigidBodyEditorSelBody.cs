@@ -2,7 +2,6 @@
 using System.Linq;
 
 using Duality;
-using Duality.Drawing;
 using Duality.Components;
 using Duality.Components.Physics;
 
@@ -43,18 +42,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get
 			{
-				ICmpRenderer renderer = this.bodyObj.GetComponent<ICmpRenderer>();
-				if (renderer == null)
-				{
-					if (this.bodyObj.Transform != null)
-						return CamView.DefaultDisplayBoundRadius * this.bodyObj.Transform.Scale;
-					else
-						return CamView.DefaultDisplayBoundRadius;
-				}
-
-				CullingInfo info;
-				renderer.GetCullingInfo(out info);
-				return info.Radius;
+				ICmpRenderer r = this.bodyObj.GetComponent<ICmpRenderer>();
+				return r == null ? CamView.DefaultDisplayBoundRadius : r.BoundRadius;
 			}
 		}
 		public override bool ShowPos

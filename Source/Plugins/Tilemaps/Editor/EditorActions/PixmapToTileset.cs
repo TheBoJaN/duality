@@ -10,13 +10,18 @@ using Duality.Editor.Plugins.Tilemaps.Properties;
 namespace Duality.Editor.Plugins.Tilemaps.EditorActions
 {
 	/// <summary>
-	/// Creates a new Tileset Resource based on the Pixmap.
+	/// Context menu action that will create a new <see cref="Tileset"/> 
+	/// based on the selected <see cref="Pixmap"/> resource.
 	/// </summary>
 	public class PixmapToTileset : EditorSingleAction<Pixmap>
 	{
 		public override string Name
 		{
 			get { return TilemapsRes.ActionName_CreateTileset; }
+		}
+		public override string Description
+		{
+			get { return TilemapsRes.ActionDesc_CreateTileset; }
 		}
 		public override Image Icon
 		{

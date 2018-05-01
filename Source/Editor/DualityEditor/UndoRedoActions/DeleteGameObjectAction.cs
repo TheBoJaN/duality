@@ -40,7 +40,7 @@ namespace Duality.Editor.UndoRedoActions
 				}
 			}
 
-			Scene.Current.RemoveObjects(this.targetObj);
+			Scene.Current.RemoveObject(this.targetObj);
 			foreach (GameObject obj in this.targetObj)
 				obj.Dispose();
 

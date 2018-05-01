@@ -338,7 +338,7 @@ namespace Duality.Editor.Plugins.SceneView
 		{
 			if (obj == null) return null;
 			GameObjectNode thisNode = new GameObjectNode(obj, !this.buttonShowComponents.Checked);
-			foreach (Component c in obj.Components)
+			foreach (Component c in obj.GetComponents<Component>())
 			{
 				ComponentNode compNode = this.ScanComponent(c);
 				if (compNode != null) this.InsertNodeSorted(compNode, thisNode);
@@ -453,7 +453,7 @@ namespace Duality.Editor.Plugins.SceneView
 				if (ignoreGameObjList != null && ignoreGameObjList.Contains(cmpToRemove.GameObj)) continue;
 
 				Component reqComp = null;
-				foreach (Component otherComponent in cmpToRemove.GameObj.Components)
+				foreach (Component otherComponent in cmpToRemove.GameObj.GetComponents<Component>())
 				{
 					if (cmpList.Contains(otherComponent)) continue;
 
@@ -535,7 +535,7 @@ namespace Duality.Editor.Plugins.SceneView
 
 			if (action != null)
 			{
-				action.Perform(new[] { subject });
+				action.Perform(subject);
 				return true;
 			}
 			else return false;
@@ -1660,14 +1660,8 @@ namespace Duality.Editor.Plugins.SceneView
 			// Update the displayed names of objects
 			if (e.HasProperty(ReflectionInfo.Property_GameObject_Name))
 			{
-				foreach (GameObject obj in e.Objects.GameObjects)
-				{
-					GameObjectNode node = this.FindNode(obj);
-					if (node == null) continue;
-
-					node.Text = node.Obj.Name;
-					node.UpdateIcon();
-				}
+				foreach (GameObjectNode node in e.Objects.GameObjects.Select(g => this.FindNode(g)))
+					if (node != null) node.Text = node.Obj.Name;
 			}
 		}
 		private void DualityEditorApp_ResourceRenamed(object sender, ResourceRenamedEventArgs e)
@@ -1849,8 +1843,8 @@ namespace Duality.Editor.Plugins.SceneView
 					if (item.Tag is CreateContextEntryTag)
 						result = HelpInfo.FromMember(ReflectionHelper.ResolveType((item.Tag as CreateContextEntryTag).TypeId));
 					// Editor Actions
-					else if (item.Tag is IEditorAction && (item.Tag as IEditorAction).HelpInfo != null)
-						result = (item.Tag as IEditorAction).HelpInfo;
+					else if (item.Tag is IEditorAction && !string.IsNullOrEmpty((item.Tag as IEditorAction).Description))
+						result = HelpInfo.FromText(item.Text, (item.Tag as IEditorAction).Description);
 					// A HelpInfo attached to the item
 					else if (item.Tag is HelpInfo)
 						result = item.Tag as HelpInfo;
@@ -1882,16 +1876,10 @@ namespace Duality.Editor.Plugins.SceneView
 		string IToolTipProvider.GetToolTip(TreeNodeAdv viewNode, Aga.Controls.Tree.NodeControls.NodeControl nodeControl)
 		{
 			IEditorAction action = this.GetResourceOpenAction(viewNode);
-			if (action != null && action.HelpInfo != null)
-			{
-				return string.Format(
-					Duality.Editor.Plugins.SceneView.Properties.SceneViewRes.SceneView_Help_Doubleclick,
-					action.HelpInfo.Description);
-			}
-			else
-			{
-				return null;
-			}
+			if (action != null) return string.Format(
+				Duality.Editor.Plugins.SceneView.Properties.SceneViewRes.SceneView_Help_Doubleclick,
+				action.Description);
+			else return null;
 		}
 		
 		private int ContextMenuItemComparison(IMenuModelItem itemA, IMenuModelItem itemB)

@@ -63,6 +63,16 @@ namespace Duality
 
 
 		/// <summary>
+		/// Fired when a <see cref="GameObject"/> is registered.
+		/// </summary>
+		[Obsolete("Use GameObjectsAdded (note the plural) instead.")]
+		public event EventHandler<GameObjectEventArgs>	GameObjectAdded;
+		/// <summary>
+		/// Fired when a <see cref="GameObject"/> is unregistered.
+		/// </summary>
+		[Obsolete("Use GameObjectsRemoved (note the plural) instead.")]
+		public event EventHandler<GameObjectEventArgs>	GameObjectRemoved;
+		/// <summary>
 		/// Fired once for every <see cref="GameObject"/> add operation.
 		/// </summary>
 		public event EventHandler<GameObjectGroupEventArgs> GameObjectsAdded;
@@ -89,15 +99,17 @@ namespace Duality
 		/// Registers a GameObject and all of its children.
 		/// </summary>
 		/// <param name="obj"></param>
-		public void AddObject(GameObject obj)
+		public bool AddObject(GameObject obj)
 		{
-			this.AddObjects(new GameObject[] { obj });
+			this.AddObject(new GameObject[] { obj });
+			// ToDo: Remove the return value in the v3.0 branch
+			return this.allObj.Contains(obj);
 		}
 		/// <summary>
 		/// Registers a set of GameObjects
 		/// </summary>
 		/// <param name="objEnum"></param>
-		public void AddObjects(IEnumerable<GameObject> objEnum)
+		public void AddObject(IEnumerable<GameObject> objEnum)
 		{
 			List<GameObject> addedObjects = new List<GameObject>();
 			foreach (GameObject obj in objEnum)
@@ -110,15 +122,18 @@ namespace Duality
 		/// Unregisters a GameObject and all of its children
 		/// </summary>
 		/// <param name="obj"></param>
-		public void RemoveObject(GameObject obj)
+		public bool RemoveObject(GameObject obj)
 		{
-			this.RemoveObjects(new GameObject[] { obj });
+			// ToDo: Remove the return value in the v3.0 branch
+			bool existedBefore = this.allObj.Contains(obj);
+			this.RemoveObject(new GameObject[] { obj });
+			return existedBefore;
 		}
 		/// <summary>
 		/// Unregisters a set of GameObjects
 		/// </summary>
 		/// <param name="objEnum"></param>
-		public void RemoveObjects(IEnumerable<GameObject> objEnum)
+		public void RemoveObject(IEnumerable<GameObject> objEnum)
 		{
 			List<GameObject> removedObjects = new List<GameObject>();
 			foreach (GameObject obj in objEnum)
@@ -191,6 +206,8 @@ namespace Duality
 			foreach (GameObject obj in objList)
 			{
 				this.RegisterEvents(obj);
+				if (this.GameObjectAdded != null)
+					this.GameObjectAdded(this, new GameObjectEventArgs(obj));
 			}
 
 			if (this.GameObjectsAdded != null)
@@ -203,6 +220,8 @@ namespace Duality
 			foreach (GameObject obj in objList)
 			{
 				this.UnregisterEvents(obj);
+				if (this.GameObjectRemoved != null)
+					this.GameObjectRemoved(this, new GameObjectEventArgs(obj));
 			}
 
 			if (this.GameObjectsRemoved != null)

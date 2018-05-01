@@ -32,7 +32,7 @@ namespace Duality.Editor
 		/// </summary>
 		internal EditorPluginManager()
 		{
-			this.PluginLog = Logs.Editor;
+			this.PluginLog = Log.Editor;
 		}
 
 		/// <summary>
@@ -53,7 +53,7 @@ namespace Duality.Editor
 			this.PluginLog.Write("Scanning for editor plugins...");
 			this.PluginLog.PushIndent();
 
-			foreach (string dllPath in this.AssemblyLoader.AvailableAssemblyPaths)
+			foreach (string dllPath in this.PluginLoader.AvailableAssemblyPaths)
 			{
 				if (!dllPath.EndsWith(".editor.dll", StringComparison.InvariantCultureIgnoreCase))
 					continue;
@@ -160,19 +160,19 @@ namespace Duality.Editor
 		protected override void OnInit()
 		{
 			base.OnInit();
-			this.AssemblyLoader.AssemblyResolve += this.assemblyLoader_AssemblyResolve;
+			this.PluginLoader.AssemblyResolve += this.pluginLoader_AssemblyResolve;
 		}
 		protected override void OnTerminate()
 		{
 			base.OnTerminate();
-			this.AssemblyLoader.AssemblyResolve -= this.assemblyLoader_AssemblyResolve;
+			this.PluginLoader.AssemblyResolve -= this.pluginLoader_AssemblyResolve;
 		}
 		protected override void OnInitPlugin(EditorPlugin plugin)
 		{
 			plugin.InitPlugin(DualityEditorApp.MainForm);
 		}
 
-		private void assemblyLoader_AssemblyResolve(object sender, AssemblyResolveEventArgs args)
+		private void pluginLoader_AssemblyResolve(object sender, AssemblyResolveEventArgs args)
 		{
 			// Early-out, if the Assembly has already been resolved
 			if (args.IsResolved) return;
@@ -180,7 +180,7 @@ namespace Duality.Editor
 			// Search for editor plugins that haven't been loaded yet, and load them first.
 			// This is required to satisfy dependencies while loading plugins, since
 			// we can't know which one requires which beforehand.
-			foreach (string libFile in this.AssemblyLoader.AvailableAssemblyPaths)
+			foreach (string libFile in this.PluginLoader.AvailableAssemblyPaths)
 			{
 				if (!libFile.EndsWith(".editor.dll", StringComparison.OrdinalIgnoreCase))
 					continue;

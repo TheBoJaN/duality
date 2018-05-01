@@ -8,7 +8,6 @@ using System.Windows.Forms;
 using Duality;
 using Duality.Components;
 using Duality.Drawing;
-using Duality.Resources;
 
 using Duality.Editor;
 using Duality.Editor.Backend;
@@ -102,37 +101,33 @@ namespace Duality.Editor.Plugins.CamView
 		{
 			this.RenderableSite.MakeCurrent();
 			this.RenderPickingMap();
-			return this.CameraComponent.PickRendererAt(x / 2, y / 2);
+			return this.CameraComponent.PickRendererAt(x, y);
 		}
 		public IEnumerable<ICmpRenderer> PickRenderersIn(int x, int y, int w, int h)
 		{
 			this.RenderableSite.MakeCurrent();
 			this.RenderPickingMap();
-			return this.CameraComponent.PickRenderersIn(x / 2, y / 2, (w + 1) / 2, (h + 1) / 2);
+			return this.CameraComponent.PickRenderersIn(x, y, w, h);
 		}
-		public bool IsSphereInView(Vector3 worldPos, float radius = 1.0f)
+		public bool IsCoordInView(Vector3 c, float boundRad = 1.0f)
 		{
-			return this.CameraComponent.IsSphereInView(worldPos, radius);
+			return this.CameraComponent.IsCoordInView(c, boundRad);
 		}
 		public float GetScaleAtZ(float z)
 		{
 			return this.CameraComponent.GetScaleAtZ(z);
 		}
-		public Vector3 GetWorldPos(Vector3 screenPos)
+		public Vector3 GetSpaceCoord(Vector3 screenCoord)
 		{
-			return this.CameraComponent.GetWorldPos(screenPos);
+			return this.CameraComponent.GetSpaceCoord(screenCoord);
 		}
-		public Vector3 GetWorldPos(Vector2 screenPos)
+		public Vector3 GetSpaceCoord(Vector2 screenCoord)
 		{
-			return this.CameraComponent.GetWorldPos(screenPos);
+			return this.CameraComponent.GetSpaceCoord(screenCoord);
 		}
-		public Vector2 GetScreenPos(Vector3 worldPos)
+		public Vector3 GetScreenCoord(Vector3 spaceCoord)
 		{
-			return this.CameraComponent.GetScreenPos(worldPos);
-		}
-		public Vector2 GetScreenPos(Vector2 worldPos)
-		{
-			return this.CameraComponent.GetScreenPos(worldPos);
+			return this.CameraComponent.GetScreenCoord(spaceCoord);
 		}
 
 		public void MakeDualityTarget()
@@ -145,32 +140,12 @@ namespace Duality.Editor.Plugins.CamView
 			if (this.pickingFrameLast == Time.FrameCount) return false;
 			if (this.ClientSize.IsEmpty) return false;
 
-			Point2 clientSize = new Point2(this.ClientSize.Width, this.ClientSize.Height);
-			RenderSetup renderSetup = this.CameraComponent.PickingSetup;
-
-			if (renderSetup != null)
-				renderSetup.AddRendererFilter(this.PickingRendererFilter);
-
 			this.pickingFrameLast = Time.FrameCount;
 			this.CameraComponent.RenderPickingMap(
-				clientSize / 2,
-				clientSize,
+				new Point2(this.ClientSize.Width, this.ClientSize.Height),
 				true);
 
-			if (renderSetup != null)
-				renderSetup.RemoveRendererFilter(this.PickingRendererFilter);
-
 			return true;
-		}
-		private bool PickingRendererFilter(ICmpRenderer r)
-		{
-			GameObject obj = (r as Component).GameObj;
-
-			if (!this.View.ObjectVisibility.Matches(obj))
-				return false;
-
-			DesignTimeObjectData data = DesignTimeObjectData.Get(obj);
-			return !data.IsHidden;
 		}
 	}
 }

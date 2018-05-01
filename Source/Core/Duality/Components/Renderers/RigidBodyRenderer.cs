@@ -25,11 +25,11 @@ namespace Duality.Components.Renderers
 		private BatchInfo            customOutlineMaterial = null;
 		private ColorRgba            colorTint             = ColorRgba.White;
 		private float                outlineWidth          = 3.0f;
-		private float                offset                = 0.0f;
+		private int                  offset                = 0;
 		private bool                 fillHollowShapes      = false;
 		private bool                 wrapTexture           = true;
 
-		[DontSerialize] private Canvas canvas = new Canvas();
+		[DontSerialize] private CanvasBuffer vertexBuffer = new CanvasBuffer();
 
 
 		public override float BoundRadius
@@ -77,10 +77,10 @@ namespace Duality.Components.Renderers
 			set { this.colorTint = value; }
 		}
 		/// <summary>
-		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
+		/// [GET / SET] A virtual Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public int Offset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
@@ -111,6 +111,14 @@ namespace Duality.Components.Renderers
 			get { return this.wrapTexture; }
 			set { this.wrapTexture = value; }
 		}
+		/// <summary>
+		/// [GET] The internal Z-Offset added to the renderers vertices based on its <see cref="Offset"/> value.
+		/// </summary>
+		[EditorHintFlags(MemberFlags.Invisible)]
+		public float VertexZOffset
+		{
+			get { return this.offset * 0.01f; }
+		}
 
 
 		public override void Draw(IDrawDevice device)
@@ -118,51 +126,48 @@ namespace Duality.Components.Renderers
 			Transform tranform = this.GameObj.Transform;
 			RigidBody body = this.GameObj.GetComponent<RigidBody>();
 
-			this.canvas.Begin(device);
+			Canvas canvas = new Canvas(device, this.vertexBuffer);
 
 			// Draw Shape Areas
-			this.canvas.State.DepthOffset = this.offset;
+			canvas.State.ZOffset = this.offset;
 			if (this.customAreaMaterial != null)
-				this.canvas.State.SetMaterial(this.customAreaMaterial);
+				canvas.State.SetMaterial(this.customAreaMaterial);
 			else
-				this.canvas.State.SetMaterial(this.areaMaterial);
+				canvas.State.SetMaterial(this.areaMaterial);
 			foreach (ShapeInfo shape in body.Shapes)
 			{
 				if (!shape.IsValid)
-					this.canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
+					canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
 				else
-					this.canvas.State.ColorTint = this.colorTint;
-				this.DrawShapeArea(this.canvas, tranform, shape);
+					canvas.State.ColorTint = this.colorTint;
+				this.DrawShapeArea(canvas, tranform, shape);
 			}
 
 			// Draw Shape Outlines
 			if (this.outlineWidth > 0.0f)
 			{
-				this.canvas.State.DepthOffset = this.offset - 0.01f;
+				canvas.State.ZOffset = this.offset - 1;
 				if (this.customOutlineMaterial != null)
-					this.canvas.State.SetMaterial(this.customOutlineMaterial);
+					canvas.State.SetMaterial(this.customOutlineMaterial);
 				else
-					this.canvas.State.SetMaterial(this.outlineMaterial);
+					canvas.State.SetMaterial(this.outlineMaterial);
 				foreach (ShapeInfo shape in body.Shapes)
 				{
 					if (!shape.IsValid)
-						this.canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
+						canvas.State.ColorTint = this.colorTint * ColorRgba.Red;
 					else
-						this.canvas.State.ColorTint = this.colorTint;
-					this.DrawShapeOutline(this.canvas, tranform, shape);
+						canvas.State.ColorTint = this.colorTint;
+					this.DrawShapeOutline(canvas, tranform, shape);
 				}
 			}
-
-			this.canvas.End();
 		}
 
 		private void DrawShapeArea(Canvas canvas, Transform transform, ShapeInfo shape)
 		{
 			canvas.PushState();
-			if (shape is CircleShapeInfo)
-			{
-				this.DrawShapeArea(canvas, transform, shape as CircleShapeInfo);
-			}
+			if      (shape is CircleShapeInfo)                         this.DrawShapeArea(canvas, transform, shape as CircleShapeInfo);
+			else if (shape is LoopShapeInfo && this.fillHollowShapes)  this.DrawShapeArea(canvas, transform, (shape as LoopShapeInfo).Vertices);
+			else if (shape is ChainShapeInfo && this.fillHollowShapes) this.DrawShapeArea(canvas, transform, (shape as ChainShapeInfo).Vertices);
 			else if (shape is PolyShapeInfo)
 			{
 				PolyShapeInfo polyShape = shape as PolyShapeInfo;
@@ -185,15 +190,6 @@ namespace Duality.Components.Renderers
 							texRect.H * localBounds.H / bounds.H);
 						this.DrawShapeArea(canvas, transform, convexPolygon, localTexRect);
 					}
-				}
-			}
-			else if (shape is VertexBasedShapeInfo)
-			{
-				VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-				bool isSolid = (vertexShape.ShapeTraits & VertexShapeTrait.IsSolid) != VertexShapeTrait.None;
-				if (isSolid || this.fillHollowShapes)
-				{
-					this.DrawShapeArea(canvas, transform, vertexShape.Vertices);
 				}
 			}
 			canvas.PopState();
@@ -249,16 +245,10 @@ namespace Duality.Components.Renderers
 		private void DrawShapeOutline(Canvas canvas, Transform transform, ShapeInfo shape)
 		{
 			canvas.PushState();
-			if (shape is CircleShapeInfo)
-			{
-				this.DrawShapeOutline(canvas, transform, shape as CircleShapeInfo);
-			}
-			else if (shape is VertexBasedShapeInfo)
-			{
-				VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-				bool isLoop = (vertexShape.ShapeTraits & VertexShapeTrait.IsLoop) != VertexShapeTrait.None;
-				this.DrawShapeOutline(canvas, transform, vertexShape.Vertices, isLoop);
-			}
+			if      (shape is CircleShapeInfo) this.DrawShapeOutline(canvas, transform, shape as CircleShapeInfo);
+			else if (shape is PolyShapeInfo)   this.DrawShapeOutline(canvas, transform, (shape as PolyShapeInfo).Vertices, true);
+			else if (shape is LoopShapeInfo)   this.DrawShapeOutline(canvas, transform, (shape as LoopShapeInfo).Vertices, true);
+			else if (shape is ChainShapeInfo)  this.DrawShapeOutline(canvas, transform, (shape as ChainShapeInfo).Vertices, false);
 			canvas.PopState();
 		}
 		private void DrawShapeOutline(Canvas canvas, Transform transform, CircleShapeInfo shape)

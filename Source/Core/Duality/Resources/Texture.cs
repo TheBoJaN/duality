@@ -71,7 +71,7 @@ namespace Duality.Resources
 
 		
 		private	ContentRef<Pixmap>	basePixmap	= null;
-		private	Point2				size		= Point2.Zero;
+		private	Vector2				size		= Vector2.Zero;
 		private	TextureSizeMode		texSizeMode	= TextureSizeMode.Default;
 		private	TextureMagFilter	filterMag	= TextureMagFilter.Linear;
 		private	TextureMinFilter	filterMin	= TextureMinFilter.LinearMipmapLinear;
@@ -90,54 +90,38 @@ namespace Duality.Resources
 		[DontSerialize] private	bool	needsReload	= true;
 		[DontSerialize] private	Rect[]	atlas		= null;
 
-		
+
 		/// <summary>
-		/// [GET] The width of the internal texture that has been allocated, in pixels.
+		/// [GET] The Textures internal texel width
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public int InternalWidth
+		public int TexelWidth
 		{
 			get { return this.texWidth; }
 		}
 		/// <summary>
-		/// [GET] The height of the internal texture that has been allocated, in pixels.
+		/// [GET] The Textures internal texel height
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public int InternalHeight
+		public int TexelHeight
 		{
 			get { return this.texHeight; }
 		}
 		/// <summary>
-		/// [GET] The size of the internal texture that has been allocated, in pixels.
+		/// [GET] The Textures original pixel width
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public Point2 InternalSize
-		{
-			get { return new Point2(this.texWidth, this.texHeight); }
-		}
-		/// <summary>
-		/// [GET] The width of the texture area that is actually used, in pixels.
-		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
-		public int ContentWidth
+		public int PixelWidth
 		{
 			get { return this.pxWidth; }
 		}
 		/// <summary>
-		/// [GET] The height of the texture area that is actually used, in pixels.
+		/// [GET] The Textures original pixel height
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public int ContentHeight
+		public int PixelHeight
 		{
 			get { return this.pxHeight; }
-		}
-		/// <summary>
-		/// [GET] The size of the texture area that is actually used, in pixels.
-		/// </summary>
-		[EditorHintFlags(MemberFlags.Invisible)]
-		public Point2 ContentSize
-		{
-			get { return new Point2(this.pxWidth, this.pxHeight); }
 		}
 		/// <summary>
 		/// [GET] The backends native texture. You shouldn't use this unless you know exactly what you're doing.
@@ -148,7 +132,7 @@ namespace Duality.Resources
 			get { return this.nativeTex; }
 		}
 		/// <summary>
-		/// [GET] The UV coordinate size that represents the texture's used content area.
+		/// [GET] UV (Texture) coordinates for the Textures lower right
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
 		public Vector2 UVRatio
@@ -177,12 +161,13 @@ namespace Duality.Resources
 			get { return this.needsReload; }
 		} 
 		/// <summary>
-		/// [GET / SET] The Textures nominal size. When create from a <see cref="BasePixmap"/>, this
-		/// value will be read-only and derived from its <see cref="Pixmap.Size"/>.
+		/// [GET / SET] The Textures size. Readonly, when created from a <see cref="BasePixmap"/>.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.AffectsOthers)]
 		[EditorHintRange(1, int.MaxValue)]
-		public Point2 Size
+		[EditorHintIncrement(1)]
+		[EditorHintDecimalPlaces(0)]
+		public Vector2 Size
 		{
 			get { return this.size; }
 			set
@@ -441,7 +426,7 @@ namespace Duality.Resources
 		/// Retrieves the pixel data that is currently stored in video memory.
 		/// </summary>
 		/// <param name="targetBuffer">The buffer (Rgba8 format) to store all the pixel data in. 
-		/// Its byte length should be at least <see cref="InternalWidth"/> * <see cref="InternalHeight"/> * 4.</param>
+		/// Its byte length should be at least <see cref="TexelWidth"/> * <see cref="TexelHeight"/> * 4.</param>
 		/// <returns>The number of bytes that were read.</returns>
 		public int GetPixelData<T>(T[] targetBuffer) where T : struct
 		{
@@ -500,11 +485,11 @@ namespace Duality.Resources
 		/// </summary>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		protected void AdjustSize(int width, int height)
+		protected void AdjustSize(float width, float height)
 		{
-			this.size = new Point2(MathF.Abs(width), MathF.Abs(height));
-			this.pxWidth = this.size.X;
-			this.pxHeight = this.size.Y;
+			this.size = new Vector2(MathF.Abs(width), MathF.Abs(height));
+			this.pxWidth = MathF.RoundToInt(this.size.X);
+			this.pxHeight = MathF.RoundToInt(this.size.Y);
 			this.pxDiameter = MathF.Distance(this.pxWidth, this.pxHeight);
 
 			if (this.texSizeMode == TextureSizeMode.NonPowerOfTwo)

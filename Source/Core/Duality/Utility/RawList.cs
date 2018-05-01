@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using System.Reflection;
 
 namespace Duality
 {
@@ -74,12 +73,12 @@ namespace Duality
 		{
 			get
 			{
-				if (index >= count) ThrowIndexOutOfRangeException();
+				if (index >= count) throw new IndexOutOfRangeException();
 				return this.data[index];
 			}
 			set
 			{
-				if (index >= count) ThrowIndexOutOfRangeException();
+				if (index >= count) throw new IndexOutOfRangeException();
 				this.data[index] = value;
 			}
 		}
@@ -218,7 +217,7 @@ namespace Duality
 			this.count += count;
 		}
 		/// <summary>
-		/// Removes the first matching item from the list.
+		/// Removes the first matchin item from the list.
 		/// </summary>
 		/// <param name="item"></param>
 		/// <returns></returns>
@@ -253,23 +252,17 @@ namespace Duality
 			if (index + count >= this.count)
 			{
 				this.count -= count;
-				if (ReflectionHelper.IsReferenceOrContainsReferences<T>())
-				{
-					Array.Clear(this.data, this.count, count);
-				}
+				Array.Clear(this.data, this.count, count);
 			}
 			else
 			{
 				this.MoveInternal(index + count, this.count - (index + count), -count, false);
 				this.count -= count;
-				if (ReflectionHelper.IsReferenceOrContainsReferences<T>())
-				{
-					Array.Clear(this.data, this.count, count);
-				}
+				Array.Clear(this.data, this.count, count);
 			}
 		}
 		/// <summary>
-		/// Removes all matching items from the list.
+		/// Removes the first matchin item from the list.
 		/// </summary>
 		/// <param name="predicate"></param>
 		/// <returns></returns>
@@ -306,10 +299,7 @@ namespace Duality
 			{
 				int removedCount = this.count - count;
 				this.count -= removedCount;
-				if (ReflectionHelper.IsReferenceOrContainsReferences<T>())
-				{
-					Array.Clear(this.data, this.count, removedCount);
-				}
+				Array.Clear(this.data, this.count, removedCount);
 				return removedCount;
 			}
 
@@ -320,10 +310,7 @@ namespace Duality
 		/// </summary>
 		public void Clear()
 		{
-			if (ReflectionHelper.IsReferenceOrContainsReferences<T>())
-			{
-				Array.Clear(this.data, 0, this.count);
-			}
+			Array.Clear(this.data, 0, this.count);
 			this.count = 0;
 		}
 
@@ -505,11 +492,6 @@ namespace Duality
 					Array.Clear(this.data, index + count - clearCount, clearCount);
 				}
 			}
-		}
-
-		private static void ThrowIndexOutOfRangeException()
-		{
-			throw new IndexOutOfRangeException();
 		}
 
 

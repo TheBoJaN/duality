@@ -16,19 +16,14 @@ namespace Duality.Editor.Plugins.LogView
 {
 	public partial class LogView : DockContent
 	{
-		private int unseenWarnings = 0;
-		private int unseenErrors   = 0;
-		private Dictionary<string,ToolStripButton> sourceFilterButtons = new Dictionary<string,ToolStripButton>();
+		private int               unseenWarnings = 0;
+		private int               unseenErrors   = 0;
+		private RawList<LogEntry> logSchedule    = new RawList<LogEntry>();
 
 
 		public LogView()
 		{
 			this.InitializeComponent();
-
-			this.buttonCore.Tag = Logs.Core.Id;
-			this.buttonEditor.Tag = Logs.Editor.Id;
-			this.buttonGame.Tag = Logs.Game.Id;
-			this.ResetSourceFilterButtons();
 
 			this.splitContainer.SplitterDistance = 1000;
 			this.SetStyle(ControlStyles.Opaque, true);
@@ -40,12 +35,18 @@ namespace Duality.Editor.Plugins.LogView
 		{
 			base.OnHandleCreated(e);
 
-			this.logEntryList.BindTo(DualityEditorApp.GlobalLogData);
+			this.logEntryList.BindToDualityLogs();
 			this.logEntryList.ScrollToEnd();
 
-			EditorLogOutput logHistory = DualityEditorApp.GlobalLogData;
-			this.unseenErrors = logHistory.ErrorCount;
-			this.unseenWarnings = logHistory.WarningCount;
+			InMemoryLogOutput logHistory = DualityEditorApp.GlobalLogData;
+			for (int i = 0; i < logHistory.Entries.Count; i++)
+			{
+				LogMessageType type = logHistory.Entries[i].Type;
+				if (type == LogMessageType.Warning)
+					this.unseenWarnings++;
+				else if (type == LogMessageType.Error)
+					this.unseenErrors++;
+			}
 			this.UpdateTabText();
 		}
 		protected override void OnShown(EventArgs e)
@@ -59,7 +60,7 @@ namespace Duality.Editor.Plugins.LogView
 		{
 			base.OnClosed(e);
 
-			this.logEntryList.BindTo(null);
+			this.logEntryList.UnbindFromDualityLogs();
 
 			this.DockPanel.ActiveContentChanged -= DockPanel_ActiveContentChanged;
 			Sandbox.Entering -= this.Sandbox_Entering;
@@ -114,12 +115,12 @@ namespace Duality.Editor.Plugins.LogView
 			if (node.GetElementValue("AutoClear", out tryParseBool))    this.checkAutoClear.Checked = tryParseBool;
 			if (node.GetElementValue("PauseOnError", out tryParseBool)) this.buttonPauseOnError.Checked = tryParseBool;
 
-			this.logEntryList.SetSourceFilter(Logs.Core.Id, !this.buttonCore.Checked);
-			this.logEntryList.SetSourceFilter(Logs.Editor.Id, !this.buttonEditor.Checked);
-			this.logEntryList.SetSourceFilter(Logs.Game.Id, !this.buttonGame.Checked);
-			this.logEntryList.SetTypeFilter(LogMessageType.Message, !this.buttonMessages.Checked);
-			this.logEntryList.SetTypeFilter(LogMessageType.Warning, !this.buttonWarnings.Checked);
-			this.logEntryList.SetTypeFilter(LogMessageType.Error, !this.buttonErrors.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceCore, this.buttonCore.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceEditor, this.buttonEditor.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceGame, this.buttonGame.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeMessage, this.buttonMessages.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeWarning, this.buttonWarnings.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeError, this.buttonErrors.Checked);
 		}
 
 		private void MarkAsRead()
@@ -156,93 +157,35 @@ namespace Duality.Editor.Plugins.LogView
 			}
 		}
 
-		private bool AddSourceFilterButton(Log source)
+		private void buttonCore_CheckedChanged(object sender, EventArgs e)
 		{
-			ToolStripButton button;
-			if (this.sourceFilterButtons.TryGetValue(source.Id, out button))
-				return false;
-
-			Image image = null;
-			if (source.CustomInfo != null)
-				image = source.CustomInfo.GetType().GetEditorImage();
-
-			button = new ToolStripButton(source.Name, image);
-			button.Tag = source.Id;
-			button.DisplayStyle = (image == null) ? ToolStripItemDisplayStyle.Text : ToolStripItemDisplayStyle.Image;
-			button.CheckOnClick = true;
-			button.Checked = true;
-			button.CheckedChanged += this.sourceFilterButton_CheckedChanged;
-
-			this.sourceFilterButtons.Add(source.Id, button);
-			this.toolStrip.Items.Add(button);
-
-			return true;
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceCore, this.buttonCore.Checked);
 		}
-		private bool RemoveSourceFilterButton(string sourceId)
+		private void buttonEditor_CheckedChanged(object sender, EventArgs e)
 		{
-			ToolStripButton button;
-			if (!this.sourceFilterButtons.TryGetValue(sourceId, out button))
-				return false;
-
-			// Special case for the default three logs
-			if (sourceId == Logs.Core.Id) return false;
-			if (sourceId == Logs.Editor.Id) return false;
-			if (sourceId == Logs.Game.Id) return false;
-
-			this.toolStrip.Items.Remove(button);
-			this.sourceFilterButtons.Remove(sourceId);
-			button.CheckedChanged -= this.sourceFilterButton_CheckedChanged;
-			button.Dispose();
-
-			return true;
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceEditor, this.buttonEditor.Checked);
 		}
-		private void ResetSourceFilterButtons()
+		private void buttonGame_CheckedChanged(object sender, EventArgs e)
 		{
-			this.toolStrip.SuspendLayout();
-			foreach (var pair in this.sourceFilterButtons)
-			{
-				// Special case for the default three logs
-				if (pair.Key == Logs.Core.Id) continue;
-				if (pair.Key == Logs.Editor.Id) continue;
-				if (pair.Key == Logs.Game.Id) continue;
-
-				ToolStripButton button = pair.Value;
-				this.toolStrip.Items.Remove(button);
-				button.CheckedChanged -= this.sourceFilterButton_CheckedChanged;
-				button.Dispose();
-			}
-			this.toolStrip.ResumeLayout();
-
-			this.sourceFilterButtons.Clear();
-			this.sourceFilterButtons.Add(Logs.Core.Id, this.buttonCore);
-			this.sourceFilterButtons.Add(Logs.Editor.Id, this.buttonEditor);
-			this.sourceFilterButtons.Add(Logs.Game.Id, this.buttonGame);
-		}
-		
-		private void sourceFilterButton_CheckedChanged(object sender, EventArgs e)
-		{
-			ToolStripButton button = sender as ToolStripButton;
-			string sourceId = button.Tag as string;
-			this.logEntryList.SetSourceFilter(sourceId, !button.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.SourceGame, this.buttonGame.Checked);
 		}
 		private void buttonMessages_CheckedChanged(object sender, EventArgs e)
 		{
-			this.logEntryList.SetTypeFilter(LogMessageType.Message, !this.buttonMessages.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeMessage, this.buttonMessages.Checked);
 		}
 		private void buttonWarnings_CheckedChanged(object sender, EventArgs e)
 		{
-			this.logEntryList.SetTypeFilter(LogMessageType.Warning, !this.buttonWarnings.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeWarning, this.buttonWarnings.Checked);
 		}
 		private void buttonErrors_CheckedChanged(object sender, EventArgs e)
 		{
-			this.logEntryList.SetTypeFilter(LogMessageType.Error, !this.buttonErrors.Checked);
+			this.logEntryList.SetFilterFlag(LogEntryList.MessageFilter.TypeError, this.buttonErrors.Checked);
 		}
 		private void buttonPauseOnError_CheckedChanged(object sender, EventArgs e) {}
 		private void actionClear_ButtonClick(object sender, EventArgs e)
 		{
 			this.logEntryList.Clear();
 			this.MarkAsRead();
-			this.ResetSourceFilterButtons();
 		}
 		private void logEntryList_Enter(object sender, EventArgs e)
 		{
@@ -253,7 +196,7 @@ namespace Duality.Editor.Plugins.LogView
 			if (this.logEntryList.SelectedEntry != null)
 			{
 				//this.splitContainer.Panel2Collapsed = false;
-				this.textBoxEntry.Text = this.logEntryList.SelectedEntry.LogEntry.Content.Message;
+				this.textBoxEntry.Text = this.logEntryList.SelectedEntry.LogEntry.Message;
 			}
 			else
 			{
@@ -261,42 +204,31 @@ namespace Duality.Editor.Plugins.LogView
 				this.textBoxEntry.Clear();
 			}
 		}
-		private void logEntryList_LogEntriesAdded(object sender, LogEntryList.ViewEntryEventArgs e)
+		private void logEntryList_NewEntry(object sender, LogEntryList.ViewEntryEventArgs e)
 		{
+			LogEntry logEntry = e.Entry.LogEntry;
 			bool isHidden = this.DockHandler.DockState.IsAutoHide() && !this.ContainsFocus;
 			bool unseenChanges = false;
 
-			bool containsError = false;
-			for (int i = 0; i < e.ViewEntries.Count; i++)
+			if (isHidden)
 			{
-				EditorLogEntry logEntry = e.ViewEntries[i].LogEntry;
-				LogMessageType type = logEntry.Content.Type;
-
-				if (isHidden)
+				if (logEntry.Type == LogMessageType.Warning)
 				{
-					if (type == LogMessageType.Warning)
-					{
-						this.unseenWarnings++;
-						unseenChanges = true;
-					}
-					else if (type == LogMessageType.Error)
-					{
-						if (this.unseenErrors == 0) System.Media.SystemSounds.Hand.Play();
-						this.unseenErrors++;
-						unseenChanges = true;
-					}
+					this.unseenWarnings++;
+					unseenChanges = true;
 				}
-				if (type == LogMessageType.Error)
-					containsError = true;
-
-				this.AddSourceFilterButton(logEntry.Source);
+				else if (logEntry.Type == LogMessageType.Error)
+				{
+					if (this.unseenErrors == 0) System.Media.SystemSounds.Hand.Play();
+					this.unseenErrors++;
+					unseenChanges = true;
+				}
 			}
 
-			if (unseenChanges)
-				this.UpdateTabText();
+			if (unseenChanges) this.UpdateTabText();
 
 			bool pause = 
-				containsError && 
+				e.Entry.LogEntry.Type == LogMessageType.Error && 
 				this.buttonPauseOnError.Checked && 
 				Sandbox.State == SandboxState.Playing && 
 				!Sandbox.IsChangingState;

@@ -101,25 +101,29 @@ namespace Duality.Editor.Plugins.SceneView.TreeModels
 		{
 			if (this.customIcon)
 			{
-				// Find the most unique / significant Component
 				Type representant = null;
-				int bestScore = int.MinValue;
-				foreach (Component component in this.obj.Components)
-				{
-					if (component == ignoreComponent) continue;
-					Type type = component.GetType();
-					
-					if (type.GetEditorImage() == null)
-						continue;
+				List<Type> availCmpTypes = this.obj.GetComponents<Component>().Where(c => c != ignoreComponent).Select(c => c.GetType()).ToList();
 
-					int requirementScore = Component.RequireMap.GetRequirements(type).Count();
-					int matchingNameScore = this.obj.Name.Contains(type.Name) ? 100 : 0;
-					int tieBreakerScore = (int)type.Name[0] - (int)' ';
-					int score = 1000 * (requirementScore + matchingNameScore) - tieBreakerScore;
-					if (score > bestScore)
+				if (representant == null)
+				{
+					// Find the most unique / significant Component
+					int bestScore = int.MinValue;
+					foreach (Type cmpType in availCmpTypes)
 					{
-						bestScore = score;
-						representant = type;
+						if (availCmpTypes.Any(c => Component.RequireMap.IsRequired(c, cmpType)))
+							continue;
+						if (cmpType.GetEditorImage() == null)
+							continue;
+
+						int score = 
+							100000 * Component.RequireMap.GetRequirements(cmpType).Count() -
+							100 * (cmpType.Name.Length > 0 ? ((int)cmpType.Name[0] - (int)' ') : 0) -
+							1 * (cmpType.Name.Length > 1 ? ((int)cmpType.Name[1] - (int)' ') : 0);
+						if (score > bestScore)
+						{
+							bestScore = score;
+							representant = cmpType;
+						}
 					}
 				}
 
