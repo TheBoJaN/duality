@@ -16,19 +16,19 @@ namespace Duality.Components
 	[RequiredComponent(typeof(Transform))]
 	public sealed class VelocityTracker : Component, ICmpUpdatable, ICmpSerializeListener
 	{
-		[DontSerialize] private Vector3 velocity      = Vector3.Zero;
-		[DontSerialize] private float   angleVelocity = 0.0f;
-		[DontSerialize] private Vector3 posDiff       = Vector3.Zero;
-		[DontSerialize] private float   angleDiff     = 0.0f;
-		[DontSerialize] private Vector3 lastPosition  = Vector3.Zero;
-		[DontSerialize] private float   lastAngle     = 0.0f;
+		[DontSerialize] private Vector3D velocity      = Vector3D.Zero;
+		[DontSerialize] private double   angleVelocity = 0.0f;
+		[DontSerialize] private Vector3D posDiff       = Vector3D.Zero;
+		[DontSerialize] private double   angleDiff     = 0.0f;
+		[DontSerialize] private Vector3D lastPosition  = Vector3D.Zero;
+		[DontSerialize] private double   lastAngle     = 0.0f;
 
 
 		/// <summary>
 		/// [GET] The objects measured velocity in world space. The value is internally smoothed
 		/// over several frames to filter out fluctuations due to framerate variations.
 		/// </summary>
-		public Vector3 Vel
+		public Vector3D Vel
 		{
 			get { return this.velocity; }
 		}
@@ -37,7 +37,7 @@ namespace Duality.Components
 		/// The value is internally smoothed over several frames to filter out fluctuations due
 		/// to framerate variations.
 		/// </summary>
-		public float AngleVel
+		public double AngleVel
 		{
 			get { return this.angleVelocity; }
 		}
@@ -45,7 +45,7 @@ namespace Duality.Components
 		/// [GET] The objects measured continuous position change in world space between the last two frames.
 		/// Note that this value can fluctuate depending on framerate variations during simulation.
 		/// </summary>
-		public Vector3 LastMovement
+		public Vector3D LastMovement
 		{
 			get { return this.posDiff; }
 		}
@@ -53,7 +53,7 @@ namespace Duality.Components
 		/// [GET] The objects measuredcontinuous angle / rotation change in world space between the last two frames.
 		/// Note that this value can fluctuate depending on framerate variations during simulation.
 		/// </summary>
-		public float LastAngleMovement
+		public double LastAngleMovement
 		{
 			get { return this.angleDiff; }
 		}
@@ -64,7 +64,7 @@ namespace Duality.Components
 		/// specified world space position as a basis for further movement.
 		/// </summary>
 		/// <param name="worldPos"></param>
-		public void ResetVelocity(Vector3 worldPos)
+		public void ResetVelocity(Vector3D worldPos)
 		{
 			this.lastPosition = worldPos;
 		}
@@ -73,7 +73,7 @@ namespace Duality.Components
 		/// specified world space angle as a basis for further rotation.
 		/// </summary>
 		/// <param name="worldAngle"></param>
-		public void ResetAngleVelocity(float worldAngle)
+		public void ResetAngleVelocity(double worldAngle)
 		{
 			this.lastAngle = worldAngle;
 		}
@@ -81,17 +81,17 @@ namespace Duality.Components
 		void ICmpUpdatable.OnUpdate()
 		{
 			// Calculate velocity values from last frames movement
-			if (MathF.Abs(Time.TimeMult) > float.Epsilon)
+			if (MathD.Abs(Time.TimeMult) > double.Epsilon)
 			{
 				Transform transform = this.GameObj.Transform;
-				Vector3 pos = transform.Pos;
-				float angle = transform.Angle;
+				Vector3D pos = transform.Pos;
+				double angle = transform.Angle;
 
 				this.posDiff = pos - this.lastPosition;
-				this.angleDiff = MathF.TurnDir(this.lastAngle, angle) * MathF.CircularDist(this.lastAngle, angle);
+				this.angleDiff = MathD.TurnDir(this.lastAngle, angle) * MathD.CircularDist(this.lastAngle, angle);
 
-				Vector3 lastVelocity = this.posDiff / Time.TimeMult;
-				float lastAngleVelocity = this.angleDiff / Time.TimeMult;
+				Vector3D lastVelocity = this.posDiff / Time.TimeMult;
+				double lastAngleVelocity = this.angleDiff / Time.TimeMult;
 
 				this.velocity += (lastVelocity - this.velocity) * 0.25f * Time.TimeMult;
 				this.angleVelocity += (lastAngleVelocity - this.angleVelocity) * 0.25f * Time.TimeMult;

@@ -14,25 +14,25 @@ namespace Duality.Components
 	[EditorHintImage(CoreResNames.ImageTransform)]
 	public sealed class Transform : Component, ICmpAttachmentListener, ICmpSerializeListener
 	{
-		private const float MinScale = 0.0000001f;
+		private const double MinScale = 0.0000001f;
 
-		private Vector3   pos             = Vector3.Zero;
-		private float     angle           = 0.0f;
-		private float     scale           = 1.0f;
+		private Vector3D   pos             = Vector3D.Zero;
+		private double     angle           = 0.0f;
+		private double     scale           = 1.0f;
 		private bool      ignoreParent    = false;
 
 		// Cached values, recalc on change
-		private Vector3   posAbs          = Vector3.Zero;
-		private float     angleAbs        = 0.0f;
-		private float     scaleAbs        = 1.0f;
+		private Vector3D   posAbs          = Vector3D.Zero;
+		private double     angleAbs        = 0.0f;
+		private double     scaleAbs        = 1.0f;
 
-		[DontSerialize] private Vector2 rotationDirAbs = new Vector2(0.0f, -1.0f);
+		[DontSerialize] private Vector2D rotationDirAbs = new Vector2D(0.0f, -1.0f);
 
 
 		/// <summary>
 		/// [GET / SET] The objects position in local space of its parent object.
 		/// </summary>
-		public Vector3 LocalPos
+		public Vector3D LocalPos
 		{
 			get { return this.pos; }
 			set
@@ -46,13 +46,13 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects angle / rotation in local space of its parent object, in radians.
 		/// </summary>
-		public float LocalAngle
+		public double LocalAngle
 		{
 			get { return this.angle; }
 			set 
 			{ 
 				// Update angle
-				this.angle = MathF.NormalizeAngle(value);
+				this.angle = MathD.NormalizeAngle(value);
 				this.UpdateAbs();
 				this.ResetAngleVelocity();
 			}
@@ -60,38 +60,38 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects scale in local space of its parent object.
 		/// </summary>
-		public float LocalScale
+		public double LocalScale
 		{
 			get { return this.scale; }
 			set
 			{
-				this.scale = MathF.Max(value, MinScale);
+				this.scale = MathD.Max(value, MinScale);
 				this.UpdateAbs();
 			}
 		}
 		/// <summary>
 		/// [GET] The objects directional forward vector in local space of its parent object.
 		/// </summary>
-		public Vector3 LocalForward
+		public Vector3D LocalForward
 		{
 			get 
 			{ 
-				return new Vector3(
-					MathF.Sin(this.LocalAngle),
-					-MathF.Cos(this.LocalAngle),
+				return new Vector3D(
+					MathD.Sin(this.LocalAngle),
+					-MathD.Cos(this.LocalAngle),
 					0.0f);
 			}
 		}
 		/// <summary>
 		/// [GET] The objects directional right vector in local space of its parent object.
 		/// </summary>
-		public Vector3 LocalRight
+		public Vector3D LocalRight
 		{
 			get 
 			{
-				return new Vector3(
-					-MathF.Cos(this.LocalAngle),
-					-MathF.Sin(this.LocalAngle),
+				return new Vector3D(
+					-MathD.Cos(this.LocalAngle),
+					-MathD.Sin(this.LocalAngle),
 					0.0f);
 			}
 		}
@@ -99,7 +99,7 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects position in world space.
 		/// </summary>
-		public Vector3 Pos
+		public Vector3D Pos
 		{
 			get { return this.posAbs; }
 			set 
@@ -111,9 +111,9 @@ namespace Duality.Components
 				if (parent != null)
 				{
 					this.pos = this.posAbs;
-					Vector3.Subtract(ref this.pos, ref parent.posAbs, out this.pos);
-					Vector3.Divide(ref this.pos, parent.scaleAbs, out this.pos);
-					MathF.TransformCoord(ref this.pos.X, ref this.pos.Y, -parent.angleAbs);
+					Vector3D.Subtract(ref this.pos, ref parent.posAbs, out this.pos);
+					Vector3D.Divide(ref this.pos, parent.scaleAbs, out this.pos);
+					MathD.TransformCoord(ref this.pos.X, ref this.pos.Y, -parent.angleAbs);
 				}
 				else
 				{
@@ -127,17 +127,17 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects angle / rotation in world space, in radians.
 		/// </summary>
-		public float Angle
+		public double Angle
 		{
 			get { return this.angleAbs; }
 			set 
 			{ 
 				// Update angle
-				this.angleAbs = MathF.NormalizeAngle(value);
+				this.angleAbs = MathD.NormalizeAngle(value);
 
 				Transform parent = this.ParentTransform;
 				if (parent != null)
-					this.angle = MathF.NormalizeAngle(this.angleAbs - parent.angleAbs);
+					this.angle = MathD.NormalizeAngle(this.angleAbs - parent.angleAbs);
 				else
 					this.angle = this.angleAbs;
 
@@ -149,12 +149,12 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET / SET] The objects scale in world space.
 		/// </summary>
-		public float Scale
+		public double Scale
 		{
 			get { return this.scaleAbs; }
 			set 
 			{ 
-				this.scaleAbs = MathF.Max(value, MinScale);
+				this.scaleAbs = MathD.Max(value, MinScale);
 
 				Transform parent = this.ParentTransform;
 				if (parent != null)
@@ -168,11 +168,11 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET] The objects directional forward (zero degree angle) vector in world space.
 		/// </summary>
-		public Vector3 Forward
+		public Vector3D Forward
 		{
 			get 
 			{ 
-				return new Vector3(
+				return new Vector3D(
 					this.rotationDirAbs.X,
 					this.rotationDirAbs.Y,
 					0.0f);
@@ -181,11 +181,11 @@ namespace Duality.Components
 		/// <summary>
 		/// [GET] The objects directional right (90 degree angle) vector in world space.
 		/// </summary>
-		public Vector3 Right
+		public Vector3D Right
 		{
 			get 
 			{
-				return new Vector3(
+				return new Vector3D(
 					-this.rotationDirAbs.Y,
 					this.rotationDirAbs.X,
 					0.0f);
@@ -229,9 +229,9 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="local"></param>
 		/// <returns></returns>
-		public Vector3 GetWorldPoint(Vector3 local)
+		public Vector3D GetWorldPoint(Vector3D local)
 		{
-			return new Vector3(
+			return new Vector3D(
 				local.X * this.scaleAbs * -this.rotationDirAbs.Y + local.Y * this.scaleAbs * -this.rotationDirAbs.X + this.posAbs.X,
 				local.X * this.scaleAbs * this.rotationDirAbs.X + local.Y * this.scaleAbs * -this.rotationDirAbs.Y + this.posAbs.Y,
 				local.Z * this.scaleAbs + this.posAbs.Z);
@@ -241,9 +241,9 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="local"></param>
 		/// <returns></returns>
-		public Vector2 GetWorldPoint(Vector2 local)
+		public Vector2D GetWorldPoint(Vector2D local)
 		{
-			return new Vector2(
+			return new Vector2D(
 				local.X * this.scaleAbs * -this.rotationDirAbs.Y + local.Y * this.scaleAbs * -this.rotationDirAbs.X + this.posAbs.X,
 				local.X * this.scaleAbs * this.rotationDirAbs.X + local.Y * this.scaleAbs * -this.rotationDirAbs.Y + this.posAbs.Y);
 		}
@@ -252,10 +252,10 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="world"></param>
 		/// <returns></returns>
-		public Vector3 GetLocalPoint(Vector3 world)
+		public Vector3D GetLocalPoint(Vector3D world)
 		{
-			float inverseScale = 1f / this.scaleAbs;
-			return new Vector3(
+			double inverseScale = 1f / this.scaleAbs;
+			return new Vector3D(
 				((world.X - this.posAbs.X) * -this.rotationDirAbs.Y + (world.Y - this.posAbs.Y) * this.rotationDirAbs.X) * inverseScale,
 				((world.X - this.posAbs.X) * -this.rotationDirAbs.X + (world.Y - this.posAbs.Y) * -this.rotationDirAbs.Y) * inverseScale,
 				(world.Z - this.posAbs.Z) * inverseScale);
@@ -265,10 +265,10 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="world"></param>
 		/// <returns></returns>
-		public Vector2 GetLocalPoint(Vector2 world)
+		public Vector2D GetLocalPoint(Vector2D world)
 		{
-			float inverseScale = 1f / this.scaleAbs;
-			return new Vector2(
+			double inverseScale = 1f / this.scaleAbs;
+			return new Vector2D(
 				((world.X - this.posAbs.X) * -this.rotationDirAbs.Y + (world.Y - this.posAbs.Y) * this.rotationDirAbs.X) * inverseScale,
 				((world.X - this.posAbs.X) * -this.rotationDirAbs.X + (world.Y - this.posAbs.Y) * -this.rotationDirAbs.Y) * inverseScale);
 		}
@@ -279,9 +279,9 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="local"></param>
 		/// <returns></returns>
-		public Vector3 GetWorldVector(Vector3 local)
+		public Vector3D GetWorldVector(Vector3D local)
 		{
-			return new Vector3(
+			return new Vector3D(
 				local.X * this.scaleAbs * -this.rotationDirAbs.Y + local.Y * this.scaleAbs * -this.rotationDirAbs.X,
 				local.X * this.scaleAbs * this.rotationDirAbs.X + local.Y * this.scaleAbs * -this.rotationDirAbs.Y,
 				local.Z * this.scaleAbs);
@@ -292,9 +292,9 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="local"></param>
 		/// <returns></returns>
-		public Vector2 GetWorldVector(Vector2 local)
+		public Vector2D GetWorldVector(Vector2D local)
 		{
-			return new Vector2(
+			return new Vector2D(
 				local.X * this.scaleAbs * -this.rotationDirAbs.Y + local.Y * this.scaleAbs * -this.rotationDirAbs.X,
 				local.X * this.scaleAbs * this.rotationDirAbs.X + local.Y * this.scaleAbs * -this.rotationDirAbs.Y);
 		}
@@ -304,10 +304,10 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="world"></param>
 		/// <returns></returns>
-		public Vector3 GetLocalVector(Vector3 world)
+		public Vector3D GetLocalVector(Vector3D world)
 		{
-			float inverseScale = 1f / this.scaleAbs;
-			return new Vector3(
+			double inverseScale = 1f / this.scaleAbs;
+			return new Vector3D(
 				(world.X * -this.rotationDirAbs.Y + world.Y * this.rotationDirAbs.X) * inverseScale,
 				(world.X * -this.rotationDirAbs.X + world.Y * -this.rotationDirAbs.Y) * inverseScale,
 				world.Z * inverseScale);
@@ -318,10 +318,10 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="world"></param>
 		/// <returns></returns>
-		public Vector2 GetLocalVector(Vector2 world)
+		public Vector2D GetLocalVector(Vector2D world)
 		{
-			float inverseScale = 1f / this.scaleAbs;
-			return new Vector2(
+			double inverseScale = 1f / this.scaleAbs;
+			return new Vector2D(
 				(world.X * -this.rotationDirAbs.Y + world.Y * this.rotationDirAbs.X) * inverseScale,
 				(world.X * -this.rotationDirAbs.X + world.Y * -this.rotationDirAbs.Y) * inverseScale);
 		}
@@ -330,7 +330,7 @@ namespace Duality.Components
 		/// Moves the object by the given local offset. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveByLocal(Vector3 value)
+		public void MoveByLocal(Vector3D value)
 		{
 			this.pos += value; 
 			this.UpdateAbs();
@@ -339,15 +339,15 @@ namespace Duality.Components
 		/// Moves the object by the given local offset. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveByLocal(Vector2 value)
+		public void MoveByLocal(Vector2D value)
 		{
-			this.MoveByLocal(new Vector3(value));
+			this.MoveByLocal(new Vector3D(value));
 		}
 		/// <summary>
 		/// Moves the object by given world offset. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveBy(Vector3 value)
+		public void MoveBy(Vector3D value)
 		{
 			this.posAbs += value;
 
@@ -355,9 +355,9 @@ namespace Duality.Components
 			if (parent != null)
 			{
 				this.pos = this.posAbs;
-				Vector3.Subtract(ref this.pos, ref parent.posAbs, out this.pos);
-				Vector3.Divide(ref this.pos, parent.scaleAbs, out this.pos);
-				MathF.TransformCoord(ref this.pos.X, ref this.pos.Y, -parent.angleAbs);
+				Vector3D.Subtract(ref this.pos, ref parent.posAbs, out this.pos);
+				Vector3D.Divide(ref this.pos, parent.scaleAbs, out this.pos);
+				MathD.TransformCoord(ref this.pos.X, ref this.pos.Y, -parent.angleAbs);
 			}
 			else
 			{
@@ -370,15 +370,15 @@ namespace Duality.Components
 		/// Moves the object by given world offset. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveBy(Vector2 value)
+		public void MoveBy(Vector2D value)
 		{
-			this.MoveBy(new Vector3(value));
+			this.MoveBy(new Vector3D(value));
 		}
 		/// <summary>
 		/// Moves the object to the given position in local space of its parent object. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveToLocal(Vector3 value)
+		public void MoveToLocal(Vector3D value)
 		{
 			this.MoveByLocal(value - this.pos);
 		}
@@ -387,15 +387,15 @@ namespace Duality.Components
 		/// This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveToLocal(Vector2 value)
+		public void MoveToLocal(Vector2D value)
 		{
-			this.MoveToLocal(new Vector3(value, this.pos.Z));
+			this.MoveToLocal(new Vector3D(value, this.pos.Z));
 		}
 		/// <summary>
 		/// Moves the object to the given world position. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveTo(Vector3 value)
+		public void MoveTo(Vector3D value)
 		{
 			this.MoveBy(value - this.posAbs);
 		}
@@ -404,34 +404,34 @@ namespace Duality.Components
 		/// This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void MoveTo(Vector2 value)
+		public void MoveTo(Vector2D value)
 		{
-			this.MoveTo(new Vector3(value, this.posAbs.Z));
+			this.MoveTo(new Vector3D(value, this.posAbs.Z));
 		}
 		/// <summary>
 		/// Turns the object by the given radian angle. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void TurnBy(float value)
+		public void TurnBy(double value)
 		{
-			this.angle = MathF.NormalizeAngle(this.angle + value);
+			this.angle = MathD.NormalizeAngle(this.angle + value);
 			this.UpdateAbs();
 		}
 		/// <summary>
 		/// Turns the object to the given radian angle in local space of its parent object. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void TurnToLocal(float value)
+		public void TurnToLocal(double value)
 		{
-			this.TurnBy(MathF.TurnDir(this.angle, value) * MathF.CircularDist(value, this.angle));
+			this.TurnBy(MathD.TurnDir(this.angle, value) * MathD.CircularDist(value, this.angle));
 		}
 		/// <summary>
 		/// Turns the object to the given world space radian angle. This will be treates as movement, rather than teleportation.
 		/// </summary>
 		/// <param name="value"></param>
-		public void TurnTo(float value)
+		public void TurnTo(double value)
 		{
-			this.TurnBy(MathF.TurnDir(this.angleAbs, value) * MathF.CircularDist(value, this.angleAbs));
+			this.TurnBy(MathD.TurnDir(this.angleAbs, value) * MathD.CircularDist(value, this.angleAbs));
 		}
 
 		/// <summary>
@@ -443,7 +443,7 @@ namespace Duality.Components
 		/// <param name="angle"></param>
 		/// <param name="scale"></param>
 		/// <param name="angleVel"></param>
-		public void SetTransform(Vector3 pos, float angle, float scale)
+		public void SetTransform(Vector3D pos, double angle, double scale)
 		{
 			this.posAbs = pos;
 			this.angleAbs = angle;
@@ -474,7 +474,7 @@ namespace Duality.Components
 		/// <param name="angle"></param>
 		/// <param name="scale"></param>
 		/// <param name="angleVel"></param>
-		public void SetLocalTransform(Vector3 pos, float angle, float scale)
+		public void SetLocalTransform(Vector3D pos, double angle, double scale)
 		{
 			this.pos = pos;
 			this.angle = angle;
@@ -570,9 +570,9 @@ namespace Duality.Components
 		
 		private void UpdateRotationDirAbs()
 		{
-			this.rotationDirAbs = new Vector2(
-				MathF.Sin(this.angleAbs), 
-				-MathF.Cos(this.angleAbs));
+			this.rotationDirAbs = new Vector2D(
+				MathD.Sin(this.angleAbs), 
+				-MathD.Cos(this.angleAbs));
 		}
 		private void ResetVelocity()
 		{
@@ -602,7 +602,7 @@ namespace Duality.Components
 			}
 			else
 			{
-				this.angleAbs = MathF.NormalizeAngle(this.angle + parent.angleAbs);
+				this.angleAbs = MathD.NormalizeAngle(this.angle + parent.angleAbs);
 				this.scaleAbs = this.scale * parent.scaleAbs;
 				this.posAbs = parent.GetWorldPoint(this.pos);
 			}
@@ -646,16 +646,16 @@ namespace Duality.Components
 			}
 			else
 			{
-				this.angle = MathF.NormalizeAngle(this.angleAbs - parent.angleAbs);
+				this.angle = MathD.NormalizeAngle(this.angleAbs - parent.angleAbs);
 				this.scale = this.scaleAbs / parent.scaleAbs;
 				
-				Vector2 parentAngleAbsDotX;
-				Vector2 parentAngleAbsDotY;
-				MathF.GetTransformDotVec(-parent.angleAbs, out parentAngleAbsDotX, out parentAngleAbsDotY);
+				Vector2D parentAngleAbsDotX;
+				Vector2D parentAngleAbsDotY;
+				MathD.GetTransformDotVec(-parent.angleAbs, out parentAngleAbsDotX, out parentAngleAbsDotY);
 
-				Vector3.Subtract(ref this.posAbs, ref parent.posAbs, out this.pos);
-				MathF.TransformDotVec(ref this.pos, ref parentAngleAbsDotX, ref parentAngleAbsDotY);
-				Vector3.Divide(ref this.pos, parent.scaleAbs, out this.pos);
+				Vector3D.Subtract(ref this.posAbs, ref parent.posAbs, out this.pos);
+				MathD.TransformDotVec(ref this.pos, ref parentAngleAbsDotX, ref parentAngleAbsDotY);
+				Vector3D.Divide(ref this.pos, parent.scaleAbs, out this.pos);
 			}
 
 			this.CheckValidTransform();
@@ -684,13 +684,13 @@ namespace Duality.Components
 		[System.Diagnostics.Conditional("DEBUG")]
 		internal void CheckValidTransform()
 		{
-			MathF.CheckValidValue(this.pos);
-			MathF.CheckValidValue(this.scale);
-			MathF.CheckValidValue(this.angle);
+			MathD.CheckValidValue(this.pos);
+			MathD.CheckValidValue(this.scale);
+			MathD.CheckValidValue(this.angle);
 
-			MathF.CheckValidValue(this.posAbs);
-			MathF.CheckValidValue(this.scaleAbs);
-			MathF.CheckValidValue(this.angleAbs);
+			MathD.CheckValidValue(this.posAbs);
+			MathD.CheckValidValue(this.scaleAbs);
+			MathD.CheckValidValue(this.angleAbs);
 		}
 	}
 }
