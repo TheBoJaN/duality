@@ -15,7 +15,7 @@ namespace FarseerPhysics.Collision
 
 		void RemoveProxy(int proxyId);
 
-		void MoveProxy(int proxyId, ref AABB aabb, Vector2 displacement);
+		void MoveProxy(int proxyId, ref AABB aabb, Vector2D displacement);
 
 		FixtureProxy GetProxy(int proxyId);
 
@@ -25,6 +25,6 @@ namespace FarseerPhysics.Collision
 
 		void Query(Func<int, bool> callback, ref AABB aabb);
 
-		void RayCast(Func<RayCastInput, int, float> callback, ref RayCastInput input);
+		void RayCast(Func<RayCastInput, int, double> callback, ref RayCastInput input);
 	}
 }

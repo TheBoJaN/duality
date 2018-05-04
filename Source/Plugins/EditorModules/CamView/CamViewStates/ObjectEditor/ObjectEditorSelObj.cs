@@ -21,14 +21,14 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 	{
 		public abstract object ActualObject { get; }
 		public abstract bool HasTransform { get; }
-		public abstract float BoundRadius { get; }
-		public abstract Vector3 Pos { get; set; }
-		public virtual Vector3 Scale
+		public abstract double BoundRadius { get; }
+		public abstract Vector3D Pos { get; set; }
+		public virtual Vector3D Scale
 		{
-			get { return Vector3.One; }
+			get { return Vector3D.One; }
 			set {}
 		}
-		public virtual float Angle
+		public virtual double Angle
 		{
 			get { return 0.0f; }
 			set {}

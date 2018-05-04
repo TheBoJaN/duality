@@ -44,9 +44,9 @@ namespace FarseerPhysics.Dynamics.Joints
 	{
 		private Jacobian _J;
 
-		private float _ant;
-		private float _impulse;
-		private float _mass;
+		private double _ant;
+		private double _impulse;
+		private double _mass;
 		private PrismaticJoint _prismatic1;
 		private PrismaticJoint _prismatic2;
 		private RevoluteJoint _revolute1;
@@ -59,7 +59,7 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// <param name="jointA">The first joint.</param>
 		/// <param name="jointB">The second joint.</param>
 		/// <param name="ratio">The ratio.</param>
-		public GearJoint(Joint jointA, Joint jointB, float ratio)
+		public GearJoint(Joint jointA, Joint jointB, double ratio)
 			: base(jointA.BodyA, jointA.BodyA)
 		{
 			this.JointType = JointType.Gear;
@@ -82,7 +82,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			if (type2 == JointType.Revolute || type2 == JointType.Prismatic)
 				Debug.Assert(jointB.BodyB.BodyType == BodyType.Static);
 
-			float coordinate1 = 0.0f, coordinate2 = 0.0f;
+			double coordinate1 = 0.0f, coordinate2 = 0.0f;
 
 			switch (type1)
 			{
@@ -119,12 +119,12 @@ namespace FarseerPhysics.Dynamics.Joints
 			this._ant = coordinate1 + this.Ratio * coordinate2;
 		}
 
-		public override Vector2 WorldAnchorA
+		public override Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.GetWorldPoint(this.LocalAnchor1); }
 		}
 
-		public override Vector2 WorldAnchorB
+		public override Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.GetWorldPoint(this.LocalAnchor2); }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
@@ -133,7 +133,7 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// <summary>
 		/// The gear ratio.
 		/// </summary>
-		public float Ratio { get; set; }
+		public double Ratio { get; set; }
 
 		/// <summary>
 		/// The first revolute/prismatic joint attached to the gear joint.
@@ -145,23 +145,23 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// </summary>
 		public Joint JointB { get; set; }
 
-		public Vector2 LocalAnchor1 { get; private set; }
-		public Vector2 LocalAnchor2 { get; private set; }
+		public Vector2D LocalAnchor1 { get; private set; }
+		public Vector2D LocalAnchor2 { get; private set; }
 
-		public override Vector2 GetReactionForce(float inv_dt)
+		public override Vector2D GetReactionForce(double inv_dt)
 		{
-			Vector2 P = this._impulse * this._J.LinearB;
+			Vector2D P = this._impulse * this._J.LinearB;
 			return inv_dt * P;
 		}
 
-		public override float GetReactionTorque(float inv_dt)
+		public override double GetReactionTorque(double inv_dt)
 		{
 			Transform xf1;
 			this.BodyB.GetTransform(out xf1);
 
-			Vector2 r = MathUtils.Multiply(ref xf1.R, this.LocalAnchor2 - this.BodyB.LocalCenter);
-			Vector2 P = this._impulse * this._J.LinearB;
-			float L = this._impulse * this._J.AngularB - MathUtils.Cross(r, P);
+			Vector2D r = MathUtils.Multiply(ref xf1.R, this.LocalAnchor2 - this.BodyB.LocalCenter);
+			Vector2D P = this._impulse * this._J.LinearB;
+			double L = this._impulse * this._J.AngularB - MathUtils.Cross(r, P);
 			return inv_dt * L;
 		}
 
@@ -170,7 +170,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body b1 = this.BodyA;
 			Body b2 = this.BodyB;
 
-			float K = 0.0f;
+			double K = 0.0f;
 			this._J.SetZero();
 
 			if (this._revolute1 != null)
@@ -180,15 +180,15 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 			else if (this._prismatic1 != null)
 			{
-				Vector2 ug = this._prismatic1.LocalXAxis1; // MathUtils.Multiply(ref xfg1.R, _prismatic1.LocalXAxis1);
+				Vector2D ug = this._prismatic1.LocalXAxis1; // MathUtils.Multiply(ref xfg1.R, _prismatic1.LocalXAxis1);
 
 				Transform xf1 /*, xfg1*/;
 				b1.GetTransform(out xf1);
 				//g1.GetTransform(out xfg1);
 
 
-				Vector2 r = MathUtils.Multiply(ref xf1.R, this.LocalAnchor1 - b1.LocalCenter);
-				float crug = MathUtils.Cross(r, ug);
+				Vector2D r = MathUtils.Multiply(ref xf1.R, this.LocalAnchor1 - b1.LocalCenter);
+				double crug = MathUtils.Cross(r, ug);
 				this._J.LinearA = -ug;
 				this._J.AngularA = -crug;
 				K += b1.InvMass + b1.InvI * crug * crug;
@@ -201,14 +201,14 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 			else if (this._prismatic2 != null)
 			{
-				Vector2 ug = this._prismatic2.LocalXAxis1; // MathUtils.Multiply(ref xfg1.R, _prismatic1.LocalXAxis1);
+				Vector2D ug = this._prismatic2.LocalXAxis1; // MathUtils.Multiply(ref xfg1.R, _prismatic1.LocalXAxis1);
 
 				Transform /*xfg1,*/ xf2;
 				//g1.GetTransform(out xfg1);
 				b2.GetTransform(out xf2);
 
-				Vector2 r = MathUtils.Multiply(ref xf2.R, this.LocalAnchor2 - b2.LocalCenter);
-				float crug = MathUtils.Cross(r, ug);
+				Vector2D r = MathUtils.Multiply(ref xf2.R, this.LocalAnchor2 - b2.LocalCenter);
+				double crug = MathUtils.Cross(r, ug);
 				this._J.LinearB = -this.Ratio * ug;
 				this._J.AngularB = -this.Ratio * crug;
 				K += this.Ratio * this.Ratio * (b2.InvMass + b2.InvI * crug * crug);
@@ -239,10 +239,10 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body b1 = this.BodyA;
 			Body b2 = this.BodyB;
 
-			float Cdot = this._J.Compute(b1.LinearVelocityInternal, b1.AngularVelocityInternal,
+			double Cdot = this._J.Compute(b1.LinearVelocityInternal, b1.AngularVelocityInternal,
 									b2.LinearVelocityInternal, b2.AngularVelocityInternal);
 
-			float impulse = this._mass * (-Cdot);
+			double impulse = this._mass * (-Cdot);
 			this._impulse += impulse;
 
 			b1.LinearVelocityInternal += b1.InvMass * impulse * this._J.LinearA;
@@ -253,12 +253,12 @@ namespace FarseerPhysics.Dynamics.Joints
 
 		internal override bool SolvePositionConstraints()
 		{
-			const float linearError = 0.0f;
+			const double linearError = 0.0f;
 
 			Body b1 = this.BodyA;
 			Body b2 = this.BodyB;
 
-			float coordinate1 = 0.0f, coordinate2 = 0.0f;
+			double coordinate1 = 0.0f, coordinate2 = 0.0f;
 			if (this._revolute1 != null)
 			{
 				coordinate1 = this._revolute1.JointAngle;
@@ -277,9 +277,9 @@ namespace FarseerPhysics.Dynamics.Joints
 				coordinate2 = this._prismatic2.JointTranslation;
 			}
 
-			float C = this._ant - (coordinate1 + this.Ratio * coordinate2);
+			double C = this._ant - (coordinate1 + this.Ratio * coordinate2);
 
-			float impulse = this._mass * (-C);
+			double impulse = this._mass * (-C);
 
 			b1.Sweep.C += b1.InvMass * impulse * this._J.LinearA;
 			b1.Sweep.A += b1.InvI * impulse * this._J.AngularA;

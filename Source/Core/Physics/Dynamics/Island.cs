@@ -48,10 +48,10 @@ namespace FarseerPhysics.Dynamics
 		private Contact[] _contacts;
 		private int _jointCapacity;
 		private Joint[] _joints;
-		public float JointUpdateTime;
+		public double JointUpdateTime;
 
-		private const float LinTolSqr = Settings.LinearSleepTolerance * Settings.LinearSleepTolerance;
-		private const float AngTolSqr = Settings.AngularSleepTolerance * Settings.AngularSleepTolerance;
+		private const double LinTolSqr = Settings.LinearSleepTolerance * Settings.LinearSleepTolerance;
+		private const double AngTolSqr = Settings.AngularSleepTolerance * Settings.AngularSleepTolerance;
 
 		private Stopwatch _watch = new Stopwatch();
 
@@ -90,9 +90,9 @@ namespace FarseerPhysics.Dynamics
 			this.JointCount = 0;
 		}
 
-		private float _tmpTime;
+		private double _tmpTime;
 
-		public void Solve(ref TimeStep step, ref Vector2 gravity)
+		public void Solve(ref TimeStep step, ref Vector2D gravity)
 		{
 			// Integrate velocities and apply damping.
 			for (int i = 0; i < this.BodyCount; ++i)
@@ -218,23 +218,23 @@ namespace FarseerPhysics.Dynamics
 				}
 
 				// Check for large velocities.
-				float translationX = step.dt * b.LinearVelocityInternal.X;
-				float translationY = step.dt * b.LinearVelocityInternal.Y;
-				float result = translationX * translationX + translationY * translationY;
+				double translationX = step.dt * b.LinearVelocityInternal.X;
+				double translationY = step.dt * b.LinearVelocityInternal.Y;
+				double result = translationX * translationX + translationY * translationY;
 
 				if (result > Settings.MaxTranslationSquared)
 				{
-					float sq = (float)Math.Sqrt(result);
+					double sq = (double)Math.Sqrt(result);
 
-					float ratio = Settings.MaxTranslation / sq;
+					double ratio = Settings.MaxTranslation / sq;
 					b.LinearVelocityInternal.X *= ratio;
 					b.LinearVelocityInternal.Y *= ratio;
 				}
 
-				float rotation = step.dt * b.AngularVelocityInternal;
+				double rotation = step.dt * b.AngularVelocityInternal;
 				if (rotation * rotation > Settings.MaxRotationSquared)
 				{
-					float ratio = Settings.MaxRotation / Math.Abs(rotation);
+					double ratio = Settings.MaxRotation / Math.Abs(rotation);
 					b.AngularVelocityInternal *= ratio;
 				}
 
@@ -294,7 +294,7 @@ namespace FarseerPhysics.Dynamics
 
 			if (Settings.AllowSleep)
 			{
-				float minSleepTime = Settings.MaxFloat;
+				double minSleepTime = Settings.MaxFloat;
 
 				for (int i = 0; i < this.BodyCount; ++i)
 				{
@@ -312,7 +312,7 @@ namespace FarseerPhysics.Dynamics
 
 					if ((b.Flags & BodyFlags.AutoSleep) == 0 ||
 						b.AngularVelocityInternal * b.AngularVelocityInternal > AngTolSqr ||
-						Vector2.Dot(b.LinearVelocityInternal, b.LinearVelocityInternal) > LinTolSqr)
+						Vector2D.Dot(b.LinearVelocityInternal, b.LinearVelocityInternal) > LinTolSqr)
 					{
 						b.SleepTime = 0.0f;
 						minSleepTime = 0.0f;
@@ -340,7 +340,7 @@ namespace FarseerPhysics.Dynamics
 			this._contactSolver.Reset(this._contacts, this.ContactCount, subStep.dtRatio, false);
 
 			// Solve position constraints.
-			const float kTOIBaumgarte = 0.75f;
+			const double kTOIBaumgarte = 0.75f;
 			for (int i = 0; i < Settings.TOIPositionIterations; ++i)
 			{
 				bool contactsOkay = this._contactSolver.SolvePositionConstraints(kTOIBaumgarte);
@@ -387,18 +387,18 @@ namespace FarseerPhysics.Dynamics
 				}
 
 				// Check for large velocities.
-				float translationx = subStep.dt * b.LinearVelocityInternal.X;
-				float translationy = subStep.dt * b.LinearVelocityInternal.Y;
-				float dot = translationx * translationx + translationy * translationy;
+				double translationx = subStep.dt * b.LinearVelocityInternal.X;
+				double translationy = subStep.dt * b.LinearVelocityInternal.Y;
+				double dot = translationx * translationx + translationy * translationy;
 				if (dot > Settings.MaxTranslationSquared)
 				{
-					float norm = 1f / (float)Math.Sqrt(dot);
-					float value = Settings.MaxTranslation * subStep.inv_dt;
+					double norm = 1f / (double)Math.Sqrt(dot);
+					double value = Settings.MaxTranslation * subStep.inv_dt;
 					b.LinearVelocityInternal.X = value * (translationx * norm);
 					b.LinearVelocityInternal.Y = value * (translationy * norm);
 				}
 
-				float rotation = subStep.dt * b.AngularVelocity;
+				double rotation = subStep.dt * b.AngularVelocity;
 				if (rotation * rotation > Settings.MaxRotationSquared)
 				{
 					if (rotation < 0.0)

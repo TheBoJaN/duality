@@ -14,22 +14,22 @@ namespace Duality.Components.Physics
 	/// </summary>
 	public sealed class RevoluteJointInfo : JointInfo
 	{
-		private	Vector2		localAnchorA	= Vector2.Zero;
-		private	Vector2		localAnchorB	= Vector2.Zero;
-		private	float		lowerLimit		= 0.0f;
-		private	float		upperLimit		= 0.0f;
+		private	Vector2D		localAnchorA	= Vector2D.Zero;
+		private	Vector2D		localAnchorB	= Vector2D.Zero;
+		private	double		lowerLimit		= 0.0f;
+		private	double		upperLimit		= 0.0f;
 		private	bool		limitEnabled	= false;
-		private	float		refAngle		= 0.0f;
+		private	double		refAngle		= 0.0f;
 		private	bool		motorEnabled	= false;
-		private float		maxMotorTorque	= 0.0f;
-		private float		motorSpeed		= 0.0f;
+		private double		maxMotorTorque	= 0.0f;
+		private double		motorSpeed		= 0.0f;
 
 
 		/// <summary>
 		/// [GET / SET] The first RigidBodies local anchor point.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 LocalAnchorA
+		public Vector2D LocalAnchorA
 		{
 			get { return this.localAnchorA; }
 			set { this.localAnchorA = value; this.UpdateJoint(); }
@@ -38,7 +38,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The second RigidBodies local anchor point.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 LocalAnchorB
+		public Vector2D LocalAnchorB
 		{
 			get { return this.localAnchorB; }
 			set { this.localAnchorB = value; this.UpdateJoint(); }
@@ -54,26 +54,26 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The lower joint limit in radians.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float LowerLimit
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double LowerLimit
 		{
 			get { return this.lowerLimit; }
-			set { this.lowerLimit = MathF.Min(value, this.upperLimit); this.UpdateJoint(); }
+			set { this.lowerLimit = MathD.Min(value, this.upperLimit); this.UpdateJoint(); }
 		}
 		/// <summary>
 		/// [GET / SET] The upper joint limit in radians.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float UpperLimit
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double UpperLimit
 		{
 			get { return this.upperLimit; }
-			set { this.upperLimit = MathF.Max(value, this.lowerLimit); this.UpdateJoint(); }
+			set { this.upperLimit = MathD.Max(value, this.lowerLimit); this.UpdateJoint(); }
 		}
 		/// <summary>
 		/// [GET / SET] The joint's reference angle.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float ReferenceAngle
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double ReferenceAngle
 		{
 			get { return this.refAngle; }
 			set { this.refAngle = value; this.UpdateJoint(); }
@@ -92,7 +92,7 @@ namespace Duality.Components.Physics
 		[EditorHintIncrement(10.0f)]
 		[EditorHintDecimalPlaces(0)]
 		[EditorHintRange(0, 100000, 0, 5000)]
-		public float MaxMotorTorque
+		public double MaxMotorTorque
 		{
 			get { return this.maxMotorTorque; }
 			set { this.maxMotorTorque = value; this.UpdateJoint(); }
@@ -100,8 +100,8 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The desired motor speed in radians per frame.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float MotorSpeed
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double MotorSpeed
 		{
 			get { return this.motorSpeed; }
 			set { this.motorSpeed = value; this.UpdateJoint(); }
@@ -110,7 +110,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint angle speed in radians per frame.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointSpeed
+		public double JointSpeed
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.AngularVelocityToDuality * (this.joint as RevoluteJoint).JointSpeed); }
 		}
@@ -118,7 +118,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint angle in radians.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointAngle
+		public double JointAngle
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.AngleToDuality * (this.joint as RevoluteJoint).JointAngle); }
 		}
@@ -126,7 +126,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint motor torque.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float MotorTorque
+		public double MotorTorque
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.TorqueToDuality * (this.joint as RevoluteJoint).MotorTorque); }
 		}
@@ -134,7 +134,7 @@ namespace Duality.Components.Physics
 
 		protected override Joint CreateJoint(World world, Body bodyA, Body bodyB)
 		{
-			return bodyA != null && bodyB != null ? JointFactory.CreateRevoluteJoint(world, bodyA, bodyB, Vector2.Zero) : null;
+			return bodyA != null && bodyB != null ? JointFactory.CreateRevoluteJoint(world, bodyA, bodyB, Vector2D.Zero) : null;
 		}
 		internal override void UpdateJoint()
 		{

@@ -141,30 +141,30 @@ public class QuadTree<T>
 	/// <param name="p1"></param>
 	/// <param name="p2"></param>
 	/// <returns></returns>
-	public static bool RayCastAABB(AABB aabb, Vector2 p1, Vector2 p2)
+	public static bool RayCastAABB(AABB aabb, Vector2D p1, Vector2D p2)
 	{
 		AABB segmentAABB = new AABB();
 		{
-			Vector2.Min(ref p1, ref p2, out segmentAABB.LowerBound);
-			Vector2.Max(ref p1, ref p2, out segmentAABB.UpperBound);
+			Vector2D.Min(ref p1, ref p2, out segmentAABB.LowerBound);
+			Vector2D.Max(ref p1, ref p2, out segmentAABB.UpperBound);
 		}
 		if (!AABB.TestOverlap(aabb, segmentAABB)) return false;
 
-		Vector2 rayDir = p2 - p1;
-		Vector2 rayPos = p1;
+		Vector2D rayDir = p2 - p1;
+		Vector2D rayPos = p1;
 
-		Vector2 norm = new Vector2(-rayDir.Y, rayDir.X); //normal to ray
+		Vector2D norm = new Vector2D(-rayDir.Y, rayDir.X); //normal to ray
 		if (norm.Length == 0.0)
 			return true; //if ray is just a point, return true (iff point is within aabb, as tested earlier)
 		norm.Normalize();
 
-		float dPos = Vector2.Dot(rayPos, norm);
+		double dPos = Vector2D.Dot(rayPos, norm);
 
-		Vector2[] verts = aabb.GetVertices();
-		float d0 = Vector2.Dot(verts[0], norm) - dPos;
+		Vector2D[] verts = aabb.GetVertices();
+		double d0 = Vector2D.Dot(verts[0], norm) - dPos;
 		for (int i = 1; i < 4; i++)
 		{
-			float d = Vector2.Dot(verts[i], norm) - dPos;
+			double d = Vector2D.Dot(verts[i], norm) - dPos;
 			if (Math.Sign(d) != Math.Sign(d0))
 				//return true if the ray splits the vertices (ie: sign of dot products with normal are not all same)
 				return true;
@@ -196,14 +196,14 @@ public class QuadTree<T>
 		}
 	}
 
-	public void RayCast(Func<RayCastInput, Element<T>, float> callback, ref RayCastInput input)
+	public void RayCast(Func<RayCastInput, Element<T>, double> callback, ref RayCastInput input)
 	{
 		Stack<QuadTree<T>> stack = new Stack<QuadTree<T>>();
 		stack.Push(this);
 
-		float maxFraction = input.MaxFraction;
-		Vector2 p1 = input.Point1;
-		Vector2 p2 = p1 + (input.Point2 - input.Point1) * maxFraction;
+		double maxFraction = input.MaxFraction;
+		Vector2D p1 = input.Point1;
+		Vector2D p2 = p1 + (input.Point2 - input.Point1) * maxFraction;
 
 		while (stack.Count > 0)
 		{
@@ -222,7 +222,7 @@ public class QuadTree<T>
 				subInput.Point2 = input.Point2;
 				subInput.MaxFraction = maxFraction;
 
-				float value = callback(subInput, n);
+				double value = callback(subInput, n);
 				if (value == 0.0f)
 					return; // the client has terminated the raycast.
 

@@ -16,8 +16,8 @@ namespace Duality.Components.Physics
 	{
 		[DontSerialize]
 		private Fixture fixture;
-		private float   radius;
-		private Vector2 position;
+		private double   radius;
+		private Vector2D position;
 
 
 		/// <summary>
@@ -25,7 +25,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(1)]
 		[EditorHintDecimalPlaces(1)]
-		public float Radius
+		public double Radius
 		{
 			get { return this.radius; }
 			set { this.radius = value; this.UpdateInternalShape(true); }
@@ -35,14 +35,14 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(1)]
 		[EditorHintDecimalPlaces(1)]
-		public Vector2 Position
+		public Vector2D Position
 		{
 			get { return this.position; }
 			set { this.position = value; this.UpdateInternalShape(true); }
 		}
-		public override Rect AABB
+		public override RectD AABB
 		{
-			get { return Rect.Align(Alignment.Center, this.position.X, this.position.Y, this.radius * 2, this.radius * 2); }
+			get { return RectD.Align(Alignment.Center, this.position.X, this.position.Y, this.radius * 2, this.radius * 2); }
 		}
 		protected override bool IsInternalShapeCreated
 		{
@@ -51,7 +51,7 @@ namespace Duality.Components.Physics
 
 
 		public CircleShapeInfo() {}
-		public CircleShapeInfo(float radius, Vector2 position, float density)
+		public CircleShapeInfo(double radius, Vector2D position, double density)
 		{
 			this.radius = radius;
 			this.position = position;
@@ -84,7 +84,7 @@ namespace Duality.Components.Physics
 				Body body = this.Parent.PhysicsBody;
 				if (body != null)
 				{
-					float scale = this.ParentScale;
+					double scale = this.ParentScale;
 					CircleShape circle = new CircleShape(
 						PhysicsUnit.LengthToPhysical * this.radius * scale, 
 						this.density);

@@ -24,15 +24,15 @@ namespace Duality.Components.Renderers
 		private BatchInfo            customAreaMaterial    = null;
 		private BatchInfo            customOutlineMaterial = null;
 		private ColorRgba            colorTint             = ColorRgba.White;
-		private float                outlineWidth          = 3.0f;
-		private float                offset                = 0.0f;
+		private double                outlineWidth          = 3.0f;
+		private double                offset                = 0.0f;
 		private bool                 fillHollowShapes      = false;
 		private bool                 wrapTexture           = true;
 
 		[DontSerialize] private Canvas canvas = new Canvas();
 
 
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get { return this.GameObj.GetComponent<RigidBody>().BoundRadius; }
 		}
@@ -80,7 +80,7 @@ namespace Duality.Components.Renderers
 		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public double DepthOffset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
@@ -90,7 +90,7 @@ namespace Duality.Components.Renderers
 		/// No outline will be rendered, if this value is smaller than or equal zero.
 		/// </summary>
 		[EditorHintRange(0.0f, 100.0f)]
-		public float OutlineWidth
+		public double OutlineWidth
 		{
 			get { return this.outlineWidth; }
 			set { this.outlineWidth = value; }
@@ -121,7 +121,7 @@ namespace Duality.Components.Renderers
 			this.canvas.Begin(device);
 
 			// Draw Shape Areas
-			this.canvas.State.DepthOffset = this.offset;
+			this.canvas.State.DepthOffset = (float)this.offset;
 			if (this.customAreaMaterial != null)
 				this.canvas.State.SetMaterial(this.customAreaMaterial);
 			else
@@ -138,7 +138,7 @@ namespace Duality.Components.Renderers
 			// Draw Shape Outlines
 			if (this.outlineWidth > 0.0f)
 			{
-				this.canvas.State.DepthOffset = this.offset - 0.01f;
+				this.canvas.State.DepthOffset = (float)this.offset - 0.01f;
 				if (this.customOutlineMaterial != null)
 					this.canvas.State.SetMaterial(this.customOutlineMaterial);
 				else
@@ -175,7 +175,7 @@ namespace Duality.Components.Renderers
 				}
 				if (polyShape.ConvexPolygons != null)
 				{
-					foreach (Vector2[] convexPolygon in polyShape.ConvexPolygons)
+					foreach (Vector2D[] convexPolygon in polyShape.ConvexPolygons)
 					{
 						Rect localBounds = convexPolygon.BoundingBox();
 						Rect localTexRect = new Rect(
@@ -200,18 +200,18 @@ namespace Duality.Components.Renderers
 		}
 		private void DrawShapeArea(Canvas canvas, Transform transform, CircleShapeInfo shape)
 		{
-			Vector3 pos = transform.Pos;
-			float angle = transform.Angle;
-			float scale = transform.Scale;
+			Vector3D pos = transform.Pos;
+			double angle = (double)transform.Angle;
+			double scale = (double)transform.Scale;
 
 			if (this.wrapTexture)
 			{
-				canvas.State.TextureCoordinateRect = new Rect(
+				canvas.State.TextureCoordinateRect = new RectD(
 					shape.Radius * 2.0f / canvas.State.TextureBaseSize.X,
 					shape.Radius * 2.0f / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.State.TransformScale = new Vector2(scale, scale);
-			canvas.State.TransformAngle = angle;
+			canvas.State.TransformScale = new Vector2D(scale, scale);
+			canvas.State.TransformAngle = (float)angle;
 			canvas.State.TransformHandle = -shape.Position;
 			canvas.FillCircle(
 				pos.X, 
@@ -219,7 +219,7 @@ namespace Duality.Components.Renderers
 				pos.Z, 
 				shape.Radius);
 		}
-		private void DrawShapeArea(Canvas canvas, Transform transform, Vector2[] shapeVertices)
+		private void DrawShapeArea(Canvas canvas, Transform transform, Vector2D[] shapeVertices)
 		{
 			if (shapeVertices.Length < 3) return;
 
@@ -232,17 +232,17 @@ namespace Duality.Components.Renderers
 			}
 			this.DrawShapeArea(canvas, transform, shapeVertices, texRect);
 		}
-		private void DrawShapeArea(Canvas canvas, Transform transform, Vector2[] shapeVertices, Rect texRect)
+		private void DrawShapeArea(Canvas canvas, Transform transform, Vector2D[] shapeVertices, Rect texRect)
 		{
 			if (shapeVertices.Length < 3) return;
 
-			Vector3 pos = transform.Pos;
-			float angle = transform.Angle;
-			float scale = transform.Scale;
+			Vector3D pos = transform.Pos;
+			double angle = (double)transform.Angle;
+			double scale = (double)transform.Scale;
 
 			canvas.State.TextureCoordinateRect = texRect;
-			canvas.State.TransformAngle = angle;
-			canvas.State.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = (float)angle;
+			canvas.State.TransformScale = new Vector2D(scale, scale);
 			canvas.FillPolygon(shapeVertices, pos.X, pos.Y, pos.Z);
 		}
 
@@ -263,18 +263,18 @@ namespace Duality.Components.Renderers
 		}
 		private void DrawShapeOutline(Canvas canvas, Transform transform, CircleShapeInfo shape)
 		{
-			Vector3 pos = transform.Pos;
-			float angle = transform.Angle;
-			float scale = transform.Scale;
+			Vector3D pos = transform.Pos;
+			double angle = (double)transform.Angle;
+			double scale = (double)transform.Scale;
 
 			if (this.wrapTexture)
 			{
-				canvas.State.TextureCoordinateRect = new Rect(
+				canvas.State.TextureCoordinateRect = new RectD(
 					shape.Radius * 2.0f / canvas.State.TextureBaseSize.X,
 					shape.Radius * 2.0f / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.State.TransformScale = new Vector2(scale, scale);
-			canvas.State.TransformAngle = angle;
+			canvas.State.TransformScale = new Vector2D(scale, scale);
+			canvas.State.TransformAngle = (float)angle;
 			canvas.State.TransformHandle = -shape.Position;
 			canvas.FillCircleSegment(
 				pos.X, 
@@ -285,23 +285,23 @@ namespace Duality.Components.Renderers
 				MathF.RadAngle360,
 				this.outlineWidth);
 		}
-		private void DrawShapeOutline(Canvas canvas, Transform transform, Vector2[] shapeVertices, bool closedLoop)
+		private void DrawShapeOutline(Canvas canvas, Transform transform, Vector2D[] shapeVertices, bool closedLoop)
 		{
-			Vector3 pos = transform.Pos;
-			float angle = transform.Angle;
-			float scale = transform.Scale;
+			Vector3D pos = transform.Pos;
+			double angle = (double)transform.Angle;
+			double scale = (double)transform.Scale;
 
 			if (this.wrapTexture)
 			{
 				Rect pointBoundingRect = shapeVertices.BoundingBox();
-				canvas.State.TextureCoordinateRect = new Rect(
+				canvas.State.TextureCoordinateRect = new RectD(
 					pointBoundingRect.W / canvas.State.TextureBaseSize.X,
 					pointBoundingRect.H / canvas.State.TextureBaseSize.Y);
 			}
-			canvas.State.TransformAngle = angle;
-			canvas.State.TransformScale = new Vector2(scale, scale);
+			canvas.State.TransformAngle = (float)angle;
+			canvas.State.TransformScale = new Vector2D(scale, scale);
 
-			float inOutFactor = -1.0f + 0.3f / MathF.Max(1.0f, this.outlineWidth);
+			double inOutFactor = -1.0f + 0.3f / MathD.Max(1.0f, this.outlineWidth);
 			if (closedLoop)
 				canvas.FillPolygonOutline(shapeVertices, this.outlineWidth, inOutFactor, pos.X, pos.Y, pos.Z);
 			else

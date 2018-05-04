@@ -107,8 +107,8 @@ namespace DualStickSpaceShooter
 			
 			// Gather data for emitting particles
 			Vector3 effectPos = this.GameObj.Transform.Pos;
-			float effectAngle = this.GameObj.Transform.Angle;
-			float effectScale = this.GameObj.Transform.Scale;
+			float effectAngle = (float)this.GameObj.Transform.Angle;
+			float effectScale = (float)this.GameObj.Transform.Scale;
 
 			// Reserve memory for storing the new particles we're spawning
 			if (this.particles == null) this.particles = new RawList<Particle>(count);
@@ -173,8 +173,8 @@ namespace DualStickSpaceShooter
 			}
 			else
 			{
-				objAngle = this.GameObj.Transform.Angle;
-				objScale = this.GameObj.Transform.Scale;
+				objAngle = (float)this.GameObj.Transform.Angle;
+				objScale = (float)this.GameObj.Transform.Scale;
 				objPos = this.GameObj.Transform.Pos;
 			}
 			

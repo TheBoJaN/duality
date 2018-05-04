@@ -32,7 +32,7 @@ namespace FarseerPhysics.Common.ConvexHull
 			int[] edgeList = new int[vertices.Count];
 			int numEdges = 0;
 
-			float minY = float.MaxValue;
+			double minY = double.MaxValue;
 			int minYIndex = vertices.Count;
 			for (int i = 0; i < vertices.Count; ++i)
 			{
@@ -45,27 +45,27 @@ namespace FarseerPhysics.Common.ConvexHull
 
 			int startIndex = minYIndex;
 			int winIndex = -1;
-			float dx = -1.0f;
-			float dy = 0.0f;
+			double dx = -1.0f;
+			double dy = 0.0f;
 			while (winIndex != minYIndex)
 			{
-				float maxDot = -2.0f;
-				float nrm;
+				double maxDot = -2.0f;
+				double nrm;
 
 				for (int i = 0; i < vertices.Count; ++i)
 				{
 					if (i == startIndex)
 						continue;
-					float newdx = vertices[i].X - vertices[startIndex].X;
-					float newdy = vertices[i].Y - vertices[startIndex].Y;
-					nrm = (float)Math.Sqrt(newdx * newdx + newdy * newdy);
+					double newdx = vertices[i].X - vertices[startIndex].X;
+					double newdy = vertices[i].Y - vertices[startIndex].Y;
+					nrm = (double)Math.Sqrt(newdx * newdx + newdy * newdy);
 					nrm = (nrm == 0.0f) ? 1.0f : nrm;
 					newdx /= nrm;
 					newdy /= nrm;
 
 					//Dot products act as proxy for angle
 					//without requiring inverse trig.
-					float newDot = newdx * dx + newdy * dy;
+					double newDot = newdx * dx + newdy * dy;
 					if (newDot > maxDot)
 					{
 						maxDot = newDot;
@@ -75,7 +75,7 @@ namespace FarseerPhysics.Common.ConvexHull
 				edgeList[numEdges++] = winIndex;
 				dx = vertices[winIndex].X - vertices[startIndex].X;
 				dy = vertices[winIndex].Y - vertices[startIndex].Y;
-				nrm = (float)Math.Sqrt(dx * dx + dy * dy);
+				nrm = (double)Math.Sqrt(dx * dx + dy * dy);
 				nrm = (nrm == 0.0f) ? 1.0f : nrm;
 				dx /= nrm;
 				dy /= nrm;

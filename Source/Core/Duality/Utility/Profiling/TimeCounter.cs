@@ -9,25 +9,25 @@ namespace Duality
 	{
 		// Measurement
 		private	Stopwatch	watch				= new Stopwatch();
-		private	float		value				= 0.0f;
-		private	float		lastValue			= 0.0f;
+		private	double		value				= 0.0f;
+		private	double		lastValue			= 0.0f;
 		// Report data
 		private	double		accumValue			= 0.0d;
-		private	float		accumMaxValue		= float.MinValue;
-		private	float		accumMinValue		= float.MaxValue;
-		private	float[]		valueGraph			= new float[ValueHistoryLen];
+		private	double		accumMaxValue		= double.MinValue;
+		private	double		accumMinValue		= double.MaxValue;
+		private	double[]		valueGraph			= new double[ValueHistoryLen];
 		private	int			valueGraphCursor	= 0;
 
 
-		internal float Value
+		internal double Value
 		{
 			get { return this.value; }
 		}
-		public float LastValue
+		public double LastValue
 		{
 			get { return this.lastValue; }
 		}
-		public float[] ValueGraph
+		public double[] ValueGraph
 		{
 			get { return this.valueGraph; }
 		}
@@ -46,12 +46,12 @@ namespace Duality
 			this.value += this.watch.ElapsedTicks * 1000.0f / Stopwatch.Frequency;
 			this.used = true;
 		}
-		public void Add(float value)
+		public void Add(double value)
 		{
 			this.value += value;
 			this.used = true;
 		}
-		public void Set(float value)
+		public void Set(double value)
 		{
 			this.value = value;
 			this.used = true;
@@ -68,15 +68,15 @@ namespace Duality
 		{
 			this.ResetFrame();
 			this.accumValue = 0.0d;
-			this.accumMaxValue = float.MinValue;
-			this.accumMinValue = float.MaxValue;
+			this.accumMaxValue = double.MinValue;
+			this.accumMinValue = double.MaxValue;
 			this.sampleCount = 0;
 		}
 
 		public override void GetReportData(out ProfileReportCounterData data)
 		{
 			data = new ProfileReportCounterData();
-			data.Severity = MathF.Clamp(this.lastValue / Time.MillisecondsPerFrame, 0.0f, 1.0f);
+			data.Severity = MathD.Clamp(this.lastValue / Time.MillisecondsPerFrame, 0.0f, 1.0f);
 				data.LastValue = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F}", this.lastValue);
 			if (this.IsSingleValue)
 			{
@@ -86,7 +86,7 @@ namespace Duality
 			{
 				if (this.sampleCount > 0)
 				{
-					data.AverageValue = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F}", (float)(this.accumValue / (double)this.sampleCount));
+					data.AverageValue = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F}", (double)(this.accumValue / (double)this.sampleCount));
 					data.MinValue = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F}", this.accumMinValue);
 					data.MaxValue = string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:F}", this.accumMaxValue);
 				}
@@ -98,8 +98,8 @@ namespace Duality
 			if (this.used)
 			{
 				this.sampleCount++;
-				this.accumMaxValue = MathF.Max(this.value, this.accumMaxValue);
-				this.accumMinValue = MathF.Min(this.value, this.accumMinValue);
+				this.accumMaxValue = MathD.Max(this.value, this.accumMaxValue);
+				this.accumMinValue = MathD.Min(this.value, this.accumMinValue);
 				this.accumValue += this.value;
 			}
 			this.valueGraph[this.valueGraphCursor] = this.value;

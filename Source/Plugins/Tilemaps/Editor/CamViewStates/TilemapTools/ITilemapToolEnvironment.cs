@@ -46,7 +46,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 		/// [GET] A list of outlines that enclose the actions proposed <see cref="Tile"/> editing area.
 		/// Will be determined automatically when cleared.
 		/// </summary>
-		IList<Vector2[]> ActiveAreaOutlines { get; }
+		IList<Vector2D[]> ActiveAreaOutlines { get; }
 		/// <summary>
 		/// [GET] The coordinate of the <see cref="Tile"/> where the current action was started.
 		/// </summary>

@@ -517,5 +517,23 @@ namespace Duality
 		{
 			return !left.Equals(right);
 		}
+
+		/// <summary>
+		/// Convert from Vector2D
+		/// </summary>
+		/// <param name="v"></param>
+		public static implicit operator RectD(Rect v)
+		{
+			return new RectD(v.X, v.Y);
+		}
+
+		/// <summary>
+		/// Convert to Vector2
+		/// </summary>
+		/// <param name="v"></param>
+		public static implicit operator Rect(RectD v)
+		{
+			return new Rect((float)v.X, (float)v.Y);
+		}
 	}
 }

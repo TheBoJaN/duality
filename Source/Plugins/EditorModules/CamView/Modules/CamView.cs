@@ -173,7 +173,7 @@ namespace Duality.Editor.Plugins.CamView
 		}
 
 
-		public const float DefaultDisplayBoundRadius = 25.0f;
+		public const double DefaultDisplayBoundRadius = 25.0f;
 
 		private static CamView	activeCamView	= null;
 
@@ -209,7 +209,7 @@ namespace Duality.Editor.Plugins.CamView
 		private	bool			inputMouseCapture		= false;
 		private	int				inputMouseX				= 0;
 		private	int				inputMouseY				= 0;
-		private	float			inputMouseWheel			= 0.0f;
+		private	double			inputMouseWheel			= 0.0f;
 		private	int				inputMouseButtons		= 0;
 		private	bool			inputMouseInView		= false;
 		private	bool			inputKeyFocus			= false;
@@ -240,24 +240,24 @@ namespace Duality.Editor.Plugins.CamView
 		{
 			get { return this.BgColor.GetLuminance() < 0.5f ? ColorRgba.White : ColorRgba.Black; }
 		}
-		public float NearZ
+		public double NearZ
 		{
 			get { return this.camComp.NearZ; }
 			set { this.camComp.NearZ = value; }
 		}
-		public float FarZ
+		public double FarZ
 		{
 			get { return this.camComp.FarZ; }
 			set { this.camComp.FarZ = value; }
 		}
-		public float FocusDist
+		public double FocusDist
 		{
-			get { return (float)this.focusDist.Value; }
+			get { return (double)this.focusDist.Value; }
 			set { this.focusDist.Value = Math.Min(Math.Max((decimal)value, this.focusDist.Minimum), this.focusDist.Maximum); }
 		}
-		public float FocusDistIncrement
+		public double FocusDistIncrement
 		{
-			get { return (float)this.focusDist.Increment; }
+			get { return (double)this.focusDist.Increment; }
 		}
 		public ProjectionMode PerspectiveMode
 		{
@@ -335,12 +335,12 @@ namespace Duality.Editor.Plugins.CamView
 				this.availLayers.Add(t, layer);
 			}
 
-			this.snapToGridInactiveItem.Tag = Vector3.Zero;
-			this.snapToGridPixelPerfectItem.Tag = new Vector3(1, 1, 1);
-			this.snapToGrid16Item.Tag = new Vector3(16, 16, 16);
-			this.snapToGrid32Item.Tag = new Vector3(32, 32, 32);
-			this.snapToGrid64Item.Tag = new Vector3(64, 64, 64);
-			this.editingUserGuides.GridSize = Vector3.Zero;
+			this.snapToGridInactiveItem.Tag = Vector3D.Zero;
+			this.snapToGridPixelPerfectItem.Tag = new Vector3D(1, 1, 1);
+			this.snapToGrid16Item.Tag = new Vector3D(16, 16, 16);
+			this.snapToGrid32Item.Tag = new Vector3D(32, 32, 32);
+			this.snapToGrid64Item.Tag = new Vector3D(64, 64, 64);
+			this.editingUserGuides.GridSize = Vector3D.Zero;
 		}
 		protected override void OnShown(EventArgs e)
 		{
@@ -696,7 +696,7 @@ namespace Duality.Editor.Plugins.CamView
 			c.FarZ = 100000.0f;
 			c.RenderingSetup = RenderSetup.Default;
 
-			this.nativeCamObj.Transform.Pos = new Vector3(0.0f, 0.0f, -c.FocusDist);
+			this.nativeCamObj.Transform.Pos = new Vector3D(0.0f, 0.0f, -c.FocusDist);
 			DualityEditorApp.EditorObjects.AddObject(this.nativeCamObj);
 		}
 		private int GetCameraSelectorIndex(Camera c)
@@ -949,7 +949,7 @@ namespace Duality.Editor.Plugins.CamView
 			XElement snapToGridSizeElement = node.Element("SnapToGridSize");
 			if (snapToGridSizeElement != null)
 			{
-				Vector3 size;
+				Vector3D size;
 				snapToGridSizeElement.GetElementValue("X", out size.X);
 				snapToGridSizeElement.GetElementValue("Y", out size.Y);
 				snapToGridSizeElement.GetElementValue("Z", out size.Z);
@@ -1022,21 +1022,21 @@ namespace Duality.Editor.Plugins.CamView
 
 		public void ResetCamera()
 		{
-			this.FocusOnPos(Vector3.Zero);
+			this.FocusOnPos(Vector3D.Zero);
 			this.camObj.Transform.Angle = 0.0f;
 		}
-		public void FocusOnPos(Vector3 targetPos)
+		public void FocusOnPos(Vector3D targetPos)
 		{
 			if (!this.activeState.CameraActionAllowed) return;
-			targetPos -= Vector3.UnitZ * MathF.Abs(this.camComp.FocusDist);
-			//targetPos.Z = MathF.Min(this.camObj.Transform.Pos.Z, targetPos.Z);
+			targetPos -= Vector3D.UnitZ * MathD.Abs(this.camComp.FocusDist);
+			//targetPos.Z = MathD.Min(this.camObj.Transform.Pos.Z, targetPos.Z);
 			this.camObj.Transform.Pos = targetPos;
 			this.OnCamTransformChanged();
 			this.RenderableControl.Invalidate();
 		}
 		public void FocusOnObject(GameObject obj)
 		{
-			this.FocusOnPos((obj == null || obj.Transform == null) ? Vector3.Zero : obj.Transform.Pos);
+			this.FocusOnPos((obj == null || obj.Transform == null) ? Vector3D.Zero : obj.Transform.Pos);
 		}
 
 
@@ -1174,11 +1174,11 @@ namespace Duality.Editor.Plugins.CamView
 
 			if (this.activeState.EngineUserInput)
 			{
-				Vector2 gameSize = this.activeState.RenderedImageSize;
-				Rect inputArea = this.activeState.RenderedViewport;
+				Vector2D gameSize = this.activeState.RenderedImageSize;
+				RectD inputArea = this.activeState.RenderedViewport;
 
-				this.inputMouseX = MathF.RoundToInt(gameSize.X * (e.X - inputArea.X) / inputArea.W);
-				this.inputMouseY = MathF.RoundToInt(gameSize.Y * (e.Y - inputArea.Y) / inputArea.H);
+				this.inputMouseX = MathD.RoundToInt(gameSize.X * (e.X - inputArea.X) / inputArea.W);
+				this.inputMouseY = MathD.RoundToInt(gameSize.Y * (e.Y - inputArea.Y) / inputArea.H);
 				this.inputMouseInView = 
 					this.inputMouseX >= 0.0f &&
 					this.inputMouseX <= gameSize.X &&
@@ -1303,7 +1303,7 @@ namespace Duality.Editor.Plugins.CamView
 			else
 				this.focusDist.Increment = 10000m;
 
-			this.camComp.FocusDist = (float)this.focusDist.Value;
+			this.camComp.FocusDist = (double)this.focusDist.Value;
 			this.OnPerspectiveChanged();
 		}
 		private void showBgColorDialog_Click(object sender, EventArgs e)
@@ -1350,7 +1350,7 @@ namespace Duality.Editor.Plugins.CamView
 
 		private void buttonResetZoom_Click(object sender, EventArgs e)
 		{
-			this.camObj.Transform.Pos = new Vector3(this.camObj.Transform.Pos.Xy, -MathF.Abs(this.camComp.FocusDist));
+			this.camObj.Transform.Pos = new Vector3D(this.camObj.Transform.Pos.Xy, -MathD.Abs(this.camComp.FocusDist));
 			this.RenderableControl.Invalidate();
 		}
 		
@@ -1526,7 +1526,7 @@ namespace Duality.Editor.Plugins.CamView
 			}
 			else
 			{
-				this.editingUserGuides.GridSize = (Vector3)e.ClickedItem.Tag;
+				this.editingUserGuides.GridSize = (Vector3D)e.ClickedItem.Tag;
 			}
 
 			this.RenderableControl.Invalidate();
@@ -1610,18 +1610,18 @@ namespace Duality.Editor.Plugins.CamView
 				if (!this.RenderableControl.Focused) return;
 				if (!this.inputMouseCapture) return;
 				
-				Vector2 gameSize = this.activeState.RenderedImageSize;
-				Rect inputArea = this.activeState.RenderedViewport;
+				Vector2D gameSize = this.activeState.RenderedImageSize;
+				RectD inputArea = this.activeState.RenderedViewport;
 
 				Point targetLocalPoint = new Point(
-					MathF.RoundToInt(inputArea.X + inputArea.W * value.X / gameSize.X),
-					MathF.RoundToInt(inputArea.Y + inputArea.H * value.Y / gameSize.Y));
+					MathD.RoundToInt(inputArea.X + inputArea.W * value.X / gameSize.X),
+					MathD.RoundToInt(inputArea.Y + inputArea.H * value.Y / gameSize.Y));
 				Point targetScreenPoint = this.RenderableControl.PointToScreen(targetLocalPoint);
 
 				Cursor.Position = targetScreenPoint;
 			}
 		}
-		float IMouseInputSource.Wheel
+		double IMouseInputSource.Wheel
 		{
 			get { return this.inputMouseWheel; }
 		}

@@ -10,9 +10,9 @@ namespace Duality.Components.Physics
 	public struct RayCastData
 	{
 		private ShapeInfo	shape;
-		private Vector2		pos;
-		private Vector2		normal;
-		private float		fraction;
+		private Vector2D		pos;
+		private Vector2D		normal;
+		private double		fraction;
 
 		/// <summary>
 		/// [GET] The shape that was hit.
@@ -38,26 +38,26 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET] The world position at which the shape was hit.
 		/// </summary>
-		public Vector2 Pos
+		public Vector2D Pos
 		{
 			get { return this.pos; }
 		}
 		/// <summary>
 		/// [GET] The normal of the ray / shape collision.
 		/// </summary>
-		public Vector2 Normal
+		public Vector2D Normal
 		{
 			get { return this.normal; }
 		}
 		/// <summary>
 		/// [GET] The fraction (0.0f - 1.0f) of the ray at which the hit occurred.
 		/// </summary>
-		public float Fraction
+		public double Fraction
 		{
 			get { return this.fraction; }
 		}
 
-		public RayCastData(ShapeInfo shape, Vector2 pos, Vector2 normal, float fraction)
+		public RayCastData(ShapeInfo shape, Vector2D pos, Vector2D normal, double fraction)
 		{
 			this.shape = shape;
 			this.pos = pos;

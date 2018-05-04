@@ -14,7 +14,7 @@ namespace Duality.Input
 		/// <summary>
 		/// [GET] The current mouse wheel value
 		/// </summary>
-		float Wheel { get; }
+		double Wheel { get; }
 		/// <summary>
 		/// [GET] Returns whether a specific <see cref="MouseButton"/> is currently pressed.
 		/// </summary>

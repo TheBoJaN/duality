@@ -25,11 +25,11 @@ namespace Duality.Plugins.Tilemaps
 		/// <summary>
 		/// [GET] The rectangular region that is occupied by the rendered <see cref="Tilemap"/>, in local / object space.
 		/// </summary>
-		Rect LocalTilemapRect { get; }
+		RectD LocalTilemapRect { get; }
 		/// <summary>
 		/// [GET] Returns the size of a single tile in local / object space.
 		/// </summary>
-		Vector2 LocalTileSize { get; }
+		Vector2D LocalTileSize { get; }
 		/// <summary>
 		/// [GET / SET] A color by which the rendered <see cref="Tilemap"/> is tinted.
 		/// </summary>
@@ -39,7 +39,7 @@ namespace Duality.Plugins.Tilemaps
 		/// This property represents the sum of all non-local depth adjustments in the rendered <see cref="Tilemap"/>,
 		/// expressed as an offset to the depth that is implicitly defined by the <see cref="Transform"/> Z position.
 		/// </summary>
-		float BaseDepthOffset { get; }
+		double BaseDepthOffset { get; }
 
 
 		/// <summary>
@@ -49,20 +49,20 @@ namespace Duality.Plugins.Tilemaps
 		/// <param name="localPos"></param>
 		/// <param name="pickMode">Specifies the desired behavior when attempting to get a tile outside the rendered area.</param>
 		/// <returns></returns>
-		Point2 GetTileAtLocalPos(Vector2 localPos, TilePickMode pickMode);
+		Point2 GetTileAtLocalPos(Vector2D localPos, TilePickMode pickMode);
 		/// <summary>
 		/// Gets the local position of the specified tile at the upper left corner.
 		/// The function does not check if the point is a valid tile position.
 		/// </summary>
 		/// <param name="tilePos">The index of the tile of which to calculate the local position.</param>
 		/// <returns></returns>
-		Vector2 GetLocalPosAtTile(Point2 tilePos);
+		Vector2D GetLocalPosAtTile(Point2 tilePos);
 		/// <summary>
 		/// Determines the generated depth offset for the tile at the specified tile coordinates.
 		/// This also inclues the renderers overall depth offset.
 		/// </summary>
 		/// <param name="tilePos">The index of the tile of which to calculate the depth offset.</param>
 		/// <returns></returns>
-		float GetTileDepthOffsetAt(Point2 tilePos);
+		double GetTileDepthOffsetAt(Point2 tilePos);
 	}
 }

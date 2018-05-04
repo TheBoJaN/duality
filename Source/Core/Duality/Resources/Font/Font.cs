@@ -57,7 +57,7 @@ namespace Duality.Resources
 		
 		private FontData          fontData         = null;
 		private FontRenderMode    renderMode       = FontRenderMode.SharpBitmap;
-		private float             spacing          = 0.0f;
+		private float spacing          = 0.0f;
 		private float             lineHeightFactor = 1.0f;
 		private bool              kerning          = true;
 		// Data that is automatically acquired while loading the font
@@ -145,7 +145,7 @@ namespace Duality.Resources
 		/// </summary>
 		public int LineSpacing
 		{
-			get { return MathF.RoundToInt(this.fontData.Metrics.Height * this.lineHeightFactor); }
+			get { return MathD.RoundToInt(this.fontData.Metrics.Height * this.lineHeightFactor); }
 		}
 		/// <summary>
 		/// [GET] Provides access to various metrics that are inherent to this <see cref="Font"/> instance,
@@ -195,8 +195,8 @@ namespace Duality.Resources
 			if (this.fontData == null)
 				return;
 			
-			this.pixmap = new Pixmap(fontData.Bitmap);
-			this.pixmap.Atlas = fontData.Atlas.ToList();
+			this.pixmap = new Pixmap(this.fontData.Bitmap);
+			this.pixmap.Atlas = this.fontData.Atlas.ToList();
 		}
 		private void GenerateTexture()
 		{
@@ -238,7 +238,7 @@ namespace Duality.Resources
 		}
 		private void GenerateCharLookup()
 		{
-			FontGlyphData[] glyphs = fontData.Glyphs;
+			FontGlyphData[] glyphs = this.fontData.Glyphs;
 			if (glyphs == null)
 			{
 				this.charLookup = new int[0];
@@ -293,11 +293,11 @@ namespace Duality.Resources
 			int charIndex = (int)glyph > this.charLookup.Length ? 0 : this.charLookup[(int)glyph];
 			this.pixmap.LookupAtlas(charIndex, out targetRect);
 			PixelData subImg = new PixelData(
-				MathF.RoundToInt(targetRect.W), 
-				MathF.RoundToInt(targetRect.H));
+				MathD.RoundToInt(targetRect.W), 
+				MathD.RoundToInt(targetRect.H));
 			this.pixmap.MainLayer.DrawOnto(subImg, BlendMode.Solid, 
-				-MathF.RoundToInt(targetRect.X), 
-				-MathF.RoundToInt(targetRect.Y));
+				-MathD.RoundToInt(targetRect.X), 
+				-MathD.RoundToInt(targetRect.Y));
 			return subImg;
 		}
 
@@ -311,7 +311,7 @@ namespace Duality.Resources
 		/// <param name="y">An Y-Offset applied to the position of each emitted vertex.</param>
 		/// <param name="z">An Z-Offset applied to the position of each emitted vertex.</param>
 		/// <returns>The number of emitted vertices. This values isn't necessarily equal to the emitted arrays length.</returns>
-		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, float x, float y, float z = 0.0f)
+		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, double x, double y, double z = 0.0f)
 		{
 			return this.EmitTextVertices(text, ref vertices, x, y, z, ColorRgba.White);
 		}
@@ -328,13 +328,13 @@ namespace Duality.Resources
 		/// <param name="angle">An angle by which the text is rotated (before applying the offset).</param>
 		/// <param name="scale">A factor by which the text is scaled (before applying the offset).</param>
 		/// <returns>The number of emitted vertices. This values isn't necessarily equal to the emitted arrays length.</returns>
-		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, float x, float y, float z, ColorRgba clr, float angle = 0.0f, float scale = 1.0f)
+		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, double x, double y, double z, ColorRgba clr, double angle = 0.0f, double scale = 1.0f)
 		{
 			int len = this.EmitTextVertices(text, ref vertices);
 			
-			Vector3 offset = new Vector3(x, y, z);
+			Vector3 offset = new Vector3D(x, y, z);
 			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(angle, scale, out xDot, out yDot);
+			MathF.GetTransformDotVec((float)angle, (float)scale, out xDot, out yDot);
 
 			for (int i = 0; i < len; i++)
 			{
@@ -355,11 +355,11 @@ namespace Duality.Resources
 		/// <param name="y">An Y-Offset applied to the position of each emitted vertex.</param>
 		/// <param name="clr">The color value that is applied to each emitted vertex.</param>
 		/// <returns>The number of emitted vertices. This values isn't necessarily equal to the emitted arrays length.</returns>
-		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, float x, float y, ColorRgba clr)
+		public int EmitTextVertices(string text, ref VertexC1P3T2[] vertices, double x, double y, ColorRgba clr)
 		{
 			int len = this.EmitTextVertices(text, ref vertices);
 			
-			Vector3 offset = new Vector3(x, y, 0);
+			Vector3 offset = new Vector3D(x, y, 0);
 
 			for (int i = 0; i < len; i++)
 			{
@@ -384,38 +384,38 @@ namespace Duality.Resources
 			if (this.texture == null)
 				return len;
 
-			float curOffset = 0.0f;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			float glyphXAdv;
+			double glyphXAdv;
 			for (int i = 0; i < text.Length; i++)
 			{
 				this.ProcessTextAdv(text, i, out glyphData, out uvRect, out glyphXAdv);
 
-				Vector2 glyphPos;
-				glyphPos.X = MathF.Round(curOffset - glyphData.Offset.X);
-				glyphPos.Y = MathF.Round(0 - glyphData.Offset.Y);
+				Vector2D glyphPos;
+				glyphPos.X = MathD.Round(curOffset - glyphData.Offset.X);
+				glyphPos.Y = MathD.Round(0 - glyphData.Offset.Y);
 
-				vertices[i * 4 + 0].Pos.X = glyphPos.X;
-				vertices[i * 4 + 0].Pos.Y = glyphPos.Y;
+				vertices[i * 4 + 0].Pos.X = (float)glyphPos.X;
+				vertices[i * 4 + 0].Pos.Y = (float)glyphPos.Y;
 				vertices[i * 4 + 0].Pos.Z = 0.0f;
 				vertices[i * 4 + 0].TexCoord = uvRect.TopLeft;
 				vertices[i * 4 + 0].Color = ColorRgba.White;
 
-				vertices[i * 4 + 1].Pos.X = glyphPos.X + glyphData.Size.X;
-				vertices[i * 4 + 1].Pos.Y = glyphPos.Y;
+				vertices[i * 4 + 1].Pos.X = (float)(glyphPos.X + glyphData.Size.X);
+				vertices[i * 4 + 1].Pos.Y = (float)glyphPos.Y;
 				vertices[i * 4 + 1].Pos.Z = 0.0f;
 				vertices[i * 4 + 1].TexCoord = uvRect.TopRight;
 				vertices[i * 4 + 1].Color = ColorRgba.White;
 
-				vertices[i * 4 + 2].Pos.X = glyphPos.X + glyphData.Size.X;
-				vertices[i * 4 + 2].Pos.Y = glyphPos.Y + glyphData.Size.Y;
+				vertices[i * 4 + 2].Pos.X = (float)(glyphPos.X + glyphData.Size.X);
+				vertices[i * 4 + 2].Pos.Y = (float)(glyphPos.Y + glyphData.Size.Y);
 				vertices[i * 4 + 2].Pos.Z = 0.0f;
 				vertices[i * 4 + 2].TexCoord = uvRect.BottomRight;
 				vertices[i * 4 + 2].Color = ColorRgba.White;
 
-				vertices[i * 4 + 3].Pos.X = glyphPos.X;
-				vertices[i * 4 + 3].Pos.Y = glyphPos.Y + glyphData.Size.Y;
+				vertices[i * 4 + 3].Pos.X = (float)glyphPos.X;
+				vertices[i * 4 + 3].Pos.Y = (float)(glyphPos.Y + glyphData.Size.Y);
 				vertices[i * 4 + 3].Pos.Z = 0.0f;
 				vertices[i * 4 + 3].TexCoord = uvRect.BottomLeft;
 				vertices[i * 4 + 3].Color = ColorRgba.White;
@@ -433,7 +433,7 @@ namespace Duality.Resources
 		/// <param name="target"></param>
 		/// <param name="x"></param>
 		/// <param name="y"></param>
-		public void RenderToBitmap(string text, PixelData target, float x = 0.0f, float y = 0.0f)
+		public void RenderToBitmap(string text, PixelData target, double x = 0.0f, double y = 0.0f)
 		{
 			this.RenderToBitmap(text, target, x, y, ColorRgba.White);
 		}
@@ -445,16 +445,16 @@ namespace Duality.Resources
 		/// <param name="x"></param>
 		/// <param name="y"></param>
 		/// <param name="clr"></param>
-		public void RenderToBitmap(string text, PixelData target, float x, float y, ColorRgba clr)
+		public void RenderToBitmap(string text, PixelData target, double x, double y, ColorRgba clr)
 		{
 			if (this.pixmap == null)
 				return;
 
 			PixelData bitmap = this.pixmap.MainLayer;
-			float curOffset = 0.0f;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			float glyphXAdv;
+			double glyphXAdv;
 			for (int i = 0; i < text.Length; i++)
 			{
 				this.ProcessTextAdv(text, i, out glyphData, out uvRect, out glyphXAdv);
@@ -462,12 +462,12 @@ namespace Duality.Resources
 				
 				bitmap.DrawOnto(target, 
 					BlendMode.Alpha, 
-					MathF.RoundToInt(x + curOffset - glyphData.Offset.X), 
-					MathF.RoundToInt(y - glyphData.Offset.Y),
+					MathD.RoundToInt(x + curOffset - glyphData.Offset.X), 
+					MathD.RoundToInt(y - glyphData.Offset.Y),
 					(int)glyphData.Size.X, 
 					(int)glyphData.Size.Y,
-					MathF.RoundToInt(dataCoord.X), 
-					MathF.RoundToInt(dataCoord.Y), 
+					MathD.RoundToInt(dataCoord.X), 
+					MathD.RoundToInt(dataCoord.Y), 
 					clr);
 
 				curOffset += glyphXAdv;
@@ -479,15 +479,15 @@ namespace Duality.Resources
 		/// </summary>
 		/// <param name="text">The text to measure.</param>
 		/// <returns>The size of the measured text.</returns>
-		public Vector2 MeasureText(string text)
+		public Vector2D MeasureText(string text)
 		{
-			if (this.texture == null || text == null) return Vector2.Zero;
+			if (this.texture == null || text == null) return Vector2D.Zero;
 
-			Vector2 textSize = Vector2.Zero;
-			float curOffset = 0.0f;
+			Vector2D textSize = Vector2D.Zero;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			float glyphXAdv;
+			double glyphXAdv;
 			for (int i = 0; i < text.Length; i++)
 			{
 				this.ProcessTextAdv(text, i, out glyphData, out uvRect, out glyphXAdv);
@@ -498,8 +498,8 @@ namespace Duality.Resources
 				curOffset += glyphXAdv;
 			}
 
-			textSize.X = MathF.Round(textSize.X);
-			textSize.Y = MathF.Round(textSize.Y);
+			textSize.X = MathD.Round(textSize.X);
+			textSize.Y = MathD.Round(textSize.Y);
 			return textSize;
 		}
 		/// <summary>
@@ -507,17 +507,17 @@ namespace Duality.Resources
 		/// </summary>
 		/// <param name="text">The text to measure.</param>
 		/// <returns>The size of the measured text.</returns>
-		public Vector2 MeasureText(string[] text)
+		public Vector2D MeasureText(string[] text)
 		{
-			if (this.texture == null) return Vector2.Zero;
+			if (this.texture == null) return Vector2D.Zero;
 
-			Vector2 textSize = Vector2.Zero;
+			Vector2D textSize = Vector2D.Zero;
 			if (text == null) return textSize;
 
 			for (int i = 0; i < text.Length; i++)
 			{
-				Vector2 lineSize = this.MeasureText(text[i]);
-				textSize.X = MathF.Max(textSize.X, lineSize.X);
+				Vector2D lineSize = this.MeasureText(text[i]);
+				textSize.X = MathD.Max(textSize.X, lineSize.X);
 				textSize.Y += i == 0 ? this.Height : this.LineSpacing;
 			}
 
@@ -530,15 +530,15 @@ namespace Duality.Resources
 		/// <param name="maxWidth">The maximum width it may occupy.</param>
 		/// <param name="fitMode">The mode by which the text fitting algorithm operates.</param>
 		/// <returns></returns>
-		public string FitText(string text, float maxWidth, FitTextMode fitMode = FitTextMode.ByChar)
+		public string FitText(string text, double maxWidth, FitTextMode fitMode = FitTextMode.ByChar)
 		{
 			if (this.texture == null) return text;
 
-			Vector2 textSize = Vector2.Zero;
-			float curOffset = 0.0f;
+			Vector2D textSize = Vector2D.Zero;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			float glyphXAdv;
+			double glyphXAdv;
 			int lastValidLength = 0;
 			for (int i = 0; i < text.Length; i++)
 			{
@@ -565,24 +565,24 @@ namespace Duality.Resources
 		/// <param name="text">The text that contains the glyph to measure.</param>
 		/// <param name="index">The index of the glyph to measure.</param>
 		/// <returns>A rectangle that describes the specified glyphs position and size.</returns>
-		public Rect MeasureTextGlyph(string text, int index)
+		public RectD MeasureTextGlyph(string text, int index)
 		{
-			if (this.texture == null) return Rect.Empty;
+			if (this.texture == null) return RectD.Empty;
 
-			float curOffset = 0.0f;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			float glyphXAdv;
+			double glyphXAdv;
 			for (int i = 0; i < text.Length; i++)
 			{
 				this.ProcessTextAdv(text, i, out glyphData, out uvRect, out glyphXAdv);
 
-				if (i == index) return new Rect(curOffset - glyphData.Offset.X, 0 - glyphData.Offset.Y, glyphData.Size.X, glyphData.Size.Y);
+				if (i == index) return new RectD(curOffset - glyphData.Offset.X, 0 - glyphData.Offset.Y, glyphData.Size.X, glyphData.Size.Y);
 
 				curOffset += glyphXAdv;
 			}
 
-			return Rect.Empty;
+			return RectD.Empty;
 		}
 		/// <summary>
 		/// Returns the index of the glyph that is located at a certain location within a text.
@@ -591,20 +591,20 @@ namespace Duality.Resources
 		/// <param name="x">X-Coordinate of the position where to look for a glyph.</param>
 		/// <param name="y">Y-Coordinate of the position where to look for a glyph.</param>
 		/// <returns>The index of the glyph that is located at the specified position.</returns>
-		public int PickTextGlyph(string text, float x, float y)
+		public int PickTextGlyph(string text, double x, double y)
 		{
 			if (this.texture == null) return -1;
 
-			float curOffset = 0.0f;
+			double curOffset = 0.0f;
 			FontGlyphData glyphData;
 			Rect uvRect;
-			Rect glyphRect;
-			float glyphXAdv;
+			RectD glyphRect;
+			double glyphXAdv;
 			for (int i = 0; i < text.Length; i++)
 			{
 				this.ProcessTextAdv(text, i, out glyphData, out uvRect, out glyphXAdv);
 
-				glyphRect = new Rect(curOffset - glyphData.Offset.X, 0 - glyphData.Offset.Y, glyphData.Size.X, glyphData.Size.Y);
+				glyphRect = new RectD(curOffset - glyphData.Offset.X, 0 - glyphData.Offset.Y, glyphData.Size.X, glyphData.Size.Y);
 				if (glyphRect.Contains(x, y)) return i;
 
 				curOffset += glyphXAdv;
@@ -613,7 +613,7 @@ namespace Duality.Resources
 			return -1;
 		}
 
-		private void ProcessTextAdv(string text, int index, out FontGlyphData glyphData, out Rect uvRect, out float glyphXAdv)
+		private void ProcessTextAdv(string text, int index, out FontGlyphData glyphData, out Rect uvRect, out double glyphXAdv)
 		{
 			char glyph = text[index];
 			int charIndex = (int)glyph > this.charLookup.Length ? 0 : this.charLookup[(int)glyph];
@@ -626,7 +626,7 @@ namespace Duality.Resources
 			if (this.kerning)
 			{
 				char glyphNext = index + 1 < text.Length ? text[index + 1] : ' ';
-				float advanceOffset = this.kerningLookup.GetAdvanceOffset(glyph, glyphNext);
+				double advanceOffset = this.kerningLookup.GetAdvanceOffset(glyph, glyphNext);
 				glyphXAdv += advanceOffset;
 			}
 		}

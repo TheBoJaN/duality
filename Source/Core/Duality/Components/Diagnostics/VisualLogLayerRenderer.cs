@@ -63,7 +63,7 @@ namespace Duality.Components.Diagnostics
 					if (isOverlayLog != this.overlay) continue;
 
 					this.canvas.PushState();
-					this.canvas.State.DepthOffset += logEntry.DepthOffset;
+					this.canvas.State.DepthOffset += (float)logEntry.DepthOffset;
 					if (logEntry.LifetimeAsAlpha)
 					{
 						this.canvas.State.ColorTint *= new ColorRgba(1.0f, logEntry.LifetimeRatio);
@@ -72,7 +72,7 @@ namespace Duality.Components.Diagnostics
 					if (logEntry.Anchor == VisualLogAnchor.Object && logEntry.AnchorObj != null && logEntry.AnchorObj.Transform != null)
 					{
 						Transform anchorTransform = logEntry.AnchorObj.Transform;
-						logEntry.Draw(this.canvas, anchorTransform.Pos, anchorTransform.Angle, anchorTransform.Scale);
+						logEntry.Draw(this.canvas, anchorTransform.Pos, (float)anchorTransform.Angle, (float)anchorTransform.Scale);
 					}
 					else
 					{

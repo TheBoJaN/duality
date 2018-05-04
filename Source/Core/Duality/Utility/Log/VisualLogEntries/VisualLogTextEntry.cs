@@ -13,14 +13,14 @@ namespace Duality
 	/// </summary>
 	public sealed class VisualLogTextEntry : VisualLogEntry
 	{
-		private	Vector3		pos			= Vector3.Zero;
+		private	Vector3D		pos			= Vector3D.Zero;
 		private	Alignment	blockAlign	= Alignment.TopLeft;
 		private	string[]	lines		= new string[0];
 		
 		/// <summary>
 		/// [GET / SET] The point in space that is described by this text.
 		/// </summary>
-		public Vector3 Pos
+		public Vector3D Pos
 		{
 			get { return this.pos; }
 			set { this.pos = value; }
@@ -57,30 +57,30 @@ namespace Duality
 			get { return this.lines; }
 		}
 
-		public override void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale)
+		public override void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale)
 		{
-			float borderRadius = DefaultOutlineWidth;
-			float textScale = 1.0f;
+			double borderRadius = DefaultOutlineWidth;
+			double textScale = 1.0f;
 			bool worldSpace = (target.DrawDevice.VisibilityMask & VisibilityFlag.ScreenOverlay) == VisibilityFlag.None;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.pos.Z + basePos.Z);
+				double scale = target.DrawDevice.GetScaleAtZ((float)(this.pos.Z + basePos.Z));
 				borderRadius /= scale;
 				textScale /= scale;
 			}
 
 			// Determine base position
-			Vector3 originPos = this.pos;
-			MathF.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
+			Vector3D originPos = this.pos;
+			MathD.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
 			originPos += basePos;
 
 			// Draw text and background
 			target.State.ColorTint = target.State.ColorTint.WithAlpha(target.State.ColorTint.A * 2.0f / 255.0f);
 			target.State.ColorTint *= this.Color;
 			if (worldSpace) target.State.TransformAngle = target.DrawDevice.ViewerAngle;
-			target.State.TransformScale = new Vector2(textScale, textScale);
+			target.State.TransformScale = new Vector2D(textScale, textScale);
 			target.DrawText(
 				this.lines,
 				originPos.X, 

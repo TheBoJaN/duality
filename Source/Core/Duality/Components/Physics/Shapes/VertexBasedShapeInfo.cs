@@ -12,9 +12,9 @@ namespace Duality.Components.Physics
 {
 	public abstract class VertexBasedShapeInfo : ShapeInfo
 	{
-		protected static readonly Vector2[] EmptyVertices = new Vector2[0];
+		protected static readonly Vector2D[] EmptyVertices = new Vector2D[0];
 
-		protected Vector2[] vertices;
+		protected Vector2D[] vertices;
 
 
 		/// <summary>
@@ -25,12 +25,12 @@ namespace Duality.Components.Physics
 		[EditorHintFlags(MemberFlags.ForceWriteback)]
 		[EditorHintIncrement(1)]
 		[EditorHintDecimalPlaces(1)]
-		public Vector2[] Vertices
+		public Vector2D[] Vertices
 		{
 			get { return this.vertices ?? EmptyVertices; }
 			set
 			{
-				this.vertices = value ?? new Vector2[] { Vector2.Zero, Vector2.UnitX, Vector2.UnitY };
+				this.vertices = value ?? new Vector2D[] { Vector2D.Zero, Vector2D.UnitX, Vector2D.UnitY };
 				this.UpdateInternalShape(true);
 			}
 		}
@@ -40,31 +40,31 @@ namespace Duality.Components.Physics
 		[EditorHintFlags(MemberFlags.Invisible)]
 		public abstract VertexShapeTrait ShapeTraits { get; }
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public override Rect AABB
+		public override RectD AABB
 		{
 			get 
 			{
 				if (this.vertices == null || this.vertices.Length == 0)
 					return Rect.Empty;
 
-				float minX = float.MaxValue;
-				float minY = float.MaxValue;
-				float maxX = float.MinValue;
-				float maxY = float.MinValue;
+				double minX = double.MaxValue;
+				double minY = double.MaxValue;
+				double maxX = double.MinValue;
+				double maxY = double.MinValue;
 				for (int i = 0; i < this.vertices.Length; i++)
 				{
-					minX = MathF.Min(minX, this.vertices[i].X);
-					minY = MathF.Min(minY, this.vertices[i].Y);
-					maxX = MathF.Max(maxX, this.vertices[i].X);
-					maxY = MathF.Max(maxY, this.vertices[i].Y);
+					minX = MathD.Min(minX, this.vertices[i].X);
+					minY = MathD.Min(minY, this.vertices[i].Y);
+					maxX = MathD.Max(maxX, this.vertices[i].X);
+					maxY = MathD.Max(maxY, this.vertices[i].Y);
 				}
-				return new Rect(minX, minY, maxX - minX, maxY - minY);
+				return new RectD(minX, minY, maxX - minX, maxY - minY);
 			}
 		}
 
 
 		protected VertexBasedShapeInfo() { }
-		protected VertexBasedShapeInfo(Vector2[] vertices)
+		protected VertexBasedShapeInfo(Vector2D[] vertices)
 		{
 			this.vertices = vertices;
 		}

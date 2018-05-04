@@ -95,7 +95,11 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\PropertyEditors\Point2PropertyEditor.cs" />
+    <Compile Include="Controls\PropertyEditors\RectDPropertyEditor.cs" />
     <Compile Include="Controls\PropertyEditors\SpriteIndexBlendPropertyEditor.cs" />
+    <Compile Include="Controls\PropertyEditors\Vector2DPropertyEditor.cs" />
+    <Compile Include="Controls\PropertyEditors\Vector3DPropertyEditor.cs" />
+    <Compile Include="Controls\PropertyEditors\Vector4DPropertyEditor.cs" />
     <Compile Include="Controls\ToolStrip\ToolStripTextBoxAdv.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -460,12 +464,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="AggregateOutput" BeforeTargets="AfterBuild">
-  
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).exe" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).exe.config" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).pdb" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).xml" DestinationFolder="$(SolutionDir)Build\Output\" />
-	
     <Copy SourceFiles="$(OutputPath)AdamsLair.WinForms.dll" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)AdamsLair.WinForms.xml" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)Aga.Controls.dll" DestinationFolder="$(SolutionDir)Build\Output\" />
@@ -476,6 +478,5 @@
     <Copy SourceFiles="$(OutputPath)VistaBridgeLibrary.xml" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)Windows7.DesktopIntegration.dll" DestinationFolder="$(SolutionDir)Build\Output\" />
     <Copy SourceFiles="$(OutputPath)Windows7.DesktopIntegration.xml" DestinationFolder="$(SolutionDir)Build\Output\" />
-	
   </Target>
 </Project>

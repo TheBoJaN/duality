@@ -29,6 +29,6 @@ namespace Duality
 		/// <param name="progressToNext">
 		/// A factor from zero to one that indicates how far the sprite animation has advanced from the current sprite index to the next one.
 		/// </param>
-		void ApplySpriteAnimation(int currentSpriteIndex, int nextSpriteIndex, float progressToNext);
+		void ApplySpriteAnimation(int currentSpriteIndex, int nextSpriteIndex, double progressToNext);
 	}
 }

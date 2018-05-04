@@ -43,8 +43,8 @@ namespace Duality.Plugins.Tilemaps
 		// Shape property values that are used when generating new shapes.
 		// These are not directly editable, but retrieved from RigidBody
 		// values / generated shapes the user has edited.
-		private float shapeFriction    = 0.3f;
-		private float shapeRestitution = 0.3f;
+		private double shapeFriction    = 0.3f;
+		private double shapeRestitution = 0.3f;
 
 		[DontSerialize] private Tilemap referenceTilemap = null;
 		[DontSerialize] private Tilemap[] sourceTilemaps = null;
@@ -122,14 +122,14 @@ namespace Duality.Plugins.Tilemaps
 		/// <summary>
 		/// [GET] The rectangular region that is occupied by the generated <see cref="RigidBody"/> shapes, in local / object space.
 		/// </summary>
-		public Rect LocalTilemapRect
+		public RectD LocalTilemapRect
 		{
 			get
 			{
 				Tilemap tilemap = this.referenceTilemap;
 				Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
-				Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
-				return Rect.Align(this.origin, 0, 0, this.tileCount.X * tileSize.X, this.tileCount.Y * tileSize.Y);
+				Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+				return RectD.Align(this.origin, 0, 0, this.tileCount.X * tileSize.X, this.tileCount.Y * tileSize.Y);
 			}
 		}
 		
@@ -230,11 +230,11 @@ namespace Duality.Plugins.Tilemaps
 					// Determine general working data
 					Tilemap tilemap = this.referenceTilemap;
 					Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
-					Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+					Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 					Point2 sectorBaseTile = new Point2(
 						sectorX * SectorSize,
 						sectorY * SectorSize);
-					Vector2 sectorBasePos = sectorBaseTile * tileSize;
+					Vector2D sectorBasePos = sectorBaseTile * tileSize;
 
 					// Clear the temporary edge map first
 					this.tempEdgeMap.Clear();
@@ -247,7 +247,7 @@ namespace Duality.Plugins.Tilemaps
 
 					// Now traverse the edge map and gradually create chain / loop 
 					// shapes until all edges have been used.
-					Rect localRect = Rect.Align(this.origin, 0, 0, this.tileCount.X * tileSize.X, this.tileCount.Y * tileSize.Y);
+					RectD localRect = RectD.Align(this.origin, 0, 0, this.tileCount.X * tileSize.X, this.tileCount.Y * tileSize.Y);
 					GenerateCollisionShapes(this.tempEdgeMap, localRect.TopLeft + sectorBasePos, tileSize, this.roundedCorners, sector.Shapes);
 
 					// Add all the generated shapes to the target body
@@ -346,8 +346,8 @@ namespace Duality.Plugins.Tilemaps
 			RigidBody body = this.GameObj.GetComponent<RigidBody>();
 
 			int shapeCount = 0;
-			float friction = 0.0f;
-			float restitution = 0.0f;
+			double friction = 0.0f;
+			double restitution = 0.0f;
 			for (int y = 0; y < this.sectorCount.Y; y++)
 			{
 				for (int x = 0; x < this.sectorCount.X; x++)
@@ -367,8 +367,8 @@ namespace Duality.Plugins.Tilemaps
 
 			if (shapeCount > 0)
 			{
-				this.shapeFriction = friction / (float)shapeCount;
-				this.shapeRestitution = restitution / (float)shapeCount; 
+				this.shapeFriction = friction / (double)shapeCount;
+				this.shapeRestitution = restitution / (double)shapeCount; 
 			}
 		}
 		
@@ -631,12 +631,12 @@ namespace Duality.Plugins.Tilemaps
 					targetEdgeMap.AddEdge(new Point2(rightBorderPos, y - 1), new Point2(rightBorderPos, y));
 			}
 		}
-		private static void GenerateCollisionShapes(TileEdgeMap edgeMap, Vector2 origin, Vector2 tileSize, bool roundedCorners, IList<ShapeInfo> shapeList)
+		private static void GenerateCollisionShapes(TileEdgeMap edgeMap, Vector2D origin, Vector2D tileSize, bool roundedCorners, IList<ShapeInfo> shapeList)
 		{
 			// Traverse the edge map and gradually create chain / loop 
 			// shapes until all edges have been used.
 			RawList<Point2> currentChain = new RawList<Point2>();
-			RawList<Vector2> vertexBuffer = new RawList<Vector2>();
+			RawList<Vector2D> vertexBuffer = new RawList<Vector2D>();
 			while (true)
 			{
 				// Begin a new continuous chain of nodes
@@ -683,9 +683,9 @@ namespace Duality.Plugins.Tilemaps
 						int prevIndex = (i - 1 + currentChain.Count) % currentChain.Count;
 						int nextIndex = (i + 1) % currentChain.Count;
 
-						Vector2 currentVert = origin + tileSize * (Vector2)currentChain[i];
-						Vector2 prevVert = origin + tileSize * (Vector2)currentChain[prevIndex];
-						Vector2 nextVert = origin + tileSize * (Vector2)currentChain[nextIndex];
+						Vector2D currentVert = origin + tileSize * (Vector2D)currentChain[i];
+						Vector2D prevVert = origin + tileSize * (Vector2D)currentChain[prevIndex];
+						Vector2D nextVert = origin + tileSize * (Vector2D)currentChain[nextIndex];
 
 						if (nextVert - currentVert != currentVert - prevVert)
 						{
@@ -711,16 +711,16 @@ namespace Duality.Plugins.Tilemaps
 						int prevIndex = (i - 1 + currentChain.Count) % currentChain.Count;
 						int nextIndex = (i + 1) % currentChain.Count;
 
-						Vector2 currentVert = origin + tileSize * (Vector2)currentChain[i];
-						Vector2 prevVert = origin + tileSize * (Vector2)currentChain[prevIndex];
-						Vector2 nextVert = origin + tileSize * (Vector2)currentChain[nextIndex];
+						Vector2D currentVert = origin + tileSize * (Vector2D)currentChain[i];
+						Vector2D prevVert = origin + tileSize * (Vector2D)currentChain[prevIndex];
+						Vector2D nextVert = origin + tileSize * (Vector2D)currentChain[nextIndex];
 
 						if (nextVert - currentVert != currentVert - prevVert)
 							vertexBuffer.Add(currentVert);
 					}
 				}
 
-				Vector2[] vertices = new Vector2[vertexBuffer.Count];
+				Vector2D[] vertices = new Vector2D[vertexBuffer.Count];
 				vertexBuffer.CopyTo(vertices, 0);
 				shapeList.Add(isLoop ? 
 					(ShapeInfo)new LoopShapeInfo(vertices) : 

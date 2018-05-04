@@ -11,11 +11,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 	{
 		private	CircleShapeInfo	circle;
 			
-		public override Vector3 Pos
+		public override Vector3D Pos
 		{
 			get
 			{
-				return this.Body.GameObj.Transform.GetWorldPoint(new Vector3(this.circle.Position));
+				return this.Body.GameObj.Transform.GetWorldPoint(new Vector3D(this.circle.Position));
 			}
 			set
 			{
@@ -23,18 +23,18 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.circle.Position = this.Body.GameObj.Transform.GetLocalPoint(value).Xy;
 			}
 		}
-		public override Vector3 Scale
+		public override Vector3D Scale
 		{
 			get
 			{
-				return Vector3.One * this.circle.Radius;
+				return Vector3D.One * this.circle.Radius;
 			}
 			set
 			{
-				this.circle.Radius = value.Length / MathF.Sqrt(3.0f);
+				this.circle.Radius = value.Length / MathD.Sqrt(3.0f);
 			}
 		}
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get { return this.circle.Radius * this.Body.GameObj.Transform.Scale; }
 		}

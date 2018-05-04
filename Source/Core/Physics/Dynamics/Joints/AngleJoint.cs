@@ -9,13 +9,13 @@ namespace FarseerPhysics.Dynamics.Joints
 	/// </summary>
 	public class AngleJoint : Joint
 	{
-		public float BiasFactor;
-		public float MaxImpulse;
-		public float Softness;
-		private float _bias;
-		private float _jointError;
-		private float _massFactor;
-		private float _targetAngle;
+		public double BiasFactor;
+		public double MaxImpulse;
+		public double Softness;
+		private double _bias;
+		private double _jointError;
+		private double _massFactor;
+		private double _targetAngle;
 
 		internal AngleJoint()
 		{
@@ -29,10 +29,10 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.TargetAngle = 0;
 			this.BiasFactor = .2f;
 			this.Softness = 0f;
-			this.MaxImpulse = float.MaxValue;
+			this.MaxImpulse = double.MaxValue;
 		}
 
-		public float TargetAngle
+		public double TargetAngle
 		{
 			get { return this._targetAngle; }
 			set
@@ -45,25 +45,25 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 		}
 
-		public override Vector2 WorldAnchorA
+		public override Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.Position; }
 		}
 
-		public override Vector2 WorldAnchorB
+		public override Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.Position; }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
 		}
 
-		public override Vector2 GetReactionForce(float inv_dt)
+		public override Vector2D GetReactionForce(double inv_dt)
 		{
 			//TODO
 			//return _inv_dt * _impulse;
-			return Vector2.Zero;
+			return Vector2D.Zero;
 		}
 
-		public override float GetReactionTorque(float inv_dt)
+		public override double GetReactionTorque(double inv_dt)
 		{
 			return 0;
 		}
@@ -79,7 +79,7 @@ namespace FarseerPhysics.Dynamics.Joints
 
 		internal override void SolveVelocityConstraints(ref TimeStep step)
 		{
-			float p = (this._bias - this.BodyB.AngularVelocity + this.BodyA.AngularVelocity) * this._massFactor;
+			double p = (this._bias - this.BodyB.AngularVelocity + this.BodyA.AngularVelocity) * this._massFactor;
 			this.BodyA.AngularVelocity -= this.BodyA.InvI * Math.Sign(p) * Math.Min(Math.Abs(p), this.MaxImpulse);
 			this.BodyB.AngularVelocity += this.BodyB.InvI * Math.Sign(p) * Math.Min(Math.Abs(p), this.MaxImpulse);
 		}

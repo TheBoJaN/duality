@@ -30,16 +30,16 @@ namespace FarseerPhysics.Dynamics
 		/// <summary>
 		/// Time step (Delta time)
 		/// </summary>
-		public float dt;
+		public double dt;
 
 		/// <summary>
 		/// dt * inv_dt0
 		/// </summary>
-		public float dtRatio;
+		public double dtRatio;
 
 		/// <summary>
 		/// Inverse time step (0 if dt == 0).
 		/// </summary>
-		public float inv_dt;
+		public double inv_dt;
 	}
 }

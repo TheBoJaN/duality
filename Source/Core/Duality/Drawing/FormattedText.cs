@@ -171,17 +171,17 @@ namespace Duality.Drawing
 			/// The icons UV-Coordinates on the icon texture that will be used for rendering icons.
 			/// </summary>
 			[EditorHintDecimalPlaces(2)]
-			public	Rect	uvRect;
+			public	RectD	uvRect;
 			/// <summary>
 			/// The icons display size.
 			/// </summary>
-			public	Vector2	size;
+			public	Vector2D	size;
 			/// <summary>
 			/// An optional pixel offset that is applied to the icon when drawing it
 			/// </summary>
-			public	Vector2	offset;
+			public	Vector2D	offset;
 
-			public Icon(Rect uvRect, Vector2 size, Vector2 offset)
+			public Icon(RectD uvRect, Vector2D size, Vector2D offset)
 			{
 				this.uvRect = uvRect;
 				this.size = size;
@@ -223,14 +223,14 @@ namespace Duality.Drawing
 		/// </summary>
 		public class Metrics
 		{
-			private	Vector2				size;
-			private	IReadOnlyList<Rect>	lineBounds;
-			private	IReadOnlyList<Rect>	elementBounds;
+			private	Vector2D				size;
+			private	IReadOnlyList<RectD>	lineBounds;
+			private	IReadOnlyList<RectD>	elementBounds;
 
 			/// <summary>
 			/// [GET] The size of the formatted text block as whole.
 			/// </summary>
-			public Vector2 Size 
+			public Vector2D Size 
 			{
 				get { return this.size; }
 			}
@@ -244,19 +244,19 @@ namespace Duality.Drawing
 			/// <summary>
 			/// [GET] Each lines boundary.
 			/// </summary>
-			public IReadOnlyList<Rect> LineBounds
+			public IReadOnlyList<RectD> LineBounds
 			{
 				get { return this.lineBounds; }
 			}
 			/// <summary>
 			/// [GET] Each formatted text elements individual boundary.
 			/// </summary>
-			public IReadOnlyList<Rect> ElementBounds
+			public IReadOnlyList<RectD> ElementBounds
 			{
 				get { return this.elementBounds; }
 			}
 
-			public Metrics(Vector2 size, List<Rect> lineBounds, List<Rect> elementBounds)
+			public Metrics(Vector2D size, List<RectD> lineBounds, List<RectD> elementBounds)
 			{
 				this.size = size;
 				this.lineBounds = lineBounds;
@@ -290,20 +290,20 @@ namespace Duality.Drawing
 			private	int				vertIconIndex;
 			private	int				elemIndex;
 			private	int				lineIndex;
-			private	Vector2			offset;
+			private	Vector2D			offset;
 			// Format state
 			private	int				fontIndex;
 			private	Font			font;
 			private	ColorRgba		color;
 			// Line stats
-			private	float			lineBeginX;
-			private	float			lineAvailWidth;
-			private	float			lineWidth;
-			private	float			lineHeight;
+			private	double			lineBeginX;
+			private	double			lineAvailWidth;
+			private	double			lineWidth;
+			private	double			lineHeight;
 			private	int				lineBaseLine;
 			private	Alignment		lineAlign;
 			// Current element data. Current == just 'been processed in NextElement()
-			private	Vector2			curElemOffset;
+			private	Vector2D			curElemOffset;
 			private	int				curElemVertTextIndex;
 			private	int				curElemVertIconIndex;
 			private	int				curElemWrapIndex;
@@ -334,7 +334,7 @@ namespace Duality.Drawing
 			{
 				get { return this.lineIndex; }
 			}
-			public Vector2 CurrentElemOffset
+			public Vector2D CurrentElemOffset
 			{
 				get { return this.curElemOffset; }
 			}
@@ -430,7 +430,7 @@ namespace Duality.Drawing
 						textToDisplay = textElem.Text;
 						fittingText = textElem.Text;
 					}
-					Vector2 textElemSize = this.font.MeasureText(fittingText);
+					Vector2D textElemSize = this.font.MeasureText(fittingText);
 
 					// Perform word wrap by whole Element
 					if (this.parent.maxWidth > 0 && this.parent.wrapMode == WrapMode.Element)
@@ -619,7 +619,7 @@ namespace Duality.Drawing
 					else if (this.lineAlign == Alignment.Center)
 						this.lineBeginX += (this.lineAvailWidth - this.lineWidth) / 2;
 
-					this.lineBeginX = MathF.Round(this.lineBeginX);
+					this.lineBeginX = MathD.Round(this.lineBeginX);
 				}
 			}
 		}
@@ -757,7 +757,7 @@ namespace Duality.Drawing
 		/// <summary>
 		/// [GET] The text blocks boundary size.
 		/// </summary>
-		public Vector2 Size
+		public Vector2D Size
 		{
 			get { return this.TextMetrics.Size; }
 		}
@@ -998,7 +998,7 @@ namespace Duality.Drawing
 		/// Returns an array of vertex counts for each emitted vertex array. 
 		/// Index 0 represents the number of emitted icon vertices, Index n represents the number of vertices emitted using Font n - 1.
 		/// </returns>
-		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, float x, float y, float z = 0.0f)
+		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, double x, double y, double z = 0.0f)
 		{
 			return this.EmitVertices(ref vertText, ref vertIcons, x, y, z, ColorRgba.White);
 		}
@@ -1015,11 +1015,11 @@ namespace Duality.Drawing
 		/// Returns an array of vertex counts for each emitted vertex array. 
 		/// Index 0 represents the number of emitted icon vertices, Index n represents the number of vertices emitted using Font n - 1.
 		/// </returns>
-		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, float x, float y, ColorRgba clr)
+		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, double x, double y, ColorRgba clr)
 		{
 			int[] vertLen = this.EmitVertices(ref vertText, ref vertIcons);
 			
-			Vector3 offset = new Vector3(x, y, 0);
+			Vector3D offset = new Vector3D(x, y, 0);
 
 			if (clr == ColorRgba.White)
 			{
@@ -1027,12 +1027,12 @@ namespace Duality.Drawing
 				{
 					for (int j = 0; j < vertLen[i + 1]; j++)
 					{
-						Vector3.Add(ref vertText[i][j].Pos, ref offset, out vertText[i][j].Pos);
+						Vector3D.Add(ref offset, ref vertText[i][j].Pos, out vertText[i][j].Pos);
 					}
 				}
 				for (int i = 0; i < vertLen[0]; i++)
 				{
-					Vector3.Add(ref vertIcons[i].Pos, ref offset, out vertIcons[i].Pos);
+					Vector3D.Add(ref offset, ref vertIcons[i].Pos, out vertIcons[i].Pos);
 				}
 			}
 			else
@@ -1041,13 +1041,13 @@ namespace Duality.Drawing
 				{
 					for (int j = 0; j < vertLen[i + 1]; j++)
 					{
-						Vector3.Add(ref vertText[i][j].Pos, ref offset, out vertText[i][j].Pos);
+						Vector3D.Add(ref offset, ref vertText[i][j].Pos, out vertText[i][j].Pos);
 						ColorRgba.Multiply(ref vertText[i][j].Color, ref clr, out vertText[i][j].Color);
 					}
 				}
 				for (int i = 0; i < vertLen[0]; i++)
 				{
-					Vector3.Add(ref vertIcons[i].Pos, ref offset, out vertIcons[i].Pos);
+					Vector3D.Add(ref offset, ref vertIcons[i].Pos, out vertIcons[i].Pos);
 					ColorRgba.Multiply(ref vertIcons[i].Color, ref clr, out vertIcons[i].Color);
 				}
 			}
@@ -1070,10 +1070,10 @@ namespace Duality.Drawing
 		/// Returns an array of vertex counts for each emitted vertex array. 
 		/// Index 0 represents the number of emitted icon vertices, Index n represents the number of vertices emitted using Font n - 1.
 		/// </returns>
-		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, float x, float y, float z, ColorRgba clr, float angle = 0.0f, float scale = 1.0f)
+		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, double x, double y, double z, ColorRgba clr, double angle = 0.0f, double scale = 1.0f)
 		{
-			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(angle, scale, out xDot, out yDot);
+			Vector2D xDot, yDot;
+			MathD.GetTransformDotVec(angle, scale, out xDot, out yDot);
 			return this.EmitVertices(ref vertText, ref vertIcons, x, y, z, clr, xDot, yDot);
 		}
 		/// <summary>
@@ -1092,11 +1092,11 @@ namespace Duality.Drawing
 		/// Returns an array of vertex counts for each emitted vertex array. 
 		/// Index 0 represents the number of emitted icon vertices, Index n represents the number of vertices emitted using Font n - 1.
 		/// </returns>
-		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, float x, float y, float z, ColorRgba clr, Vector2 xDot, Vector2 yDot)
+		public int[] EmitVertices(ref VertexC1P3T2[][] vertText, ref VertexC1P3T2[] vertIcons, double x, double y, double z, ColorRgba clr, Vector2D xDot, Vector2D yDot)
 		{
 			int[] vertLen = this.EmitVertices(ref vertText, ref vertIcons);
 			
-			Vector3 offset = new Vector3(x, y, z);
+			Vector3D offset = new Vector3D(x, y, z);
 
 			if (clr == ColorRgba.White)
 			{
@@ -1104,14 +1104,14 @@ namespace Duality.Drawing
 				{
 					for (int j = 0; j < vertLen[i + 1]; j++)
 					{
-						MathF.TransformDotVec(ref vertText[i][j].Pos, ref xDot, ref yDot);
-						Vector3.Add(ref vertText[i][j].Pos, ref offset, out vertText[i][j].Pos);
+						MathD.TransformDotVec(ref vertText[i][j].Pos, ref xDot, ref yDot);
+						Vector3D.Add(ref offset, ref vertText[i][j].Pos, out vertText[i][j].Pos);
 					}
 				}
 				for (int i = 0; i < vertLen[0]; i++)
 				{
-					MathF.TransformDotVec(ref vertIcons[i].Pos, ref xDot, ref yDot);
-					Vector3.Add(ref vertIcons[i].Pos, ref offset, out vertIcons[i].Pos);
+					MathD.TransformDotVec(ref vertIcons[i].Pos, ref xDot, ref yDot);
+					Vector3D.Add(ref offset, ref vertIcons[i].Pos, out vertIcons[i].Pos);
 				}
 			}
 			else
@@ -1120,15 +1120,15 @@ namespace Duality.Drawing
 				{
 					for (int j = 0; j < vertLen[i + 1]; j++)
 					{
-						MathF.TransformDotVec(ref vertText[i][j].Pos, ref xDot, ref yDot);
-						Vector3.Add(ref vertText[i][j].Pos, ref offset, out vertText[i][j].Pos);
+						MathD.TransformDotVec(ref vertText[i][j].Pos, ref xDot, ref yDot);
+						Vector3D.Add(ref offset, ref vertText[i][j].Pos, out vertText[i][j].Pos);
 						ColorRgba.Multiply(ref vertText[i][j].Color, ref clr, out vertText[i][j].Color);
 					}
 				}
 				for (int i = 0; i < vertLen[0]; i++)
 				{
-					MathF.TransformDotVec(ref vertIcons[i].Pos, ref xDot, ref yDot);
-					Vector3.Add(ref vertIcons[i].Pos, ref offset, out vertIcons[i].Pos);
+					MathD.TransformDotVec(ref vertIcons[i].Pos, ref xDot, ref yDot);
+					Vector3D.Add(ref offset, ref vertIcons[i].Pos, out vertIcons[i].Pos);
 					ColorRgba.Multiply(ref vertIcons[i].Color, ref clr, out vertIcons[i].Color);
 				}
 			}
@@ -1237,30 +1237,30 @@ namespace Duality.Drawing
 					{
 						IconElement iconElem = elem as IconElement;
 						Icon icon = iconElem.IconIndex >= 0 && iconElem.IconIndex < this.icons.Length ? this.icons[iconElem.IconIndex] : new Icon();
-						Vector2 iconOffset = icon.offset;
-						Vector2 iconSize = icon.size;
-						Rect iconUvRect = icon.uvRect;
+						Vector2D iconOffset = icon.offset;
+						Vector2D iconSize = icon.size;
+						RectD iconUvRect = icon.uvRect;
 
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Pos.X = state.CurrentElemOffset.X + iconOffset.X;
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Pos.Y = state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y;
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Pos.X = (float)(state.CurrentElemOffset.X + iconOffset.X);
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Pos.Y = (float)(state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y);
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Pos.Z = 0;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].Color = state.Color;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 0].TexCoord = iconUvRect.TopLeft;
 
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Pos.X = state.CurrentElemOffset.X + iconSize.X + iconOffset.X;
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Pos.Y = state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y;
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Pos.X = (float)(state.CurrentElemOffset.X + iconSize.X + iconOffset.X);
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Pos.Y = (float)(state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y);
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Pos.Z = 0;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].Color = state.Color;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 1].TexCoord = iconUvRect.TopRight;
 
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Pos.X = state.CurrentElemOffset.X + iconSize.X + iconOffset.X;
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Pos.Y = state.CurrentElemOffset.Y + state.LineBaseLine + iconOffset.Y;
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Pos.X = (float)(state.CurrentElemOffset.X + iconSize.X + iconOffset.X);
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Pos.Y = (float)(state.CurrentElemOffset.Y + state.LineBaseLine + iconOffset.Y);
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Pos.Z = 0;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].Color = state.Color;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 2].TexCoord = iconUvRect.BottomRight;
 
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Pos.X = state.CurrentElemOffset.X + iconOffset.X;
-						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Pos.Y = state.CurrentElemOffset.Y + state.LineBaseLine + iconOffset.Y;
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Pos.X = (float)(state.CurrentElemOffset.X + iconOffset.X);
+						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Pos.Y = (float)(state.CurrentElemOffset.Y + state.LineBaseLine + iconOffset.Y);
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Pos.Z = 0;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].Color = state.Color;
 						this.vertIconsCache[state.CurrentElemIconVertexIndex + 3].TexCoord = iconUvRect.BottomLeft;
@@ -1276,14 +1276,14 @@ namespace Duality.Drawing
 
 			// Updating the metrics cache
 			{
-				Vector2 size = Vector2.Zero;
-				List<Rect> lineBounds = new List<Rect>(16);
-				List<Rect> elementBounds = new List<Rect>(this.elements.Length);
+				Vector2D size = Vector2D.Zero;
+				List<RectD> lineBounds = new List<RectD>(16);
+				List<RectD> elementBounds = new List<RectD>(this.elements.Length);
 
 				RenderState state = new RenderState(this);
 				Element elem;
-				Vector2 elemSize;
-				Vector2 elemOffset;
+				Vector2D elemSize;
+				Vector2D elemOffset;
 				int lastElemIndex = -1;
 				int lastLineIndex = 0;
 				bool elemIndexChanged = true;
@@ -1295,31 +1295,31 @@ namespace Duality.Drawing
 					{
 						TextElement textElem = elem as TextElement;
 						elemSize = state.Font.MeasureText(state.CurrentElemText);
-						elemOffset = new Vector2(state.CurrentElemOffset.X, state.CurrentElemOffset.Y + state.LineBaseLine - state.Font.Metrics.BaseLine);
+						elemOffset = new Vector2D(state.CurrentElemOffset.X, state.CurrentElemOffset.Y + state.LineBaseLine - state.Font.Metrics.BaseLine);
 					}
 					else if (elem is IconElement && this.icons != null)
 					{
 						IconElement iconElem = elem as IconElement;
 						bool iconValid = iconElem.IconIndex > 0 && iconElem.IconIndex < this.icons.Length;
-						elemSize = iconValid ? this.icons[iconElem.IconIndex].size : Vector2.Zero;
-						elemOffset = new Vector2(state.CurrentElemOffset.X, state.CurrentElemOffset.Y + state.LineBaseLine - elemSize.Y);
+						elemSize = iconValid ? this.icons[iconElem.IconIndex].size : Vector2D.Zero;
+						elemOffset = new Vector2D(state.CurrentElemOffset.X, state.CurrentElemOffset.Y + state.LineBaseLine - elemSize.Y);
 					}
 					else
 					{
-						elemSize = Vector2.Zero;
-						elemOffset = Vector2.Zero;
+						elemSize = Vector2D.Zero;
+						elemOffset = Vector2D.Zero;
 					}
-					hasBounds = elemSize != Vector2.Zero;
+					hasBounds = elemSize != Vector2D.Zero;
 
-					if (elemIndexChanged) elementBounds.Add(Rect.Empty);
-					if (hasBounds && elementBounds[elementBounds.Count - 1] == Rect.Empty)
-						elementBounds[elementBounds.Count - 1] = new Rect(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
+					if (elemIndexChanged) elementBounds.Add(RectD.Empty);
+					if (hasBounds && elementBounds[elementBounds.Count - 1] == RectD.Empty)
+						elementBounds[elementBounds.Count - 1] = new RectD(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
 					else if (hasBounds)
 						elementBounds[elementBounds.Count - 1] = elementBounds[elementBounds.Count - 1].ExpandedToContain(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
 				
-					if (lineChanged) lineBounds.Add(Rect.Empty);
-					if (hasBounds && lineBounds[lineBounds.Count - 1] == Rect.Empty)
-						lineBounds[lineBounds.Count - 1] = new Rect(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
+					if (lineChanged) lineBounds.Add(RectD.Empty);
+					if (hasBounds && lineBounds[lineBounds.Count - 1] == RectD.Empty)
+						lineBounds[lineBounds.Count - 1] = new RectD(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
 					else if (hasBounds)
 						lineBounds[lineBounds.Count - 1] = lineBounds[lineBounds.Count - 1].ExpandedToContain(elemOffset.X, elemOffset.Y, elemSize.X, elemSize.Y);
 
@@ -1341,7 +1341,7 @@ namespace Duality.Drawing
 		/// </summary>
 		/// <param name="text"></param>
 		/// <param name="target"></param>
-		public void RenderToBitmap(string text, PixelData target, float x = 0.0f, float y = 0.0f, PixelData icons = null)
+		public void RenderToBitmap(string text, PixelData target, double x = 0.0f, double y = 0.0f, PixelData icons = null)
 		{
 			// Rendering
 			int fontNum = this.fonts != null ? this.fonts.Length : 0;
@@ -1363,24 +1363,24 @@ namespace Duality.Drawing
 				{
 					IconElement iconElem = elem as IconElement;
 					Icon icon = iconElem.IconIndex >= 0 && iconElem.IconIndex < this.icons.Length ? this.icons[iconElem.IconIndex] : new Icon();
-					Vector2 iconSize = icon.size;
-					Vector2 iconOffset = icon.offset;
-					Rect iconUvRect = icon.uvRect;
-					Vector2 dataCoord = iconUvRect.Pos * icons.Size;
-					Vector2 dataSize = iconUvRect.Size * icons.Size;
+					Vector2D iconSize = icon.size;
+					Vector2D iconOffset = icon.offset;
+					RectD iconUvRect = icon.uvRect;
+					Vector2D dataCoord = iconUvRect.Pos * icons.Size;
+					Vector2D dataSize = iconUvRect.Size * icons.Size;
 					
 					PixelData iconLayer = icons.CloneSubImage(
-						MathF.RoundToInt(dataCoord.X), 
-						MathF.RoundToInt(dataCoord.Y),
-						MathF.RoundToInt(dataSize.X), 
-						MathF.RoundToInt(dataSize.Y));
+						MathD.RoundToInt(dataCoord.X), 
+						MathD.RoundToInt(dataCoord.Y),
+						MathD.RoundToInt(dataSize.X), 
+						MathD.RoundToInt(dataSize.Y));
 					iconLayer.Rescale(
-						MathF.RoundToInt(iconSize.X), 
-						MathF.RoundToInt(iconSize.Y));
+						MathD.RoundToInt(iconSize.X), 
+						MathD.RoundToInt(iconSize.Y));
 					iconLayer.DrawOnto(target,
 						BlendMode.Alpha,
-						MathF.RoundToInt(x + state.CurrentElemOffset.X + iconOffset.X), 
-						MathF.RoundToInt(y + state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y), 
+						MathD.RoundToInt(x + state.CurrentElemOffset.X + iconOffset.X), 
+						MathD.RoundToInt(y + state.CurrentElemOffset.Y + state.LineBaseLine - iconSize.Y + iconOffset.Y), 
 						iconLayer.Width, 
 						iconLayer.Height,
 						0, 

@@ -149,7 +149,7 @@ namespace FarseerPhysics.Dynamics.Contacts
 		// Nodes for connecting bodies.
 		internal ContactEdge NodeA = new ContactEdge();
 		internal ContactEdge NodeB = new ContactEdge();
-		public float TOI;
+		public double TOI;
 		internal int TOICount;
 		private ContactType _type;
 
@@ -203,7 +203,7 @@ namespace FarseerPhysics.Dynamics.Contacts
 		/// <summary>
 		/// Gets the world manifold.
 		/// </summary>
-		public void GetWorldManifold(out Vector2 normal, out FixedArray2<Vector2> points)
+		public void GetWorldManifold(out Vector2D normal, out FixedArray2<Vector2D> points)
 		{
 			Body bodyA = this.FixtureA.Body;
 			Body bodyB = this.FixtureB.Body;

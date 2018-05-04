@@ -43,30 +43,30 @@ namespace FarseerPhysics.Dynamics.Joints
 	/// </summary>
 	public class RopeJoint : Joint
 	{
-		public Vector2 LocalAnchorA;
-		public Vector2 LocalAnchorB;
+		public Vector2D LocalAnchorA;
+		public Vector2D LocalAnchorB;
 
-		private float _impulse;
-		private float _length;
+		private double _impulse;
+		private double _length;
 
-		private float _mass;
-		private Vector2 _rA, _rB;
+		private double _mass;
+		private Vector2D _rA, _rB;
 		private LimitState _state;
-		private Vector2 _u;
+		private Vector2D _u;
 
 		internal RopeJoint()
 		{
 			this.JointType = JointType.Rope;
 		}
 
-		public RopeJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB)
+		public RopeJoint(Body bodyA, Body bodyB, Vector2D localAnchorA, Vector2D localAnchorB)
 			: base(bodyA, bodyB)
 		{
 			this.JointType = JointType.Rope;
 			this.LocalAnchorA = localAnchorA;
 			this.LocalAnchorB = localAnchorB;
 
-			Vector2 d = this.WorldAnchorB - this.WorldAnchorA;
+			Vector2D d = this.WorldAnchorB - this.WorldAnchorA;
 			this.MaxLength = d.Length;
 
 			this._mass = 0.0f;
@@ -76,30 +76,30 @@ namespace FarseerPhysics.Dynamics.Joints
 		}
 
 		/// Get the maximum length of the rope.
-		public float MaxLength { get; set; }
+		public double MaxLength { get; set; }
 
 		public LimitState State
 		{
 			get { return this._state; }
 		}
 
-		public override sealed Vector2 WorldAnchorA
+		public override sealed Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.GetWorldPoint(this.LocalAnchorA); }
 		}
 
-		public override sealed Vector2 WorldAnchorB
+		public override sealed Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.GetWorldPoint(this.LocalAnchorB); }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
 		}
 
-		public override Vector2 GetReactionForce(float invDt)
+		public override Vector2D GetReactionForce(double invDt)
 		{
 			return (invDt * this._impulse) * this._u;
 		}
 
-		public override float GetReactionTorque(float invDt)
+		public override double GetReactionTorque(double invDt)
 		{
 			return 0;
 		}
@@ -123,7 +123,7 @@ namespace FarseerPhysics.Dynamics.Joints
 
 			this._length = this._u.Length;
 
-			float C = this._length - this.MaxLength;
+			double C = this._length - this.MaxLength;
 			if (C > 0.0f)
 			{
 				this._state = LimitState.AtUpper;
@@ -139,16 +139,16 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 			else
 			{
-				this._u = Vector2.Zero;
+				this._u = Vector2D.Zero;
 				this._mass = 0.0f;
 				this._impulse = 0.0f;
 				return;
 			}
 
 			// Compute effective mass.
-			float crA = MathUtils.Cross(this._rA, this._u);
-			float crB = MathUtils.Cross(this._rB, this._u);
-			float invMass = bA.InvMass + bA.InvI * crA * crA + bB.InvMass + bB.InvI * crB * crB;
+			double crA = MathUtils.Cross(this._rA, this._u);
+			double crB = MathUtils.Cross(this._rB, this._u);
+			double invMass = bA.InvMass + bA.InvI * crA * crA + bB.InvMass + bB.InvI * crB * crB;
 
 			this._mass = invMass != 0.0f ? 1.0f / invMass : 0.0f;
 
@@ -158,7 +158,7 @@ namespace FarseerPhysics.Dynamics.Joints
 				// Scale the impulse to support a variable time step.
 				this._impulse *= step.dtRatio;
 
-				Vector2 P = this._impulse * this._u;
+				Vector2D P = this._impulse * this._u;
 				bA.LinearVelocity -= bA.InvMass * P;
 				bA.AngularVelocity -= bA.InvI * MathUtils.Cross(this._rA, P);
 				bB.LinearVelocity += bB.InvMass * P;
@@ -177,10 +177,10 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bB = this.BodyB;
 
 			// Cdot = dot(u, v + cross(w, r))
-			Vector2 vA = bA.LinearVelocity + MathUtils.Cross(bA.AngularVelocity, this._rA);
-			Vector2 vB = bB.LinearVelocity + MathUtils.Cross(bB.AngularVelocity, this._rB);
-			float C = this._length - this.MaxLength;
-			float Cdot = Vector2.Dot(this._u, vB - vA);
+			Vector2D vA = bA.LinearVelocity + MathUtils.Cross(bA.AngularVelocity, this._rA);
+			Vector2D vB = bB.LinearVelocity + MathUtils.Cross(bB.AngularVelocity, this._rB);
+			double C = this._length - this.MaxLength;
+			double Cdot = Vector2D.Dot(this._u, vB - vA);
 
 			// Predictive constraint.
 			if (C < 0.0f)
@@ -188,12 +188,12 @@ namespace FarseerPhysics.Dynamics.Joints
 				Cdot += step.inv_dt * C;
 			}
 
-			float impulse = -this._mass * Cdot;
-			float oldImpulse = this._impulse;
+			double impulse = -this._mass * Cdot;
+			double oldImpulse = this._impulse;
 			this._impulse = Math.Min(0.0f, this._impulse + impulse);
 			impulse = this._impulse - oldImpulse;
 
-			Vector2 P = impulse * this._u;
+			Vector2D P = impulse * this._u;
 			bA.LinearVelocity -= bA.InvMass * P;
 			bA.AngularVelocity -= bA.InvI * MathUtils.Cross(this._rA, P);
 			bB.LinearVelocity += bB.InvMass * P;
@@ -211,21 +211,21 @@ namespace FarseerPhysics.Dynamics.Joints
 			Transform xf2;
 			bB.GetTransform(out xf2);
 
-			Vector2 rA = MathUtils.Multiply(ref xf1.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xf2.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xf1.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xf2.R, this.LocalAnchorB - bB.LocalCenter);
 
-			Vector2 u = bB.Sweep.C + rB - bA.Sweep.C - rA;
+			Vector2D u = bB.Sweep.C + rB - bA.Sweep.C - rA;
 
 
-			float length = u.Length;
+			double length = u.Length;
 			u.Normalize();
 
-			float C = length - this.MaxLength;
+			double C = length - this.MaxLength;
 
 			C = MathUtils.Clamp(C, 0.0f, Settings.MaxLinearCorrection);
 
-			float impulse = -this._mass * C;
-			Vector2 P = impulse * u;
+			double impulse = -this._mass * C;
+			Vector2D P = impulse * u;
 
 			bA.Sweep.C -= bA.InvMass * P;
 			bA.Sweep.A -= bA.InvI * MathUtils.Cross(rA, P);

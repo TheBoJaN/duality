@@ -26,8 +26,8 @@ namespace DualStickSpaceShooter
 			Transform transform = this.GameObj.Transform;
 			SpriteRenderer sprite = this.GameObj.GetComponent<SpriteRenderer>();
 
-			float brightness = MathF.Clamp(500.0f / MathF.Max(1.0f, 500.0f + transform.Pos.Z), 0.0f, 1.0f);
-			sprite.ColorTint = (baseColor * brightness).WithAlpha(this.baseColor.A);
+			float brightness = MathF.Clamp(500.0f / MathF.Max(1.0f, 500.0f + (float)transform.Pos.Z), 0.0f, 1.0f);
+			sprite.ColorTint = (this.baseColor * brightness).WithAlpha(this.baseColor.A);
 		}
 	}
 }

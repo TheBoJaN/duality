@@ -18,7 +18,7 @@ namespace Duality.Components.Physics
 	{
 		[DontSerialize]
 		private List<Fixture> fixtures;
-		private List<Vector2[]> convexPolygons;
+		private List<Vector2D[]> convexPolygons;
 
 
 		/// <summary>
@@ -27,7 +27,7 @@ namespace Duality.Components.Physics
 		/// returned values.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public IReadOnlyList<Vector2[]> ConvexPolygons
+		public IReadOnlyList<Vector2D[]> ConvexPolygons
 		{
 			get { return this.convexPolygons; }
 		}
@@ -52,7 +52,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="vertices"></param>
 		/// <param name="density"></param>
-		public PolyShapeInfo(Vector2[] vertices, float density) : base(vertices)
+		public PolyShapeInfo(Vector2D[] vertices, double density) : base(vertices)
 		{
 			this.density = density;
 		}
@@ -93,7 +93,7 @@ namespace Duality.Components.Physics
 		{
 			if (this.convexPolygons != null && this.convexPolygons.Count > 0) return;
 			if (this.convexPolygons == null)
-				this.convexPolygons = new List<Vector2[]>();
+				this.convexPolygons = new List<Vector2D[]>();
 
 			// No valid polygon defined at all: Nothing to generate.
 			if (this.vertices == null || this.vertices.Length < 3) return;
@@ -103,7 +103,7 @@ namespace Duality.Components.Physics
 			// Do not allow neighbor vertices that are too close to each other.
 			for (int i = 1; i < fullPolygon.Count; i++)
 			{
-				float distance = (fullPolygon[i - 1] - fullPolygon[i]).Length;
+				double distance = (fullPolygon[i - 1] - fullPolygon[i]).Length;
 				if (distance < 0.01f) return;
 		}
 
@@ -144,8 +144,8 @@ namespace Duality.Components.Physics
 				if (body != null)
 				{
 					this.Parent.CheckValidTransform();
-					float scale = this.ParentScale;
-					foreach (Vector2[] polygon in this.convexPolygons)
+					double scale = this.ParentScale;
+					foreach (Vector2D[] polygon in this.convexPolygons)
 					{
 						Vertices farseerPolygon = VerticesToFarseer(polygon, scale);
 						Fixture fixture = new Fixture(
@@ -161,14 +161,14 @@ namespace Duality.Components.Physics
 			return this.fixtures.Count > 0;
 		}
 
-		private static Vector2[] VerticesToDuality(Vertices vertices)
+		private static Vector2D[] VerticesToDuality(Vertices vertices)
 			{
-			Vector2[] transformed = new Vector2[vertices.Count];
+			Vector2D[] transformed = new Vector2D[vertices.Count];
 			for (int i = 0; i < transformed.Length; i++)
 				transformed[i] = PhysicsUnit.LengthToDuality * vertices[i];
 			return transformed;
 			}
-		private static Vertices VerticesToFarseer(Vector2[] vertices, float scale)
+		private static Vertices VerticesToFarseer(Vector2D[] vertices, double scale)
 		{
 			Vertices transformed = new Vertices(vertices.Length);
 			for (int i = 0; i < vertices.Length; i++)

@@ -19,7 +19,7 @@ namespace FarseerPhysics.Common.ConvexHull
 		{
 			P.Sort(new PointComparer());
 
-			Vector2[] H = new Vector2[P.Count];
+			Vector2D[] H = new Vector2D[P.Count];
 			Vertices res = new Vertices();
 
 			int n = P.Count;
@@ -29,7 +29,7 @@ namespace FarseerPhysics.Common.ConvexHull
 
 			// Get the indices of points with min x-coord and min|max y-coord
 			int minmin = 0, minmax;
-			float xmin = P[0].X;
+			double xmin = P[0].X;
 			for (i = 1; i < n; i++)
 				if (P[i].X != xmin) break;
 			minmax = i - 1;
@@ -53,7 +53,7 @@ namespace FarseerPhysics.Common.ConvexHull
 
 			// Get the indices of points with max x-coord and min|max y-coord
 			int maxmin, maxmax = n - 1;
-			float xmax = P[n - 1].X;
+			double xmax = P[n - 1].X;
 			for (i = n - 2; i >= 0; i--)
 				if (P[i].X != xmax) break;
 			maxmin = i + 1;
@@ -112,9 +112,9 @@ namespace FarseerPhysics.Common.ConvexHull
 
 		#region Nested type: PointComparer
 
-		public class PointComparer : Comparer<Vector2>
+		public class PointComparer : Comparer<Vector2D>
 		{
-			public override int Compare(Vector2 a, Vector2 b)
+			public override int Compare(Vector2D a, Vector2D b)
 			{
 				int f = a.X.CompareTo(b.X);
 				return f != 0 ? f : a.Y.CompareTo(b.Y);

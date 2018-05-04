@@ -34,17 +34,17 @@ namespace FarseerPhysics.Common
 		/// <summary>
 		/// Center of terrain in world units.
 		/// </summary>
-		public Vector2 Center;
+		public Vector2D Center;
 
 		/// <summary>
 		/// Width of terrain in world units.
 		/// </summary>
-		public float Width;
+		public double Width;
 
 		/// <summary>
 		/// Height of terrain in world units.
 		/// </summary>
-		public float Height;
+		public double Height;
 
 		/// <summary>
 		/// Points per each world unit used to define the terrain in the point cloud.
@@ -83,12 +83,12 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		private List<Body>[,] _bodyMap;
 
-		private float _localWidth;
-		private float _localHeight;
+		private double _localWidth;
+		private double _localHeight;
 		private int _xnum;
 		private int _ynum;
 		private AABB _dirtyArea;
-		private Vector2 _topLeft;
+		private Vector2D _topLeft;
 
 		public MSTerrain(World world, AABB area)
 		{
@@ -104,7 +104,7 @@ namespace FarseerPhysics.Common
 		public void Initialize()
 		{
 			// find top left of terrain in world space
-			this._topLeft = new Vector2(this.Center.X - (this.Width * 0.5f), this.Center.Y - (-this.Height * 0.5f));
+			this._topLeft = new Vector2D(this.Center.X - (this.Width * 0.5f), this.Center.Y - (-this.Height * 0.5f));
 
 			// convert the terrains size to a point cloud size
 			this._localWidth = this.Width * this.PointsPerUnit;
@@ -125,7 +125,7 @@ namespace FarseerPhysics.Common
 			this._bodyMap = new List<Body>[this._xnum, this._ynum];
 
 			// make sure to mark the dirty area to an infinitely small box
-			this._dirtyArea = new AABB(new Vector2(float.MaxValue, float.MaxValue), new Vector2(float.MinValue, float.MinValue));
+			this._dirtyArea = new AABB(new Vector2D(double.MaxValue, double.MaxValue), new Vector2D(double.MinValue, double.MinValue));
 		}
 
 		/// <summary>
@@ -134,7 +134,7 @@ namespace FarseerPhysics.Common
 		/// <param name="texture">Texture to apply.</param>
 		/// <param name="position">Top left position of the texture relative to the terrain.</param>
 		/// <param name="tester">Delegate method used to determine what colors should be included in the terrain.</param>
-		public void ApplyTexture(int texture, Vector2 position, TerrainTester tester)
+		public void ApplyTexture(int texture, Vector2D position, TerrainTester tester)
 		{
 			throw new System.NotImplementedException();
 			//Color[] colorData = new Color[texture.Width * texture.Height];
@@ -184,7 +184,7 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		/// <param name="position">Top left position of the texture relative to the terrain.</param>
 		/// <param name="data"></param>
-		public void ApplyData(sbyte[,] data, Vector2 position)
+		public void ApplyData(sbyte[,] data, Vector2D position)
 		{
 			for (int y = (int)position.Y; y < data.GetUpperBound(1) + (int)position.Y; y++)
 			{
@@ -254,11 +254,11 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		/// <param name="location">World location to modify. Automatically clipped.</param>
 		/// <param name="value">-1 = inside terrain, 1 = outside terrain</param>
-		public void ModifyTerrain(Vector2 location, sbyte value)
+		public void ModifyTerrain(Vector2D location, sbyte value)
 		{
 			// find local position
 			// make position local to map space
-			Vector2 p = location - this._topLeft;
+			Vector2D p = location - this._topLeft;
 
 			// find map position for each axis
 			p.X = p.X * this._localWidth / this.Width;
@@ -312,21 +312,21 @@ namespace FarseerPhysics.Common
 				}
 			}
 
-			this._dirtyArea = new AABB(new Vector2(float.MaxValue, float.MaxValue), new Vector2(float.MinValue, float.MinValue));
+			this._dirtyArea = new AABB(new Vector2D(double.MaxValue, double.MaxValue), new Vector2D(double.MinValue, double.MinValue));
 		}
 
 		private void GenerateTerrain(int gx, int gy)
 		{
-			float ax = gx * this.CellSize;
-			float ay = gy * this.CellSize;
+			double ax = gx * this.CellSize;
+			double ay = gy * this.CellSize;
 
-			List<Vertices> polys = MarchingSquares.DetectSquares(new AABB(new Vector2(ax, ay), new Vector2(ax + this.CellSize, ay + this.CellSize)), this.SubCellSize, this.SubCellSize, this._terrainMap, this.Iterations, true);
+			List<Vertices> polys = MarchingSquares.DetectSquares(new AABB(new Vector2D(ax, ay), new Vector2D(ax + this.CellSize, ay + this.CellSize)), this.SubCellSize, this.SubCellSize, this._terrainMap, this.Iterations, true);
 			if (polys.Count == 0) return;
 
 			this._bodyMap[gx, gy] = new List<Body>();
 
 			// create the scale vector
-			Vector2 scale = new Vector2(1f / this.PointsPerUnit, 1f / -this.PointsPerUnit);
+			Vector2D scale = new Vector2D(1f / this.PointsPerUnit, 1f / -this.PointsPerUnit);
 
 			// create physics object for this grid cell
 			foreach (Vertices item in polys)

@@ -40,22 +40,22 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <summary>
 		/// Optional adjacent vertices. These are used for smooth collision.
 		/// </summary>
-		public Vector2 Vertex0;
+		public Vector2D Vertex0;
 
 		/// <summary>
 		/// Optional adjacent vertices. These are used for smooth collision.
 		/// </summary>
-		public Vector2 Vertex3;
+		public Vector2D Vertex3;
 
 		/// <summary>
 		/// Edge start vertex
 		/// </summary>
-		private Vector2 _vertex1;
+		private Vector2D _vertex1;
 
 		/// <summary>
 		/// Edge end vertex
 		/// </summary>
-		private Vector2 _vertex2;
+		private Vector2D _vertex2;
 
 		internal EdgeShape()
 			: base(0)
@@ -64,7 +64,7 @@ namespace FarseerPhysics.Collision.Shapes
 			this._radius = Settings.PolygonRadius;
 		}
 
-		public EdgeShape(Vector2 start, Vector2 end)
+		public EdgeShape(Vector2D start, Vector2D end)
 			: base(0)
 		{
 			this.ShapeType = ShapeType.Edge;
@@ -80,7 +80,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <summary>
 		/// These are the edge vertices
 		/// </summary>
-		public Vector2 Vertex1
+		public Vector2D Vertex1
 		{
 			get { return this._vertex1; }
 			set
@@ -93,7 +93,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <summary>
 		/// These are the edge vertices
 		/// </summary>
-		public Vector2 Vertex2
+		public Vector2D Vertex2
 		{
 			get { return this._vertex2; }
 			set
@@ -108,7 +108,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// </summary>
 		/// <param name="start">The start.</param>
 		/// <param name="end">The end.</param>
-		public void Set(Vector2 start, Vector2 end)
+		public void Set(Vector2D start, Vector2D end)
 		{
 			this._vertex1 = start;
 			this._vertex2 = end;
@@ -139,7 +139,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="transform">The shape world transform.</param>
 		/// <param name="point">a point in world coordinates.</param>
 		/// <returns>True if the point is inside the shape</returns>
-		public override bool TestPoint(ref Transform transform, ref Vector2 point)
+		public override bool TestPoint(ref Transform transform, ref Vector2D point)
 		{
 			return false;
 		}
@@ -163,45 +163,45 @@ namespace FarseerPhysics.Collision.Shapes
 			output = new RayCastOutput();
 
 			// Put the ray into the edge's frame of reference.
-			Vector2 p1 = MathUtils.MultiplyT(ref transform.R, input.Point1 - transform.Position);
-			Vector2 p2 = MathUtils.MultiplyT(ref transform.R, input.Point2 - transform.Position);
-			Vector2 d = p2 - p1;
+			Vector2D p1 = MathUtils.MultiplyT(ref transform.R, input.Point1 - transform.Position);
+			Vector2D p2 = MathUtils.MultiplyT(ref transform.R, input.Point2 - transform.Position);
+			Vector2D d = p2 - p1;
 
-			Vector2 v1 = this._vertex1;
-			Vector2 v2 = this._vertex2;
-			Vector2 e = v2 - v1;
-			Vector2 normal = new Vector2(e.Y, -e.X);
+			Vector2D v1 = this._vertex1;
+			Vector2D v2 = this._vertex2;
+			Vector2D e = v2 - v1;
+			Vector2D normal = new Vector2D(e.Y, -e.X);
 			normal.Normalize();
 
 			// q = p1 + t * d
 			// dot(normal, q - v1) = 0
 			// dot(normal, p1 - v1) + t * dot(normal, d) = 0
-			float numerator = Vector2.Dot(normal, v1 - p1);
-			float denominator = Vector2.Dot(normal, d);
+			double numerator = Vector2D.Dot(normal, v1 - p1);
+			double denominator = Vector2D.Dot(normal, d);
 
 			if (denominator == 0.0f)
 			{
 				return false;
 			}
 
-			float t = numerator / denominator;
+			double t = numerator / denominator;
 			if (t < 0.0f || 1.0f < t)
 			{
 				return false;
 			}
 
-			Vector2 q = p1 + t * d;
+			Vector2D q = p1 + t * d;
 
 			// q = v1 + s * r
 			// s = dot(q - v1, r) / dot(r, r)
-			Vector2 r = v2 - v1;
-			float rr = Vector2.Dot(r, r);
+			Vector2D r = v2 - v1;
+			double rr = Vector2D.Dot(r, r);
 			if (rr == 0.0f)
 			{
 				return false;
 			}
 
-			float s = Vector2.Dot(q - v1, r) / rr;
+			double s = Vector2D.Dot(q - v1, r) / rr;
 			if (s < 0.0f || 1.0f < s)
 			{
 				return false;
@@ -227,13 +227,13 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="childIndex">The child shape index.</param>
 		public override void ComputeAABB(out AABB aabb, ref Transform transform, int childIndex)
 		{
-			Vector2 v1 = MathUtils.Multiply(ref transform, this._vertex1);
-			Vector2 v2 = MathUtils.Multiply(ref transform, this._vertex2);
+			Vector2D v1 = MathUtils.Multiply(ref transform, this._vertex1);
+			Vector2D v2 = MathUtils.Multiply(ref transform, this._vertex2);
 
-			Vector2 lower = Vector2.Min(v1, v2);
-			Vector2 upper = Vector2.Max(v1, v2);
+			Vector2D lower = Vector2D.Min(v1, v2);
+			Vector2D upper = Vector2D.Max(v1, v2);
 
-			Vector2 r = new Vector2(this.Radius, this.Radius);
+			Vector2D r = new Vector2D(this.Radius, this.Radius);
 			aabb.LowerBound = lower - r;
 			aabb.UpperBound = upper + r;
 		}
@@ -247,9 +247,9 @@ namespace FarseerPhysics.Collision.Shapes
 			this.MassData.Centroid = 0.5f * (this._vertex1 + this._vertex2);
 		}
 
-		public override float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc)
+		public override double ComputeSubmergedArea(Vector2D normal, double offset, Transform xf, out Vector2D sc)
 		{
-			sc = Vector2.Zero;
+			sc = Vector2D.Zero;
 			return 0;
 		}
 

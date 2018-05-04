@@ -19,25 +19,25 @@ namespace FarseerPhysics.Common
 		/// <summary>
 		/// All the points that makes up the curve
 		/// </summary>
-		public List<Vector2> ControlPoints;
+		public List<Vector2D> ControlPoints;
 
-		private float _deltaT;
+		private double _deltaT;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Path"/> class.
 		/// </summary>
 		public Path()
 		{
-			this.ControlPoints = new List<Vector2>();
+			this.ControlPoints = new List<Vector2D>();
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Path"/> class.
 		/// </summary>
 		/// <param name="vertices">The vertices to created the path from.</param>
-		public Path(Vector2[] vertices)
+		public Path(Vector2D[] vertices)
 		{
-			this.ControlPoints = new List<Vector2>(vertices.Length);
+			this.ControlPoints = new List<Vector2D>(vertices.Length);
 
 			for (int i = 0; i < vertices.Length; i++)
 			{
@@ -49,9 +49,9 @@ namespace FarseerPhysics.Common
 		/// Initializes a new instance of the <see cref="Path"/> class.
 		/// </summary>
 		/// <param name="vertices">The vertices to created the path from.</param>
-		public Path(IList<Vector2> vertices)
+		public Path(IList<Vector2D> vertices)
 		{
-			this.ControlPoints = new List<Vector2>(vertices.Count);
+			this.ControlPoints = new List<Vector2D>(vertices.Count);
 			for (int i = 0; i < vertices.Count; i++)
 			{
 				Add(vertices[i]);
@@ -96,7 +96,7 @@ namespace FarseerPhysics.Common
 		/// Translates the control points by the specified vector.
 		/// </summary>
 		/// <param name="vector">The vector.</param>
-		public void Translate(ref Vector2 vector)
+		public void Translate(ref Vector2D vector)
 		{
 			for (int i = 0; i < this.ControlPoints.Count; i++)
 				this.ControlPoints[i] = this.ControlPoints[i] + vector;
@@ -106,7 +106,7 @@ namespace FarseerPhysics.Common
 		/// Scales the control points by the specified vector.
 		/// </summary>
 		/// <param name="value">The Value.</param>
-		public void Scale(ref Vector2 value)
+		public void Scale(ref Vector2D value)
 		{
 			for (int i = 0; i < this.ControlPoints.Count; i++)
 				this.ControlPoints[i] = this.ControlPoints[i] * value;
@@ -116,13 +116,13 @@ namespace FarseerPhysics.Common
 		/// Rotate the control points by the defined value in radians.
 		/// </summary>
 		/// <param name="value">The amount to rotate by in radians.</param>
-		public void Rotate(float value)
+		public void Rotate(double value)
 		{
-			Matrix4 rotationMatrix;
-			Matrix4.CreateRotationZ(value, out rotationMatrix);
+			Matrix4D rotationMatrix;
+			Matrix4D.CreateRotationZ(value, out rotationMatrix);
 
 			for (int i = 0; i < this.ControlPoints.Count; i++)
-				this.ControlPoints[i] = Vector2.Transform(this.ControlPoints[i], rotationMatrix);
+				this.ControlPoints[i] = Vector2D.Transform(this.ControlPoints[i], rotationMatrix);
 		}
 
 		public override string ToString()
@@ -150,9 +150,9 @@ namespace FarseerPhysics.Common
 		{
 			Vertices verts = new Vertices();
 
-			float timeStep = 1f / divisions;
+			double timeStep = 1f / divisions;
 
-			for (float i = 0; i < 1f; i += timeStep)
+			for (double i = 0; i < 1f; i += timeStep)
 			{
 				verts.Add(GetPosition(i));
 			}
@@ -160,9 +160,9 @@ namespace FarseerPhysics.Common
 			return verts;
 		}
 
-		public Vector2 GetPosition(float time)
+		public Vector2D GetPosition(double time)
 		{
-			Vector2 temp;
+			Vector2D temp;
 
 			if (this.ControlPoints.Count < 2)
 				throw new Exception("You need at least 2 control points to calculate a position.");
@@ -190,7 +190,7 @@ namespace FarseerPhysics.Common
 				else if (p3 >= this.ControlPoints.Count - 1) p3 = p3 - (this.ControlPoints.Count - 1);
 
 				// relative time
-				float lt = (time - this._deltaT * p) / this._deltaT;
+				double lt = (time - this._deltaT * p) / this._deltaT;
 
 				temp = CatmullRom(this.ControlPoints[p0], this.ControlPoints[p1], this.ControlPoints[p2], this.ControlPoints[p3], lt);
 
@@ -215,7 +215,7 @@ namespace FarseerPhysics.Common
 				else if (p3 >= this.ControlPoints.Count - 1) p3 = this.ControlPoints.Count - 1;
 
 				// relative time
-				float lt = (time - this._deltaT * p) / this._deltaT;
+				double lt = (time - this._deltaT * p) / this._deltaT;
 
 				temp = CatmullRom(this.ControlPoints[p0], this.ControlPoints[p1], this.ControlPoints[p2], this.ControlPoints[p3], lt);
 			}
@@ -228,16 +228,16 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		/// <param name="time">The time</param>
 		/// <returns>The normal.</returns>
-		public Vector2 GetPositionNormal(float time)
+		public Vector2D GetPositionNormal(double time)
 		{
-			float offsetTime = time + 0.0001f;
+			double offsetTime = time + 0.0001f;
 
-			Vector2 a = GetPosition(time);
-			Vector2 b = GetPosition(offsetTime);
+			Vector2D a = GetPosition(time);
+			Vector2D b = GetPosition(offsetTime);
 
-			Vector2 output, temp;
+			Vector2D output, temp;
 
-			Vector2.Subtract(ref a, ref b, out temp);
+			Vector2D.Subtract(ref a, ref b, out temp);
 
 			output.X = -temp.Y;
 			output.Y = temp.X;
@@ -247,13 +247,13 @@ namespace FarseerPhysics.Common
 			return output;
 		}
 
-		public void Add(Vector2 point)
+		public void Add(Vector2D point)
 		{
 			this.ControlPoints.Add(point);
 			this._deltaT = 1f / (this.ControlPoints.Count - 1);
 		}
 
-		public void Remove(Vector2 point)
+		public void Remove(Vector2D point)
 		{
 			this.ControlPoints.Remove(point);
 			this._deltaT = 1f / (this.ControlPoints.Count - 1);
@@ -265,10 +265,10 @@ namespace FarseerPhysics.Common
 			this._deltaT = 1f / (this.ControlPoints.Count - 1);
 		}
 
-		public float GetLength()
+		public double GetLength()
 		{
-			List<Vector2> verts = GetVertices(this.ControlPoints.Count * 25);
-			float length = 0;
+			List<Vector2D> verts = GetVertices(this.ControlPoints.Count * 25);
+			double length = 0;
 
 			for (int i = 1; i < verts.Count; i++)
 			{
@@ -281,18 +281,18 @@ namespace FarseerPhysics.Common
 			return length;
 		}
 
-		public List<Vector3> SubdivideEvenly(int divisions)
+		public List<Vector3D> SubdivideEvenly(int divisions)
 		{
-			List<Vector3> verts = new List<Vector3>();
+			List<Vector3D> verts = new List<Vector3D>();
 
-			float length = GetLength();
+			double length = GetLength();
 
-			float deltaLength = length / divisions + 0.001f;
-			float t = 0.000f;
+			double deltaLength = length / divisions + 0.001f;
+			double t = 0.000f;
 
 			// we always start at the first control point
-			Vector2 start = this.ControlPoints[0];
-			Vector2 end = GetPosition(t);
+			Vector2D start = this.ControlPoints[0];
+			Vector2D end = GetPosition(t);
 
 			// increment t until we are at half the distance
 			while (deltaLength * 0.5f >= (start - end).Length)
@@ -309,10 +309,10 @@ namespace FarseerPhysics.Common
 			// for each box
 			for (int i = 1; i < divisions; i++)
 			{
-				Vector2 normal = GetPositionNormal(t);
-				float angle = (float)Math.Atan2(normal.Y, normal.X);
+				Vector2D normal = GetPositionNormal(t);
+				double angle = (double)Math.Atan2(normal.Y, normal.X);
 
-				verts.Add(new Vector3(end, angle));
+				verts.Add(new Vector3D(end, angle));
 
 				// until we reach the correct distance down the curve
 				while (deltaLength >= (start - end).Length)
@@ -331,11 +331,11 @@ namespace FarseerPhysics.Common
 			return verts;
 		}
 
-		internal static Vector2 CatmullRom(Vector2 value1, Vector2 value2, Vector2 value3, Vector2 value4, float amount)
+		internal static Vector2D CatmullRom(Vector2D value1, Vector2D value2, Vector2D value3, Vector2D value4, double amount)
 		{
-			Vector2 vector;
-			float num = amount * amount;
-			float num2 = amount * num;
+			Vector2D vector;
+			double num = amount * amount;
+			double num2 = amount * num;
 			vector.X = 0.5f * ((((2f * value2.X) + ((-value1.X + value3.X) * amount)) + (((((2f * value1.X) - (5f * value2.X)) + (4f * value3.X)) - value4.X) * num)) + ((((-value1.X + (3f * value2.X)) - (3f * value3.X)) + value4.X) * num2));
 			vector.Y = 0.5f * ((((2f * value2.Y) + ((-value1.Y + value3.Y) * amount)) + (((((2f * value1.Y) - (5f * value2.Y)) + (4f * value3.Y)) - value4.Y) * num)) + ((((-value1.Y + (3f * value2.Y)) - (3f * value3.Y)) + value4.Y) * num2));
 			return vector;

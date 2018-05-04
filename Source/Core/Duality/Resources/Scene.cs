@@ -25,11 +25,11 @@ namespace Duality.Resources
 	[EditorHintImage(CoreResNames.ImageScene)]
 	public sealed class Scene : Resource
 	{
-		private const float PhysicsAccStart = Time.MillisecondsPerFrame;
+		private const double PhysicsAccStart = Time.MillisecondsPerFrame;
 
 
-		private static World               physicsWorld      = new World(Vector2.Zero);
-		private static float               physicsAcc        = 0.0f;
+		private static World               physicsWorld      = new World(Vector2D.Zero);
+		private static double               physicsAcc        = 0.0f;
 		private static bool                physicsLowFps     = false;
 		private static ContentRef<Scene>   current           = new Scene();
 		private static bool                curAutoGen        = false;
@@ -43,7 +43,7 @@ namespace Duality.Resources
 		/// [GET] When using fixed-timestep physics, the alpha value [0.0 - 1.0] indicates how
 		/// complete the next step is. This is used for linear interpolation inbetween fixed physics steps.
 		/// </summary>
-		public static float PhysicsAlpha
+		public static double PhysicsAlpha
 		{
 			get { return physicsAcc / Time.MillisecondsPerFrame; }
 		}
@@ -376,7 +376,7 @@ namespace Duality.Resources
 			public TimeCounter Profiler;
 		}
 
-		private Vector2                     globalGravity      = Vector2.UnitY * 33.0f;
+		private Vector2D                     globalGravity      = Vector2D.UnitY * 33.0f;
 		private IRendererVisibilityStrategy visibilityStrategy = new DefaultRendererVisibilityStrategy();
 		private GameObject[]                serializeObj       = null;
 
@@ -406,7 +406,7 @@ namespace Duality.Resources
 		/// <summary>
 		/// [GET / SET] Global gravity force that is applied to all objects that obey the laws of physics.
 		/// </summary>
-		public Vector2 GlobalGravity
+		public Vector2D GlobalGravity
 		{
 			get { return this.globalGravity; }
 			set
@@ -490,7 +490,7 @@ namespace Duality.Resources
 		/// </param>
 		/// <param name="viewportRect">The viewport to which will be rendered.</param>
 		/// <param name="imageSize">Target size of the rendered image before adjusting it to fit the specified viewport.</param>
-		internal void Render(ContentRef<RenderTarget> target, Rect viewportRect, Vector2 imageSize)
+		internal void Render(ContentRef<RenderTarget> target, Rect viewportRect, Vector2D imageSize)
 		{
 			if (!this.IsCurrent) throw new InvalidOperationException("Can't render non-current Scene!");
 			switchLock++;

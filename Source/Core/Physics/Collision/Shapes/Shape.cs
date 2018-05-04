@@ -37,22 +37,22 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <summary>
 		/// The area of the shape
 		/// </summary>
-		public float Area;
+		public double Area;
 
 		/// <summary>
 		/// The position of the shape's centroid relative to the shape's origin.
 		/// </summary>
-		public Vector2 Centroid;
+		public Vector2D Centroid;
 
 		/// <summary>
 		/// The rotational inertia of the shape about the local origin.
 		/// </summary>
-		public float Inertia;
+		public double Inertia;
 
 		/// <summary>
 		/// The mass of the shape, usually in kilograms.
 		/// </summary>
-		public float Mass;
+		public double Mass;
 
 		#region IEquatable<MassData> Members
 
@@ -115,10 +115,10 @@ namespace FarseerPhysics.Collision.Shapes
 		public MassData MassData;
 		public int ShapeId;
 
-		internal float _density;
-		internal float _radius;
+		internal double _density;
+		internal double _radius;
 
-		protected Shape(float density)
+		protected Shape(double density)
 		{
 			this._density = density;
 			this.ShapeType = ShapeType.Unknown;
@@ -141,7 +141,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// Gets or sets the density.
 		/// </summary>
 		/// <value>The density.</value>
-		public float Density
+		public double Density
 		{
 			get { return this._density; }
 			set
@@ -154,7 +154,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <summary>
 		/// Radius of the Shape
 		/// </summary>
-		public float Radius
+		public double Radius
 		{
 			get { return this._radius; }
 			set
@@ -176,7 +176,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="transform">The shape world transform.</param>
 		/// <param name="point">a point in world coordinates.</param>
 		/// <returns>True if the point is inside the shape</returns>
-		public abstract bool TestPoint(ref Transform transform, ref Vector2 point);
+		public abstract bool TestPoint(ref Transform transform, ref Vector2D point);
 
 		/// <summary>
 		/// Cast a ray against a child shape.
@@ -217,6 +217,6 @@ namespace FarseerPhysics.Collision.Shapes
 			return false;
 		}
 
-		public abstract float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc);
+		public abstract double ComputeSubmergedArea(Vector2D normal, double offset, Transform xf, out Vector2D sc);
 	}
 }

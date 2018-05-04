@@ -17,7 +17,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 	public class CircleRigidBodyEditorTool : RigidBodyEditorTool
 	{
 		private CircleShapeInfo actionCircle = null;
-		private Vector2 beginLocalPos = Vector2.Zero;
+		private Vector2D beginLocalPos = Vector2D.Zero;
 
 		public override string Name
 		{
@@ -62,7 +62,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			base.UpdateAction();
 
-			float radius = MathF.Max((this.Environment.ActiveBodyPos - this.beginLocalPos).Length, 1.0f);
+			double radius = MathD.Max((this.Environment.ActiveBodyPos - this.beginLocalPos).Length, 1.0f);
 			if (radius != this.actionCircle.Radius)
 			{
 				this.actionCircle.Radius = radius;

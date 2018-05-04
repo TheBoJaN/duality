@@ -126,7 +126,7 @@ namespace FarseerPhysics.Collision
 			this._tree.RemoveProxy(proxyId);
 		}
 
-		public void MoveProxy(int proxyId, ref AABB aabb, Vector2 displacement)
+		public void MoveProxy(int proxyId, ref AABB aabb, Vector2D displacement)
 		{
 			bool buffer = this._tree.MoveProxy(proxyId, ref aabb, displacement);
 			if (buffer)
@@ -249,7 +249,7 @@ namespace FarseerPhysics.Collision
 		/// </summary>
 		/// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
 		/// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
-		public void RayCast(Func<RayCastInput, int, float> callback, ref RayCastInput input)
+		public void RayCast(Func<RayCastInput, int, double> callback, ref RayCastInput input)
 		{
 			this._tree.RayCast(callback, ref input);
 		}

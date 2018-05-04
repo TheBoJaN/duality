@@ -28,7 +28,7 @@ namespace Duality.Backend.DefaultOpenTK
 				OpenTK.Input.Mouse.SetPosition(screenPoint.X, screenPoint.Y);
 			}
 		}
-		public float Wheel
+		public double Wheel
 		{
 			get { return this.window.Mouse.WheelPrecise; }
 		}

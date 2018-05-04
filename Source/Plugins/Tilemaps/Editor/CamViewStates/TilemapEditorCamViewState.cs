@@ -30,7 +30,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			public ToolStripButton ToolButton;
 		}
 
-		private static readonly float           FillAnimDuration = 250.0f;
+		private static readonly double           FillAnimDuration = 250.0f;
 		private static readonly Point2          InvalidTile      = new Point2(-1, -1);
 		private static Texture                  strippledLineTex = null;
 
@@ -50,7 +50,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 		private ICmpTilemapRenderer activeRenderer     = null;
 		private Point2              activeAreaOrigin   = InvalidTile;
 		private Grid<bool>          activeArea         = new Grid<bool>();
-		private List<Vector2[]>     activeAreaOutlines = new List<Vector2[]>();
+		private List<Vector2D[]>     activeAreaOutlines = new List<Vector2D[]>();
 		private bool                activePreviewValid = false;
 		private DateTime            activePreviewTime  = DateTime.Now;
 		private TilemapTool         actionTool         = null;
@@ -116,7 +116,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 		{
 			get { return this.activeArea; }
 		}
-		IList<Vector2[]> ITilemapToolEnvironment.ActiveAreaOutlines
+		IList<Vector2D[]> ITilemapToolEnvironment.ActiveAreaOutlines
 		{
 			get { return this.activeAreaOutlines; }
 		}
@@ -142,11 +142,11 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 
 			Tilemap tilemap = this.activeTilemap ?? this.selectedTilemap;
 			Tileset tileset = (tilemap != null) ? tilemap.Tileset.Res : null;
-			Vector2 tileSize = (tileset != null) ? tileset.TileSize : Tileset.DefaultTileSize;
+			Vector2D tileSize = (tileset != null) ? tileset.TileSize : Tileset.DefaultTileSize;
 			data.GridBaseSize = tileSize;
 
 			if (this.hoveredRenderer != null)
-				data.DisplayedGridPos = new Vector3(this.hoveredTile);
+				data.DisplayedGridPos = new Vector3D(this.hoveredTile);
 		}
 
 		/// <summary>
@@ -301,8 +301,8 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			Transform transform = component.GameObj.Transform;
 
 			// Determine where the cursor is hovering in various coordinate systems
-			Vector3 worldCursorPos = this.CameraComponent.GetWorldPos(new Vector3(localPos.X, localPos.Y, transform.Pos.Z));
-			Vector2 localCursorPos = transform.GetLocalPoint(worldCursorPos.Xy);
+			Vector3D worldCursorPos = this.CameraComponent.GetWorldPos(new Vector3D(localPos.X, localPos.Y, transform.Pos.Z));
+			Vector2D localCursorPos = transform.GetLocalPoint(worldCursorPos.Xy);
 
 			// Determine tile coordinates of the cursor
 			return renderer.GetTileAtLocalPos(localCursorPos, pickMode);
@@ -877,7 +877,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 				IEnumerable<ICmpTilemapRenderer> tilemapRenderers = Scene.Current.FindComponents<ICmpTilemapRenderer>();
 
 				// Determine the base depth of the currently highlighted Tilemap renderer.
-				float highlightBaseDepth = float.MinValue;
+				double highlightBaseDepth = double.MinValue;
 				ICmpTilemapRenderer highlightRenderer = 
 					this.activeRenderer ?? 
 					tilemapRenderers.FirstOrDefault(r => r.ActiveTilemap == highlightTilemap);
@@ -899,7 +899,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 
 					// Determine the base depth of the tilemap renderer for comparison
 					Transform transform = (renderer as Component).GameObj.Transform;
-					float baseDepth = transform.Pos.Z + renderer.BaseDepthOffset;
+					double baseDepth = transform.Pos.Z + renderer.BaseDepthOffset;
 					bool isBelowHightlighted = baseDepth > highlightBaseDepth;
 
 					// If the renderer is below the active one, darken it.
@@ -936,13 +936,13 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 
 				Tilemap tilemap = renderer.ActiveTilemap;
 				Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
-				Rect localRect = renderer.LocalTilemapRect;
+				RectD localRect = renderer.LocalTilemapRect;
 				bool greyOut = this.selectedTilemap != null && this.selectedTilemap != tilemap;
 
 				// Configure the canvas so our shapes are properly rotated and scaled
 				canvas.State.TransformHandle = -localRect.TopLeft;
-				canvas.State.TransformAngle = transform.Angle;
-				canvas.State.TransformScale = new Vector2(transform.Scale);
+				canvas.State.TransformAngle = (float)transform.Angle;
+				canvas.State.TransformScale = new Vector2D(transform.Scale);
 				canvas.State.DepthOffset = -0.01f;
 
 				// Draw the surrounding rect of the tilemap
@@ -957,7 +957,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 				// Highlight source tiles when available
 				if (this.TileDrawSource.SourceTilemap == renderer.ActiveTilemap)
 				{
-					float intensity = (this.selectedTilemap == this.TileDrawSource.SourceTilemap) ? 1.0f : 0.5f;
+					double intensity = (this.selectedTilemap == this.TileDrawSource.SourceTilemap) ? 1.0f : 0.5f;
 					DrawTileHighlights(
 						canvas, 
 						renderer, 
@@ -972,13 +972,13 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 				if (this.activeTilemap == renderer.ActiveTilemap)
 				{
 					// Fade-in the affected area for the fill tool to prevent visual noise when hovering around
-					float outlineIntensity = 1.0f;
-					float fillIntensity = 1.0f;
+					double outlineIntensity = 1.0f;
+					double fillIntensity = 1.0f;
 					if (this.activeTool.FadeInPreviews && this.activePreviewValid)
 					{
-						float timeSinceFillSelect = (float)(DateTime.Now - this.activePreviewTime).TotalMilliseconds;
-						fillIntensity = MathF.Clamp(timeSinceFillSelect / FillAnimDuration, 0.0f, 1.0f);
-						outlineIntensity = 0.25f + 0.75f * MathF.Clamp(timeSinceFillSelect / FillAnimDuration, 0.0f, 1.0f);
+						double timeSinceFillSelect = (double)(DateTime.Now - this.activePreviewTime).TotalMilliseconds;
+						fillIntensity = MathD.Clamp(timeSinceFillSelect / FillAnimDuration, 0.0f, 1.0f);
+						outlineIntensity = 0.25f + 0.75f * MathD.Clamp(timeSinceFillSelect / FillAnimDuration, 0.0f, 1.0f);
 					}
 
 					// Draw the current tile hightlights
@@ -1028,7 +1028,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			// When using the fill tool fade-in, we'll need continuous updates until the animation is done
 			if (this.activeTool.FadeInPreviews && this.activePreviewValid)
 			{
-				float timeSinceFillSelect = (float)(DateTime.Now - this.activePreviewTime).TotalMilliseconds;
+				double timeSinceFillSelect = (double)(DateTime.Now - this.activePreviewTime).TotalMilliseconds;
 				if (timeSinceFillSelect <= FillAnimDuration)
 					this.Invalidate();
 			}
@@ -1084,7 +1084,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			Selection = 0x1,
 			Uncertain = 0x2
 		}
-		private static void DrawTileHighlights(Canvas canvas, ICmpTilemapRenderer renderer, Point2 origin, IReadOnlyGrid<bool> highlight, ColorRgba fillTint, ColorRgba outlineTint, TileHighlightMode mode, List<Vector2[]> outlineCache = null)
+		private static void DrawTileHighlights(Canvas canvas, ICmpTilemapRenderer renderer, Point2 origin, IReadOnlyGrid<bool> highlight, ColorRgba fillTint, ColorRgba outlineTint, TileHighlightMode mode, List<Vector2D[]> outlineCache = null)
 		{
 			if (highlight.Width == 0 || highlight.Height == 0) return;
 
@@ -1122,24 +1122,24 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			Transform transform = component.GameObj.Transform;
 			Tilemap tilemap = renderer.ActiveTilemap;
 			Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
-			Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
-			Rect localRect = renderer.LocalTilemapRect;
+			Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+			RectD localRect = renderer.LocalTilemapRect;
 
 			// Determine the object's local coordinate system (rotated, scaled) in world space
-			Vector2 worldAxisX = Vector2.UnitX;
-			Vector2 worldAxisY = Vector2.UnitY;
-			MathF.TransformCoord(ref worldAxisX.X, ref worldAxisX.Y, transform.Angle, transform.Scale);
-			MathF.TransformCoord(ref worldAxisY.X, ref worldAxisY.Y, transform.Angle, transform.Scale);
+			Vector2D worldAxisX = Vector2D.UnitX;
+			Vector2D worldAxisY = Vector2D.UnitY;
+			MathD.TransformCoord(ref worldAxisX.X, ref worldAxisX.Y, transform.Angle, transform.Scale);
+			MathD.TransformCoord(ref worldAxisY.X, ref worldAxisY.Y, transform.Angle, transform.Scale);
 
-			Vector2 localOriginPos = tileSize * origin;
-			Vector2 worldOriginPos = localOriginPos.X * worldAxisX + localOriginPos.Y * worldAxisY;
+			Vector2D localOriginPos = tileSize * origin;
+			Vector2D worldOriginPos = localOriginPos.X * worldAxisX + localOriginPos.Y * worldAxisY;
 
 			canvas.PushState();
 			{
 				// Configure the canvas so our shapes are properly rotated and scaled
 				canvas.State.TransformHandle = -localRect.TopLeft;
-				canvas.State.TransformAngle = transform.Angle;
-				canvas.State.TransformScale = new Vector2(transform.Scale);
+				canvas.State.TransformAngle = (float)transform.Angle;
+				canvas.State.TransformScale = new Vector2D(transform.Scale);
 
 				// Fill all highlighted tiles that are currently visible
 				{
@@ -1147,12 +1147,12 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 					canvas.State.ColorTint = fillTint * ColorRgba.White.WithAlpha(selection ? 0.2f : 0.375f);
 				
 					// Determine tile visibility
-					Vector2 worldTilemapOriginPos = localRect.TopLeft;
-					MathF.TransformCoord(ref worldTilemapOriginPos.X, ref worldTilemapOriginPos.Y, transform.Angle, transform.Scale);
+					Vector2D worldTilemapOriginPos = localRect.TopLeft;
+					MathD.TransformCoord(ref worldTilemapOriginPos.X, ref worldTilemapOriginPos.Y, transform.Angle, transform.Scale);
 					TilemapCulling.TileInput cullingIn = new TilemapCulling.TileInput
 					{
 						// Remember: All these transform values are in world space
-						TilemapPos = transform.Pos + new Vector3(worldTilemapOriginPos) + new Vector3(worldOriginPos),
+						TilemapPos = transform.Pos + new Vector3D(worldTilemapOriginPos) + new Vector3D(worldOriginPos),
 						TilemapScale = transform.Scale,
 						TilemapAngle = transform.Angle,
 						TileCount = new Point2(highlight.Width, highlight.Height),
@@ -1164,10 +1164,10 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 					// Draw all visible highlighted tiles
 					{
 						Point2 tileGridPos = cullingOut.VisibleTileStart;
-						Vector2 renderStartPos = worldOriginPos + tileGridPos.X * tileSize.X * worldAxisX + tileGridPos.Y * tileSize.Y * worldAxisY;;
-						Vector2 renderPos = renderStartPos;
-						Vector2 tileXStep = worldAxisX * tileSize.X;
-						Vector2 tileYStep = worldAxisY * tileSize.Y;
+						Vector2D renderStartPos = worldOriginPos + tileGridPos.X * tileSize.X * worldAxisX + tileGridPos.Y * tileSize.Y * worldAxisY;;
+						Vector2D renderPos = renderStartPos;
+						Vector2D tileXStep = worldAxisX * tileSize.X;
+						Vector2D tileYStep = worldAxisY * tileSize.Y;
 						int lineMergeCount = 0;
 						int totalRects = 0;
 						for (int tileIndex = 0; tileIndex < renderedTileCount; tileIndex++)
@@ -1212,7 +1212,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 				if (!uncertain)
 				{
 					// Determine the outlines of individual highlighted tile patches
-					if (outlineCache == null) outlineCache = new List<Vector2[]>();
+					if (outlineCache == null) outlineCache = new List<Vector2D[]>();
 					if (outlineCache.Count == 0)
 					{
 						GetTileAreaOutlines(highlight, tileSize, ref outlineCache);
@@ -1221,17 +1221,17 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 					// Draw outlines around all highlighted tile patches
 					canvas.State.SetMaterial(selection ? strippleMaterial : defaultMaterial);
 					canvas.State.ColorTint = outlineTint;
-					foreach (Vector2[] outline in outlineCache)
+					foreach (Vector2D[] outline in outlineCache)
 					{
 						// For strippled-line display, determine total length of outline
 						if (selection)
 						{
-							float totalLength = 0.0f;
+							double totalLength = 0.0f;
 							for (int i = 1; i < outline.Length; i++)
 							{
 								totalLength += (outline[i - 1] - outline[i]).Length;
 							}
-							canvas.State.TextureCoordinateRect = new Rect(totalLength / strippledLineTex.ContentWidth, 1.0f);
+							canvas.State.TextureCoordinateRect = new RectD(totalLength / strippledLineTex.ContentWidth, 1.0f);
 						}
 
 						// Draw the outline
@@ -1247,11 +1247,11 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 				// draw a gizmo to indicate this for the user.
 				if (uncertain)
 				{
-					Vector2 highlightSize = new Vector2(highlight.Width * tileSize.X, highlight.Height * tileSize.Y);
-					Vector2 highlightCenter = highlightSize * 0.5f;
+					Vector2D highlightSize = new Vector2D(highlight.Width * tileSize.X, highlight.Height * tileSize.Y);
+					Vector2D highlightCenter = highlightSize * 0.5f;
 
-					Vector3 circlePos = transform.Pos + new Vector3(worldOriginPos + worldAxisX * highlightCenter + worldAxisY * highlightCenter);
-					float circleRadius = MathF.Min(tileSize.X, tileSize.Y) * 0.2f;
+					Vector3D circlePos = transform.Pos + new Vector3D(worldOriginPos + worldAxisX * highlightCenter + worldAxisY * highlightCenter);
+					double circleRadius = MathD.Min(tileSize.X, tileSize.Y) * 0.2f;
 
 					canvas.State.SetMaterial(defaultMaterial);
 					canvas.State.ColorTint = outlineTint;
@@ -1264,11 +1264,11 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			}
 			canvas.PopState();
 		}
-		private static void GetTileAreaOutlines(IReadOnlyGrid<bool> tileArea, Vector2 tileSize, ref List<Vector2[]> outlines)
+		private static void GetTileAreaOutlines(IReadOnlyGrid<bool> tileArea, Vector2D tileSize, ref List<Vector2D[]> outlines)
 		{
 			// Initialize the container we'll put our outlines into
 			if (outlines == null)
-				outlines = new List<Vector2[]>();
+				outlines = new List<Vector2D[]>();
 			else
 				outlines.Clear();
 
@@ -1293,7 +1293,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 			}
 
 			// Traverse edges to form outlines until no more edges are left
-			RawList<Vector2> outlineBuilder = new RawList<Vector2>();
+			RawList<Vector2D> outlineBuilder = new RawList<Vector2D>();
 			while (true)
 			{
 				// Find the beginning of an outline
@@ -1316,7 +1316,7 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 					outlineBuilder.Add(outlineBuilder[0]);
 
 				// If we have enough vertices, keep the outline for drawing
-				Vector2[] outline = new Vector2[outlineBuilder.Count];
+				Vector2D[] outline = new Vector2D[outlineBuilder.Count];
 				outlineBuilder.CopyTo(outline, 0);
 				outlines.Add(outline);
 

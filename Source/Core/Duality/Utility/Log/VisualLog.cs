@@ -96,10 +96,10 @@ namespace Duality
 		/// <param name="screenX"></param>
 		/// <param name="screenY"></param>
 		/// <returns></returns>
-		public VisualLogPointEntry DrawPoint(float screenX, float screenY)
+		public VisualLogPointEntry DrawPoint(double screenX, double screenY)
 		{
 			VisualLogPointEntry entry = new VisualLogPointEntry();
-			entry.Pos = new Vector3(screenX, screenY, 0.0f);
+			entry.Pos = new Vector3D(screenX, screenY, 0.0f);
 			this.Draw(entry);
 			return entry;
 		}
@@ -108,7 +108,7 @@ namespace Duality
 		/// </summary>
 		/// <param name="screenPos"></param>
 		/// <returns></returns>
-		public VisualLogPointEntry DrawPoint(Vector2 screenPos)
+		public VisualLogPointEntry DrawPoint(Vector2D screenPos)
 		{
 			return this.DrawPoint(screenPos.X, screenPos.Y);
 		}
@@ -120,10 +120,10 @@ namespace Duality
 		/// <param name="worldY"></param>
 		/// <param name="worldZ"></param>
 		/// <returns></returns>
-		public VisualLogPointEntry DrawPoint(float worldX, float worldY, float worldZ)
+		public VisualLogPointEntry DrawPoint(double worldX, double worldY, double worldZ)
 		{
 			VisualLogPointEntry entry = new VisualLogPointEntry();
-			entry.Pos = new Vector3(worldX, worldY, worldZ);
+			entry.Pos = new Vector3D(worldX, worldY, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
 			this.Draw(entry);
 			return entry;
@@ -134,7 +134,7 @@ namespace Duality
 		/// </summary>
 		/// <param name="worldPos"></param>
 		/// <returns></returns>
-		public VisualLogPointEntry DrawPoint(Vector3 worldPos)
+		public VisualLogPointEntry DrawPoint(Vector3D worldPos)
 		{
 			return this.DrawPoint(worldPos.X, worldPos.Y, worldPos.Z);
 		}
@@ -145,10 +145,10 @@ namespace Duality
 		/// <param name="screenY"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		public VisualLogCircleEntry DrawCircle(float screenX, float screenY, float radius)
+		public VisualLogCircleEntry DrawCircle(double screenX, double screenY, double radius)
 		{
 			VisualLogCircleEntry entry = new VisualLogCircleEntry();
-			entry.Pos = new Vector3(screenX, screenY, 0.0f);
+			entry.Pos = new Vector3D(screenX, screenY, 0.0f);
 			entry.Radius = radius;
 			this.Draw(entry);
 			return entry;
@@ -159,7 +159,7 @@ namespace Duality
 		/// <param name="screenPos"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		public VisualLogCircleEntry DrawCircle(Vector2 screenPos, float radius)
+		public VisualLogCircleEntry DrawCircle(Vector2D screenPos, double radius)
 		{
 			return this.DrawCircle(screenPos.X, screenPos.Y, radius);
 		}
@@ -171,10 +171,10 @@ namespace Duality
 		/// <param name="worldZ"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		public VisualLogCircleEntry DrawCircle(float worldX, float worldY, float worldZ, float radius)
+		public VisualLogCircleEntry DrawCircle(double worldX, double worldY, double worldZ, double radius)
 		{
 			VisualLogCircleEntry entry = new VisualLogCircleEntry();
-			entry.Pos = new Vector3(worldX, worldY, worldZ);
+			entry.Pos = new Vector3D(worldX, worldY, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
 			entry.Radius = radius;
 			this.Draw(entry);
@@ -186,7 +186,7 @@ namespace Duality
 		/// <param name="worldPos"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		public VisualLogCircleEntry DrawCircle(Vector3 worldPos, float radius)
+		public VisualLogCircleEntry DrawCircle(Vector3D worldPos, double radius)
 		{
 			return this.DrawCircle(worldPos.X, worldPos.Y, worldPos.Z, radius);
 		}
@@ -199,11 +199,11 @@ namespace Duality
 		/// <param name="vectorX">The vector to display.</param>
 		/// <param name="vectorY">The vector to display.</param>
 		/// <returns></returns>
-		public VisualLogVectorEntry DrawVector(float screenX, float screenY, float vectorX, float vectorY)
+		public VisualLogVectorEntry DrawVector(double screenX, double screenY, double vectorX, double vectorY)
 		{
 			VisualLogVectorEntry entry = new VisualLogVectorEntry();
-			entry.Origin = new Vector3(screenX, screenY, 0.0f);
-			entry.Vector = new Vector2(vectorX, vectorY);
+			entry.Origin = new Vector3D(screenX, screenY, 0.0f);
+			entry.Vector = new Vector2D(vectorX, vectorY);
 			this.Draw(entry);
 			return entry;
 		}
@@ -214,7 +214,7 @@ namespace Duality
 		/// <param name="screenPos">The vectors screen origin.</param>
 		/// <param name="vector">The vector to display.</param>
 		/// <returns></returns>
-		public VisualLogVectorEntry DrawVector(Vector2 screenPos, Vector2 vector)
+		public VisualLogVectorEntry DrawVector(Vector2D screenPos, Vector2D vector)
 		{
 			return this.DrawVector(screenPos.X, screenPos.Y, vector.X, vector.Y);
 		}
@@ -228,12 +228,12 @@ namespace Duality
 		/// <param name="vectorX">The vector to display.</param>
 		/// <param name="vectorY">The vector to display.</param>
 		/// <returns></returns>
-		public VisualLogVectorEntry DrawVector(float worldX, float worldY, float worldZ, float vectorX, float vectorY)
+		public VisualLogVectorEntry DrawVector(double worldX, double worldY, double worldZ, double vectorX, double vectorY)
 		{
 			VisualLogVectorEntry entry = new VisualLogVectorEntry();
-			entry.Origin = new Vector3(worldX, worldY, worldZ);
+			entry.Origin = new Vector3D(worldX, worldY, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
-			entry.Vector = new Vector2(vectorX, vectorY);
+			entry.Vector = new Vector2D(vectorX, vectorY);
 			this.Draw(entry);
 			return entry;
 		}
@@ -244,7 +244,7 @@ namespace Duality
 		/// <param name="worldPos">The vectors world origin.</param>
 		/// <param name="vector">The vector to display.</param>
 		/// <returns></returns>
-		public VisualLogVectorEntry DrawVector(Vector3 worldPos, Vector2 vector)
+		public VisualLogVectorEntry DrawVector(Vector3D worldPos, Vector2D vector)
 		{
 			return this.DrawVector(worldPos.X, worldPos.Y, worldPos.Z, vector.X, vector.Y);
 		}
@@ -256,11 +256,11 @@ namespace Duality
 		/// <param name="screenX2"></param>
 		/// <param name="screenY2"></param>
 		/// <returns></returns>
-		public VisualLogConnectionEntry DrawConnection(float screenX1, float screenY1, float screenX2, float screenY2)
+		public VisualLogConnectionEntry DrawConnection(double screenX1, double screenY1, double screenX2, double screenY2)
 		{
 			VisualLogConnectionEntry entry = new VisualLogConnectionEntry();
-			entry.PosA = new Vector3(screenX1, screenY1, 0.0f);
-			entry.PosB = new Vector3(screenX2, screenY2, 0.0f);
+			entry.PosA = new Vector3D(screenX1, screenY1, 0.0f);
+			entry.PosB = new Vector3D(screenX2, screenY2, 0.0f);
 			this.Draw(entry);
 			return entry;
 		}
@@ -270,7 +270,7 @@ namespace Duality
 		/// <param name="screenPos1"></param>
 		/// <param name="screenPos2"></param>
 		/// <returns></returns>
-		public VisualLogConnectionEntry DrawConnection(Vector2 screenPos1, Vector2 screenPos2)
+		public VisualLogConnectionEntry DrawConnection(Vector2D screenPos1, Vector2D screenPos2)
 		{
 			return this.DrawConnection(screenPos1.X, screenPos1.Y, screenPos2.X, screenPos2.Y);
 		}
@@ -283,11 +283,11 @@ namespace Duality
 		/// <param name="worldX2"></param>
 		/// <param name="worldY2"></param>
 		/// <returns></returns>
-		public VisualLogConnectionEntry DrawConnection(float worldX1, float worldY1, float worldZ, float worldX2, float worldY2)
+		public VisualLogConnectionEntry DrawConnection(double worldX1, double worldY1, double worldZ, double worldX2, double worldY2)
 		{
 			VisualLogConnectionEntry entry = new VisualLogConnectionEntry();
-			entry.PosA = new Vector3(worldX1, worldY1, worldZ);
-			entry.PosB = new Vector3(worldX2, worldY2, worldZ);
+			entry.PosA = new Vector3D(worldX1, worldY1, worldZ);
+			entry.PosB = new Vector3D(worldX2, worldY2, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
 			this.Draw(entry);
 			return entry;
@@ -298,7 +298,7 @@ namespace Duality
 		/// <param name="worldPos1"></param>
 		/// <param name="worldPos2"></param>
 		/// <returns></returns>
-		public VisualLogConnectionEntry DrawConnection(Vector3 worldPos1, Vector2 worldPos2)
+		public VisualLogConnectionEntry DrawConnection(Vector3D worldPos1, Vector2D worldPos2)
 		{
 			return this.DrawConnection(worldPos1.X, worldPos1.Y, worldPos1.Z, worldPos2.X, worldPos2.Y);
 		}
@@ -309,10 +309,10 @@ namespace Duality
 		/// <param name="screenY"></param>
 		/// <param name="polygon"></param>
 		/// <returns></returns>
-		public VisualLogPolygonEntry DrawPolygon(float screenX, float screenY, Vector2[] polygon)
+		public VisualLogPolygonEntry DrawPolygon(double screenX, double screenY, Vector2D[] polygon)
 		{
 			VisualLogPolygonEntry entry = new VisualLogPolygonEntry();
-			entry.Pos = new Vector3(screenX, screenY, 0.0f);
+			entry.Pos = new Vector3D(screenX, screenY, 0.0f);
 			entry.Vertices = polygon;
 			this.Draw(entry);
 			return entry;
@@ -323,7 +323,7 @@ namespace Duality
 		/// <param name="screenPos"></param>
 		/// <param name="polygon"></param>
 		/// <returns></returns>
-		public VisualLogPolygonEntry DrawPolygon(Vector2 screenPos, Vector2[] polygon)
+		public VisualLogPolygonEntry DrawPolygon(Vector2D screenPos, Vector2D[] polygon)
 		{
 			return this.DrawPolygon(screenPos.X, screenPos.Y, polygon);
 		}
@@ -335,10 +335,10 @@ namespace Duality
 		/// <param name="worldZ"></param>
 		/// <param name="polygon"></param>
 		/// <returns></returns>
-		public VisualLogPolygonEntry DrawPolygon(float worldX, float worldY, float worldZ, Vector2[] polygon)
+		public VisualLogPolygonEntry DrawPolygon(double worldX, double worldY, double worldZ, Vector2D[] polygon)
 		{
 			VisualLogPolygonEntry entry = new VisualLogPolygonEntry();
-			entry.Pos = new Vector3(worldX, worldY, worldZ);
+			entry.Pos = new Vector3D(worldX, worldY, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
 			entry.Vertices = polygon;
 			this.Draw(entry);
@@ -350,7 +350,7 @@ namespace Duality
 		/// <param name="worldPos"></param>
 		/// <param name="polygon"></param>
 		/// <returns></returns>
-		public VisualLogPolygonEntry DrawPolygon(Vector3 worldPos, Vector2[] polygon)
+		public VisualLogPolygonEntry DrawPolygon(Vector3D worldPos, Vector2D[] polygon)
 		{
 			return this.DrawPolygon(worldPos.X, worldPos.Y, worldPos.Z, polygon);
 		}
@@ -362,10 +362,10 @@ namespace Duality
 		/// <param name="screenY"></param>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public VisualLogTextEntry DrawText(float screenX, float screenY, string text)
+		public VisualLogTextEntry DrawText(double screenX, double screenY, string text)
 		{
 			VisualLogTextEntry entry = new VisualLogTextEntry();
-			entry.Pos = new Vector3(screenX, screenY, 0.0f);
+			entry.Pos = new Vector3D(screenX, screenY, 0.0f);
 			entry.Text = text;
 			this.Draw(entry);
 			return entry;
@@ -377,7 +377,7 @@ namespace Duality
 		/// <param name="screenPos"></param>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public VisualLogTextEntry DrawText(Vector2 screenPos, string text)
+		public VisualLogTextEntry DrawText(Vector2D screenPos, string text)
 		{
 			return this.DrawText(screenPos.X, screenPos.Y, text);
 		}
@@ -390,10 +390,10 @@ namespace Duality
 		/// <param name="worldZ"></param>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public VisualLogTextEntry DrawText(float worldX, float worldY, float worldZ, string text)
+		public VisualLogTextEntry DrawText(double worldX, double worldY, double worldZ, string text)
 		{
 			VisualLogTextEntry entry = new VisualLogTextEntry();
-			entry.Pos = new Vector3(worldX, worldY, worldZ);
+			entry.Pos = new Vector3D(worldX, worldY, worldZ);
 			entry.Anchor = VisualLogAnchor.World;
 			entry.Text = text;
 			this.Draw(entry);
@@ -406,7 +406,7 @@ namespace Duality
 		/// <param name="worldPos"></param>
 		/// <param name="text"></param>
 		/// <returns></returns>
-		public VisualLogTextEntry DrawText(Vector3 worldPos, string text)
+		public VisualLogTextEntry DrawText(Vector3D worldPos, string text)
 		{
 			return this.DrawText(worldPos.X, worldPos.Y, worldPos.Z, text);
 		}
@@ -427,10 +427,10 @@ namespace Duality
 		/// </summary>
 		public void Update()
 		{
-			for (int i = entries.Count - 1; i >= 0; i--)
+			for (int i = this.entries.Count - 1; i >= 0; i--)
 			{
-				entries[i].Update();
-				if (!entries[i].IsAlive) entries.RemoveAt(i);
+				this.entries[i].Update();
+				if (!this.entries[i].IsAlive) this.entries.RemoveAt(i);
 			}
 		}
 	}

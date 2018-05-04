@@ -62,5 +62,14 @@ namespace Duality.Editor
 			this.reasonableMin = MathF.SafeToDecimal(Math.Max(reasonableMin, limitMin));
 			this.reasonableMax = MathF.SafeToDecimal(Math.Min(reasonableMax, limitMax));
 		}
+
+		public EditorHintRangeAttribute(double min, double max) : this(min, max, min, max) { }
+		public EditorHintRangeAttribute(double limitMin, double limitMax, double reasonableMin, double reasonableMax)
+		{
+			this.limitMin = MathD.SafeToDecimal(limitMin);
+			this.limitMax = MathD.SafeToDecimal(limitMax);
+			this.reasonableMin = MathD.SafeToDecimal(Math.Max(reasonableMin, limitMin));
+			this.reasonableMax = MathD.SafeToDecimal(Math.Min(reasonableMax, limitMax));
+		}
 	}
 }

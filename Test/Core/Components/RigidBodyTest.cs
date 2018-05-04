@@ -23,16 +23,16 @@ namespace Duality.Tests.Components
 			RigidBody ballBody = ball.AddComponent<RigidBody>();
 			ballBody.Restitution = 0f;
 			CollisionEventReceiver listener = ball.AddComponent<CollisionEventReceiver>();
-			ballBody.AddShape(new CircleShapeInfo(1, new Vector2(0, 0), 1));
+			ballBody.AddShape(new CircleShapeInfo(1, new Vector2D(0, 0), 1));
 			scene.AddObject(ball);
 
 			// Create the platform
 			GameObject platform = new GameObject("Platform");
 			Transform platformTrans = platform.AddComponent<Transform>();
-			platformTrans.Pos = new Vector3(0, 5, 0);
+			platformTrans.Pos = new Vector3D(0, 5, 0);
 			RigidBody platformBody = platform.AddComponent<RigidBody>();
 			platformBody.Restitution = 0f;
-			platformBody.AddShape(new ChainShapeInfo(new[] { new Vector2(-1, 0), new Vector2(1, 0), }));
+			platformBody.AddShape(new ChainShapeInfo(new[] { new Vector2D(-1, 0), new Vector2D(1, 0), }));
 			platformBody.BodyType = BodyType.Static;
 			scene.AddObject(platform);
 
@@ -77,7 +77,7 @@ namespace Duality.Tests.Components
 			RigidBody bodyB = objB.AddComponent<RigidBody>();
 
 			// Add a shape to the first one
-			bodyA.AddShape(new CircleShapeInfo(128, Vector2.Zero, 1.0f));
+			bodyA.AddShape(new CircleShapeInfo(128, Vector2D.Zero, 1.0f));
 
 			// Is the second body empty and the first isn't?
 			Assert.IsFalse(bodyA.Shapes == null || !bodyA.Shapes.Any());
@@ -101,7 +101,7 @@ namespace Duality.Tests.Components
 			RigidBody bodyB = objB.AddComponent<RigidBody>();
 
 			// Add a shape to the second one
-			bodyB.AddShape(new CircleShapeInfo(128, Vector2.Zero, 1.0f));
+			bodyB.AddShape(new CircleShapeInfo(128, Vector2D.Zero, 1.0f));
 
 			// Is the first body empty and the second isn't?
 			Assert.IsTrue(bodyA.Shapes == null || !bodyA.Shapes.Any());
@@ -116,8 +116,8 @@ namespace Duality.Tests.Components
 		}
 		[Test] public void CopyModifyShapes()
 		{
-			int radiusA = MathF.Rnd.Next();
-			int radiusB = MathF.Rnd.Next();
+			int radiusA = MathD.Rnd.Next();
+			int radiusB = MathD.Rnd.Next();
 
 			// Create two bodies
 			GameObject objA = new GameObject("ObjectA");
@@ -128,8 +128,8 @@ namespace Duality.Tests.Components
 			RigidBody bodyB = objB.AddComponent<RigidBody>();
 
 			// Add a similar shape to both
-			bodyA.AddShape(new CircleShapeInfo(radiusA, Vector2.Zero, 1.0f));
-			bodyB.AddShape(new CircleShapeInfo(radiusB, Vector2.Zero, 1.0f));
+			bodyA.AddShape(new CircleShapeInfo(radiusA, Vector2D.Zero, 1.0f));
+			bodyB.AddShape(new CircleShapeInfo(radiusB, Vector2D.Zero, 1.0f));
 
 			// Check if each body carries its designated shape
 			Assert.IsTrue(bodyA.Shapes != null && (bodyA.Shapes.First() as CircleShapeInfo).Radius == radiusA);
@@ -146,7 +146,7 @@ namespace Duality.Tests.Components
 		}
 		[Test] public void CopyReplaceShapes()
 		{
-			int radius = MathF.Rnd.Next();
+			int radius = MathD.Rnd.Next();
 
 			// Create two bodies
 			GameObject objA = new GameObject("ObjectA");
@@ -157,8 +157,8 @@ namespace Duality.Tests.Components
 			RigidBody bodyB = objB.AddComponent<RigidBody>();
 
 			// Add a different kind of shape to both
-			bodyA.AddShape(new CircleShapeInfo(radius, Vector2.Zero, 1.0f));
-			bodyB.AddShape(new PolyShapeInfo(new Vector2[] { Vector2.Zero, Vector2.UnitX, Vector2.UnitY }, 1.0f));
+			bodyA.AddShape(new CircleShapeInfo(radius, Vector2D.Zero, 1.0f));
+			bodyB.AddShape(new PolyShapeInfo(new Vector2D[] { Vector2D.Zero, Vector2D.UnitX, Vector2D.UnitY }, 1.0f));
 
 			// Check if each body carries its designated shape
 			Assert.IsNotNull(bodyA.Shapes);

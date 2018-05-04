@@ -369,7 +369,7 @@ namespace Duality.Audio
 				float maxDistTemp = this.sound.Res.MaxDist;
 				Vector3 listenerPos = DualityApp.Sound.ListenerPos;
 				Vector3 posTemp;
-				if (this.attachedTo != null)	posTemp = this.attachedTo.Transform.Pos + this.pos;
+				if (this.attachedTo != null)	posTemp = (Vector3)this.attachedTo.Transform.Pos + this.pos;
 				else							posTemp = this.pos;
 				float dist = MathF.Sqrt(
 					(posTemp.X - listenerPos.X) * (posTemp.X - listenerPos.X) +
@@ -456,13 +456,13 @@ namespace Duality.Audio
 				// Attach to object
 				if (attachTransform != null)
 				{
-					MathF.TransformCoord(ref nativeState.Position.X, ref nativeState.Position.Y, attachTransform.Angle);
-					MathF.TransformCoord(ref nativeState.Velocity.X, ref nativeState.Velocity.Y, attachTransform.Angle);
-					nativeState.Position += attachTransform.Pos;
+					MathF.TransformCoord(ref nativeState.Position.X, ref nativeState.Position.Y, (float)attachTransform.Angle);
+					MathF.TransformCoord(ref nativeState.Velocity.X, ref nativeState.Velocity.Y, (float)attachTransform.Angle);
+					nativeState.Position += (Vector3)attachTransform.Pos;
 
 					VelocityTracker attachVelocityTracker = attachTransform.GameObj.GetComponent<VelocityTracker>();
 					if (attachVelocityTracker != null)
-						nativeState.Velocity += attachVelocityTracker.Vel;
+						nativeState.Velocity += (Vector3)attachVelocityTracker.Vel;
 				}
 
 				// Distance check

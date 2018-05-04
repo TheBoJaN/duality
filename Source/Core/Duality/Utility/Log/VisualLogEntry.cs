@@ -16,12 +16,12 @@ namespace Duality
 		/// <summary>
 		/// Default width of the outline of a log entries visual representation.
 		/// </summary>
-		protected const float DefaultOutlineWidth = 1.5f;
-		private   const float LifeTimeEpsilon     = 0.000001f;
+		protected const double DefaultOutlineWidth = 1.5f;
+		private   const double LifeTimeEpsilon     = 0.000001f;
 
-		private float           maxLifetime     = LifeTimeEpsilon;
-		private float           lifetime        = LifeTimeEpsilon;
-		private float           depthOffset     = 0.0f;
+		private double           maxLifetime     = LifeTimeEpsilon;
+		private double           lifetime        = LifeTimeEpsilon;
+		private double           depthOffset     = 0.0f;
 		private ColorRgba       color           = ColorRgba.White;
 		private bool            lifetimeAsAlpha = false;   
 		private VisualLogAnchor anchor          = VisualLogAnchor.Screen;
@@ -40,27 +40,27 @@ namespace Duality
 		/// [GET / SET] The remaining lifetime of this log entry in milliseconds. If not specified otherwise,
 		/// a log entry is only displayed for a single frame.
 		/// </summary>
-		public float Lifetime
+		public double Lifetime
 		{
 			get { return this.lifetime; }
 			set
 			{
 				this.lifetime = value;
-				this.maxLifetime = MathF.Max(this.lifetime, this.maxLifetime);
+				this.maxLifetime = MathD.Max(this.lifetime, this.maxLifetime);
 			}
 		}
 		/// <summary>
 		/// [GET] The relative amount of available lifetime this log entry has. 
 		/// 0.0f means "totally dead", 1.0f means "as alive as it gets".
 		/// </summary>
-		public virtual float LifetimeRatio
+		public virtual double LifetimeRatio
 		{
-			get { return MathF.Clamp(this.lifetime / this.maxLifetime, 0.0f, 1.0f); }
+			get { return MathD.Clamp(this.lifetime / this.maxLifetime, 0.0f, 1.0f); }
 		}
 		/// <summary>
 		/// [GET / SET] The depth offset that is applied when rendering this visual log entry.
 		/// </summary>
-		public float DepthOffset
+		public double DepthOffset
 		{
 			get { return this.depthOffset; }
 			set { this.depthOffset = value; }
@@ -137,7 +137,7 @@ namespace Duality
 		/// <param name="target"></param>
 		public void Draw(Canvas target)
 		{
-			this.Draw(target, Vector3.Zero, 0.0f, 1.0f);
+			this.Draw(target, Vector3D.Zero, 0.0f, 1.0f);
 		}
 		/// <summary>
 		/// Draws the entry to the specified <see cref="Canvas"/>. Its parameters provide information
@@ -147,6 +147,6 @@ namespace Duality
 		/// <param name="basePos">The anchors base position.</param>
 		/// <param name="baseRotation">The anchors base rotation.</param>
 		/// <param name="baseScale">The anchors base scale.</param>
-		public abstract void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale);
+		public abstract void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale);
 	}
 }

@@ -36,9 +36,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return this.DragMustWaitProgress < 1.0f; }
 		}
-		private float DragMustWaitProgress
+		private double DragMustWaitProgress
 		{
-			get { return MathF.Clamp((float)(DateTime.Now - this.dragTime).TotalMilliseconds / 500.0f, 0.0f, 1.0f); }
+			get { return MathD.Clamp((double)(DateTime.Now - this.dragTime).TotalMilliseconds / 500.0f, 0.0f, 1.0f); }
 		}
 
 
@@ -255,10 +255,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 				bool lockZ = this.CameraComponent.FocusDist <= 0.0f;
 				Point mouseLoc = this.PointToClient(new Point(e.X, e.Y));
-				Vector3 spaceCoord = this.GetWorldPos(new Vector3(
+				Vector3D spaceCoord = this.GetWorldPos(new Vector3D(
 					mouseLoc.X, 
 					mouseLoc.Y, 
-					lockZ ? 0.0f : this.CameraObj.Transform.Pos.Z + MathF.Abs(this.CameraComponent.FocusDist)));
+					lockZ ? 0.0f : this.CameraObj.Transform.Pos.Z + MathD.Abs(this.CameraComponent.FocusDist)));
 				if ((this.SnapToUserGuides & UserGuideType.Position) != UserGuideType.None)
 				{
 					spaceCoord = this.EditingUserGuide.SnapPosition(spaceCoord);

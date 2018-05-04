@@ -21,7 +21,7 @@ namespace Duality.Samples.Physics
 
 			// Perform a raycast 250 units forward
 			Vector2 startPos = transform.Pos.Xy;
-			Vector2 endPos = startPos + transform.Forward.Xy * 250.0f;
+			Vector2 endPos = startPos + (Vector2)transform.Forward.Xy * 250.0f;
 			RayCastData nearestHit;
 			bool hitAnything = RigidBody.RayCast(startPos, endPos, hitData => 
 			{

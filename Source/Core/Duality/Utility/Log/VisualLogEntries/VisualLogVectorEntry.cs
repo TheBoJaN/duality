@@ -12,14 +12,14 @@ namespace Duality
 	/// </summary>
 	public sealed class VisualLogVectorEntry : VisualLogEntry
 	{
-		private	Vector3		origin			= Vector3.Zero;
-		private	Vector2		vec				= -Vector2.UnitY * 50.0f;
+		private	Vector3D		origin			= Vector3D.Zero;
+		private	Vector2D		vec				= -Vector2D.UnitY * 50.0f;
 		private	bool		invariantScale	= false;
 
 		/// <summary>
 		/// [GET / SET] The vectors origin in space.
 		/// </summary>
-		public Vector3 Origin
+		public Vector3D Origin
 		{
 			get { return this.origin; }
 			set { this.origin = value; }
@@ -27,7 +27,7 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The vector to display.
 		/// </summary>
-		public Vector2 Vector
+		public Vector2D Vector
 		{
 			get { return this.vec; }
 			set { this.vec = value; }
@@ -41,17 +41,17 @@ namespace Duality
 			set { this.invariantScale = value; }
 		}
 
-		public override void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale)
+		public override void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale)
 		{
-			float originRadius = 5.0f;
-			float vectorThickness = 4.0f;
-			float borderRadius = DefaultOutlineWidth;
-			float vectorLengthFactor = 1.0f;
+			double originRadius = 5.0f;
+			double vectorThickness = 4.0f;
+			double borderRadius = DefaultOutlineWidth;
+			double vectorLengthFactor = 1.0f;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.origin.Z + basePos.Z);
+				double scale = target.DrawDevice.GetScaleAtZ((float)(this.origin.Z + basePos.Z));
 				originRadius /= scale;
 				borderRadius /= scale;
 				vectorThickness /= scale;
@@ -60,23 +60,23 @@ namespace Duality
 
 
 			// Determine base and target positions
-			Vector3 originPos = this.origin;
-			Vector3 targetPos = this.origin + new Vector3(this.vec * vectorLengthFactor);
-			MathF.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
-			MathF.TransformCoord(ref targetPos.X, ref targetPos.Y, baseRotation, baseScale);
+			Vector3D originPos = this.origin;
+			Vector3D targetPos = this.origin + new Vector3D(this.vec * vectorLengthFactor);
+			MathD.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
+			MathD.TransformCoord(ref targetPos.X, ref targetPos.Y, baseRotation, baseScale);
 			originPos += basePos;
 			targetPos += basePos;
 
 			// Downscale vector arrow, if too small for display otherwise
-			float vectorLen = (targetPos.Xy - originPos.Xy).Length;
-			float vectorLenScale = MathF.Clamp(vectorLen / (vectorThickness * 7.0f), 0.0f, 1.0f);
+			double vectorLen = (targetPos.Xy - originPos.Xy).Length;
+			double vectorLenScale = MathD.Clamp(vectorLen / (vectorThickness * 7.0f), 0.0f, 1.0f);
 			vectorThickness *= vectorLenScale;
 
 			// Create arrow polygon
-			Vector2 dirForward = (targetPos.Xy - originPos.Xy).Normalized;
-			Vector2 dirLeft = dirForward.PerpendicularLeft;
-			Vector2 dirRight = -dirLeft;
-			Vector2[] arrow = new Vector2[7];
+			Vector2D dirForward = (targetPos.Xy - originPos.Xy).Normalized;
+			Vector2D dirLeft = dirForward.PerpendicularLeft;
+			Vector2D dirRight = -dirLeft;
+			Vector2D[] arrow = new Vector2D[7];
 			arrow[0] = dirLeft * vectorThickness * 0.5f;
 			arrow[1] = dirLeft * vectorThickness * 0.5f + dirForward * (vectorLen - vectorThickness * 2);
 			arrow[2] = dirLeft * vectorThickness * 1.25f + dirForward * (vectorLen - vectorThickness * 2);
@@ -84,11 +84,11 @@ namespace Duality
 			arrow[4] = dirRight * vectorThickness * 1.25f + dirForward * (vectorLen - vectorThickness * 2);
 			arrow[5] = dirRight * vectorThickness * 0.5f + dirForward * (vectorLen - vectorThickness * 2);
 			arrow[6] = dirRight * vectorThickness * 0.5f;
-			Vector2[] arrowHead = new Vector2[3];
+			Vector2D[] arrowHead = new Vector2D[3];
 			arrowHead[0] = arrow[2];
 			arrowHead[1] = arrow[3];
 			arrowHead[2] = arrow[4];
-			Vector2[] arrowLine = new Vector2[4];
+			Vector2D[] arrowLine = new Vector2D[4];
 			arrowLine[0] = arrow[0];
 			arrowLine[1] = arrow[1];
 			arrowLine[2] = arrow[5];
@@ -133,7 +133,7 @@ namespace Duality
 				originPos.Z, 
 				originRadius, 
 				0.0f, 
-				MathF.RadAngle360, 
+				MathD.RadAngle360, 
 				borderRadius);
 		}
 	}

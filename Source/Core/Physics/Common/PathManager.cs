@@ -59,12 +59,12 @@ namespace FarseerPhysics.Factories
 		/// <param name="body">The body.</param>
 		/// <param name="density">The density.</param>
 		/// <param name="subdivisions">The subdivisions.</param>
-		public static void ConvertPathToPolygon(Path path, Body body, float density, int subdivisions)
+		public static void ConvertPathToPolygon(Path path, Body body, double density, int subdivisions)
 		{
 			if (!path.Closed)
 				throw new Exception("The path must be closed to convert to a polygon.");
 
-			List<Vector2> verts = path.GetVertices(subdivisions);
+			List<Vector2D> verts = path.GetVertices(subdivisions);
 
 			List<Vertices> decomposedVerts = EarclipDecomposer.ConvexPartition(new Vertices(verts));
 			//List<Vertices> decomposedVerts = BayazitDecomposer.ConvexPartition(new Vertices(verts));
@@ -88,7 +88,7 @@ namespace FarseerPhysics.Factories
 		public static List<Body> EvenlyDistributeShapesAlongPath(World world, Path path, IEnumerable<Shape> shapes,
 																 BodyType type, int copies, object userData)
 		{
-			List<Vector3> centers = path.SubdivideEvenly(copies);
+			List<Vector3D> centers = path.SubdivideEvenly(copies);
 			List<Body> bodyList = new List<Body>();
 
 			for (int i = 0; i < centers.Count; i++)
@@ -97,7 +97,7 @@ namespace FarseerPhysics.Factories
 
 				// copy the type from original body
 				b.BodyType = type;
-				b.Position = new Vector2(centers[i].X, centers[i].Y);
+				b.Position = new Vector2D(centers[i].X, centers[i].Y);
 				b.Rotation = centers[i].Z;
 
 				foreach (Shape shape in shapes)
@@ -152,11 +152,11 @@ namespace FarseerPhysics.Factories
 		/// <param name="time">The time.</param>
 		/// <param name="strength">The strength.</param>
 		/// <param name="timeStep">The time step.</param>
-		public static void MoveBodyOnPath(Path path, Body body, float time, float strength, float timeStep)
+		public static void MoveBodyOnPath(Path path, Body body, double time, double strength, double timeStep)
 		{
-			Vector2 destination = path.GetPosition(time);
-			Vector2 positionDelta = body.Position - destination;
-			Vector2 velocity = (positionDelta / timeStep) * strength;
+			Vector2D destination = path.GetPosition(time);
+			Vector2D positionDelta = body.Position - destination;
+			Vector2D velocity = (positionDelta / timeStep) * strength;
 
 			body.LinearVelocity = -velocity;
 		}
@@ -171,8 +171,8 @@ namespace FarseerPhysics.Factories
 		/// <param name="connectFirstAndLast">if set to <c>true</c> [connect first and last].</param>
 		/// <param name="collideConnected">if set to <c>true</c> [collide connected].</param>
 		public static List<RevoluteJoint> AttachBodiesWithRevoluteJoint(World world, List<Body> bodies,
-																		Vector2 localAnchorA,
-																		Vector2 localAnchorB, bool connectFirstAndLast,
+																		Vector2D localAnchorA,
+																		Vector2D localAnchorB, bool connectFirstAndLast,
 																		bool collideConnected)
 		{
 			List<RevoluteJoint> joints = new List<RevoluteJoint>(bodies.Count + 1);
@@ -209,10 +209,10 @@ namespace FarseerPhysics.Factories
 		/// <param name="minLength">Minimum length of the slider joint.</param>
 		/// <param name="maxLength">Maximum length of the slider joint.</param>
 		/// <returns></returns>
-		public static List<SliderJoint> AttachBodiesWithSliderJoint(World world, List<Body> bodies, Vector2 localAnchorA,
-																	Vector2 localAnchorB, bool connectFirstAndLast,
-																	bool collideConnected, float minLength,
-																	float maxLength)
+		public static List<SliderJoint> AttachBodiesWithSliderJoint(World world, List<Body> bodies, Vector2D localAnchorA,
+																	Vector2D localAnchorB, bool connectFirstAndLast,
+																	bool collideConnected, double minLength,
+																	double maxLength)
 		{
 			List<SliderJoint> joints = new List<SliderJoint>(bodies.Count + 1);
 

@@ -170,7 +170,7 @@ namespace Duality
 		/// </summary>
 		/// <param name="counter">The <see cref="ProfileCounter"/> name to use for this measurement. For nested measurements, use path strings, e.g. "ParentCounter\ChildCounter"</param>
 		/// <returns></returns>
-		public static float GetMeasure(string counter)
+		public static double GetMeasure(string counter)
 		{
 			TimeCounter tc = GetCounter<TimeCounter>(counter);
 			if (tc != null)
@@ -307,7 +307,7 @@ namespace Duality
 					
 					if (options.HasFlag(ProfileReportOptions.FormattedText))
 					{
-						float severity = data.Severity;
+						double severity = data.Severity;
 						ColorRgba lineColor = severity >= 0.5f ? 
 							ColorRgba.Lerp(ColorRgba.White, ColorRgba.Red, 2.0f * (severity - 0.5f)) :
 							ColorRgba.Lerp(ColorRgba.TransparentWhite, ColorRgba.White, 0.1f + 0.9f * (2.0f * severity));

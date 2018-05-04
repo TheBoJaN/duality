@@ -25,19 +25,19 @@ namespace Duality.Plugins.Tilemaps
 			/// <summary>
 			/// World space position of the <see cref="Tilemap"/>.
 			/// </summary>
-			public Vector3 TilemapPos;
+			public Vector3D TilemapPos;
 			/// <summary>
 			/// World space scale of the <see cref="Tilemap"/>.
 			/// </summary>
-			public float TilemapScale;
+			public double TilemapScale;
 			/// <summary>
 			/// World space rotation of the <see cref="Tilemap"/>.
 			/// </summary>
-			public float TilemapAngle;
+			public double TilemapAngle;
 			/// <summary>
 			/// The size of a single tile in the <see cref="Tilemap"/>.
 			/// </summary>
-			public Vector2 TileSize;
+			public Vector2D TileSize;
 			/// <summary>
 			/// The total number of tiles in the <see cref="Tilemap"/>.
 			/// </summary>
@@ -61,15 +61,15 @@ namespace Duality.Plugins.Tilemaps
 			/// <summary>
 			/// The world space rendering origin of the visible tile rect.
 			/// </summary>
-			public Vector3 RenderOriginWorld;
+			public Vector3D RenderOriginWorld;
 			/// <summary>
 			/// The world space x axis of the rendered <see cref="Tilemap"/>, taking rotation and scale into account.
 			/// </summary>
-			public Vector2 XAxisWorld;
+			public Vector2D XAxisWorld;
 			/// <summary>
 			/// The world space y axis of the rendered <see cref="Tilemap"/>, taking rotation and scale into account.
 			/// </summary>
-			public Vector2 YAxisWorld;
+			public Vector2D YAxisWorld;
 		}
 
 		/// <summary>
@@ -88,53 +88,53 @@ namespace Duality.Plugins.Tilemaps
 			TileOutput output;
 
 			// Determine the view space transform of the tilemap
-			float cameraScaleAtObj = device.GetScaleAtZ(input.TilemapPos.Z);
-			Vector3 viewCenterWorldPos = device.GetWorldPos(new Vector3(device.TargetSize * 0.5f, input.TilemapPos.Z));
+			double cameraScaleAtObj = device.GetScaleAtZ((float)input.TilemapPos.Z);
+			Vector3D viewCenterWorldPos = device.GetWorldPos(new Vector3D(device.TargetSize * 0.5f, input.TilemapPos.Z));
 
 			// Early-out, if so small that it might break the math behind rendering a single tile.
 			if (cameraScaleAtObj <= 0.000000001f) return EmptyOutput;
 
 			// Determine transformed X and Y axis in world space
-			output.XAxisWorld = Vector2.UnitX;
-			output.YAxisWorld = Vector2.UnitY;
-			MathF.TransformCoord(ref output.XAxisWorld.X, ref output.XAxisWorld.Y, input.TilemapAngle, input.TilemapScale);
-			MathF.TransformCoord(ref output.YAxisWorld.X, ref output.YAxisWorld.Y, input.TilemapAngle, input.TilemapScale);
+			output.XAxisWorld = Vector2D.UnitX;
+			output.YAxisWorld = Vector2D.UnitY;
+			MathD.TransformCoord(ref output.XAxisWorld.X, ref output.XAxisWorld.Y, input.TilemapAngle, input.TilemapScale);
+			MathD.TransformCoord(ref output.YAxisWorld.X, ref output.YAxisWorld.Y, input.TilemapAngle, input.TilemapScale);
 
 			// Determine which tile is in the center of view space.
 			Point2 viewCenterTile = Point2.Zero;
 			{
-				Vector2 localViewCenter = (viewCenterWorldPos - input.TilemapPos).Xy;
-				localViewCenter = new Vector2(
-					Vector2.Dot(localViewCenter, output.XAxisWorld.Normalized),
-					Vector2.Dot(localViewCenter, output.YAxisWorld.Normalized)) / input.TilemapScale;
+				Vector2D localViewCenter = (viewCenterWorldPos - input.TilemapPos).Xy;
+				localViewCenter = new Vector2D(
+					Vector2D.Dot(localViewCenter, output.XAxisWorld.Normalized),
+					Vector2D.Dot(localViewCenter, output.YAxisWorld.Normalized)) / input.TilemapScale;
 				viewCenterTile = new Point2(
-					(int)MathF.Floor(localViewCenter.X / input.TileSize.X),
-					(int)MathF.Floor(localViewCenter.Y / input.TileSize.Y));
+					(int)MathD.Floor(localViewCenter.X / input.TileSize.X),
+					(int)MathD.Floor(localViewCenter.Y / input.TileSize.Y));
 			}
 
 			// Determine the edge length of a square that is big enough to enclose the world space rect of the Camera view
-			float visualAngle = input.TilemapAngle - device.ViewerAngle;
-			Vector2 visualBounds = new Vector2(
-				device.TargetSize.Y * MathF.Abs(MathF.Sin(visualAngle)) + device.TargetSize.X * MathF.Abs(MathF.Cos(visualAngle)),
-				device.TargetSize.X * MathF.Abs(MathF.Sin(visualAngle)) + device.TargetSize.Y * MathF.Abs(MathF.Cos(visualAngle)));
-			Vector2 localVisualBounds = visualBounds / cameraScaleAtObj;
+			double visualAngle = input.TilemapAngle - device.ViewerAngle;
+			Vector2D visualBounds = new Vector2D(
+				device.TargetSize.Y * MathD.Abs(MathD.Sin(visualAngle)) + device.TargetSize.X * MathD.Abs(MathD.Cos(visualAngle)),
+				device.TargetSize.X * MathD.Abs(MathD.Sin(visualAngle)) + device.TargetSize.Y * MathD.Abs(MathD.Cos(visualAngle)));
+			Vector2D localVisualBounds = visualBounds / cameraScaleAtObj;
 			Point2 targetVisibleTileCount = new Point2(
-				3 + (int)MathF.Ceiling(localVisualBounds.X / (MathF.Min(input.TileSize.X, input.TileSize.Y) * input.TilemapScale)), 
-				3 + (int)MathF.Ceiling(localVisualBounds.Y / (MathF.Min(input.TileSize.X, input.TileSize.Y) * input.TilemapScale)));
+				3 + (int)MathD.Ceiling(localVisualBounds.X / (MathD.Min(input.TileSize.X, input.TileSize.Y) * input.TilemapScale)), 
+				3 + (int)MathD.Ceiling(localVisualBounds.Y / (MathD.Min(input.TileSize.X, input.TileSize.Y) * input.TilemapScale)));
 
 			// Determine the tile indices (xy) that are visible within that rect
 			output.VisibleTileStart = new Point2(
-				MathF.Max(viewCenterTile.X - targetVisibleTileCount.X / 2, 0),
-				MathF.Max(viewCenterTile.Y - targetVisibleTileCount.Y / 2, 0));
+				MathD.Max(viewCenterTile.X - targetVisibleTileCount.X / 2, 0),
+				MathD.Max(viewCenterTile.Y - targetVisibleTileCount.Y / 2, 0));
 			Point2 tileGridEndPos = new Point2(
-				MathF.Min(viewCenterTile.X + targetVisibleTileCount.X / 2, input.TileCount.X),
-				MathF.Min(viewCenterTile.Y + targetVisibleTileCount.Y / 2, input.TileCount.Y));
+				MathD.Min(viewCenterTile.X + targetVisibleTileCount.X / 2, input.TileCount.X),
+				MathD.Min(viewCenterTile.Y + targetVisibleTileCount.Y / 2, input.TileCount.Y));
 			output.VisibleTileCount = new Point2(
-				MathF.Clamp(tileGridEndPos.X - output.VisibleTileStart.X, 0, input.TileCount.X),
-				MathF.Clamp(tileGridEndPos.Y - output.VisibleTileStart.Y, 0, input.TileCount.Y));
+				MathD.Clamp(tileGridEndPos.X - output.VisibleTileStart.X, 0, input.TileCount.X),
+				MathD.Clamp(tileGridEndPos.Y - output.VisibleTileStart.Y, 0, input.TileCount.Y));
 
 			// Determine start position for rendering
-			output.RenderOriginWorld = input.TilemapPos + new Vector3(
+			output.RenderOriginWorld = input.TilemapPos + new Vector3D(
 				output.VisibleTileStart.X * output.XAxisWorld * input.TileSize.X + 
 				output.VisibleTileStart.Y * output.YAxisWorld * input.TileSize.Y);
 

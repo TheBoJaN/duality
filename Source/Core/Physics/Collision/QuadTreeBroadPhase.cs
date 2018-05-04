@@ -117,7 +117,7 @@ public class QuadTreeBroadPhase : IBroadPhase
 			throw new KeyNotFoundException("proxyID not found in register");
 	}
 
-	public void MoveProxy(int proxyId, ref AABB aabb, Vector2 displacement)
+	public void MoveProxy(int proxyId, ref AABB aabb, Vector2D displacement)
 	{
 		AABB fatAABB;
 		GetFatAABB(proxyId, out fatAABB);
@@ -128,12 +128,12 @@ public class QuadTreeBroadPhase : IBroadPhase
 
 		// Extend AABB.
 		AABB b = aabb;
-		Vector2 r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
+		Vector2D r = new Vector2D(Settings.AABBExtension, Settings.AABBExtension);
 		b.LowerBound = b.LowerBound - r;
 		b.UpperBound = b.UpperBound + r;
 
 		// Predict AABB displacement.
-		Vector2 d = Settings.AABBMultiplier * displacement;
+		Vector2D d = Settings.AABBMultiplier * displacement;
 
 		if (d.X < 0.0f)
 			b.LowerBound.X += d.X;
@@ -176,7 +176,7 @@ public class QuadTreeBroadPhase : IBroadPhase
 		this._quadTree.QueryAABB(TransformPredicate(callback), ref query);
 	}
 
-	public void RayCast(Func<RayCastInput, int, float> callback, ref RayCastInput input)
+	public void RayCast(Func<RayCastInput, int, double> callback, ref RayCastInput input)
 	{
 		this._quadTree.RayCast(TransformRayCallback(callback), ref input);
 	}
@@ -185,7 +185,7 @@ public class QuadTreeBroadPhase : IBroadPhase
 
 	private AABB Fatten(ref AABB aabb)
 	{
-		Vector2 r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
+		Vector2D r = new Vector2D(Settings.AABBExtension, Settings.AABBExtension);
 		return new AABB(aabb.LowerBound - r, aabb.UpperBound + r);
 	}
 
@@ -195,10 +195,10 @@ public class QuadTreeBroadPhase : IBroadPhase
 		return qtPred;
 	}
 
-	private Func<RayCastInput, Element<FixtureProxy>, float> TransformRayCallback(
-		Func<RayCastInput, int, float> callback)
+	private Func<RayCastInput, Element<FixtureProxy>, double> TransformRayCallback(
+		Func<RayCastInput, int, double> callback)
 	{
-		Func<RayCastInput, Element<FixtureProxy>, float> newCallback =
+		Func<RayCastInput, Element<FixtureProxy>, double> newCallback =
 			(input, qtnode) => callback(input, qtnode.Value.ProxyId);
 		return newCallback;
 	}

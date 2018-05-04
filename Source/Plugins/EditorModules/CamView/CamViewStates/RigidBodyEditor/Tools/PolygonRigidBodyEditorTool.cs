@@ -36,7 +36,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			get { return 2; }
 		}
 		
-		protected override VertexBasedShapeInfo CreateShapeInfo(Vector2[] vertices)
+		protected override VertexBasedShapeInfo CreateShapeInfo(Vector2D[] vertices)
 		{
 			return new PolyShapeInfo(vertices, 1.0f);
 		}

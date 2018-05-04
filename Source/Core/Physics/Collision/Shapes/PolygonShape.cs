@@ -45,7 +45,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// </summary>
 		/// <param name="vertices">The vertices.</param>
 		/// <param name="density">The density.</param>
-		public PolygonShape(Vertices vertices, float density)
+		public PolygonShape(Vertices vertices, double density)
 			: base(density)
 		{
 			this.ShapeType = ShapeType.Polygon;
@@ -54,7 +54,7 @@ namespace FarseerPhysics.Collision.Shapes
 			Set(vertices);
 		}
 
-		public PolygonShape(float density)
+		public PolygonShape(double density)
 			: base(density)
 		{
 			this.ShapeType = ShapeType.Polygon;
@@ -155,13 +155,13 @@ namespace FarseerPhysics.Collision.Shapes
 			if (this._density <= 0)
 				return;
 
-			Vector2 center = Vector2.Zero;
-			float area = 0.0f;
-			float I = 0.0f;
+			Vector2D center = Vector2.Zero;
+			double area = 0.0f;
+			double I = 0.0f;
 
 			// pRef is the reference point for forming triangles.
 			// It's location doesn't change the result (except for rounding error).
-			Vector2 pRef = Vector2.Zero;
+			Vector2D pRef = Vector2D.Zero;
 
 #if false
     // This code would put the reference point inside the polygon.
@@ -172,34 +172,34 @@ namespace FarseerPhysics.Collision.Shapes
 	        pRef *= 1.0f / count;
 #endif
 
-			const float inv3 = 1.0f / 3.0f;
+			const double inv3 = 1.0f / 3.0f;
 
 			for (int i = 0; i < this.Vertices.Count; ++i)
 			{
 				// Triangle vertices.
-				Vector2 p1 = pRef;
-				Vector2 p2 = this.Vertices[i];
-				Vector2 p3 = i + 1 < this.Vertices.Count ? this.Vertices[i + 1] : this.Vertices[0];
+				Vector2D p1 = pRef;
+				Vector2D p2 = this.Vertices[i];
+				Vector2D p3 = i + 1 < this.Vertices.Count ? this.Vertices[i + 1] : this.Vertices[0];
 
-				Vector2 e1 = p2 - p1;
-				Vector2 e2 = p3 - p1;
+				Vector2D e1 = p2 - p1;
+				Vector2D e2 = p3 - p1;
 
-				float d;
+				double d;
 				MathUtils.Cross(ref e1, ref e2, out d);
 
-				float triangleArea = 0.5f * d;
+				double triangleArea = 0.5f * d;
 				area += triangleArea;
 
 				// Area weighted centroid
 				center += triangleArea * inv3 * (p1 + p2 + p3);
 
-				float px = p1.X, py = p1.Y;
-				float ex1 = e1.X, ey1 = e1.Y;
-				float ex2 = e2.X, ey2 = e2.Y;
+				double px = p1.X, py = p1.Y;
+				double ex1 = e1.X, ey1 = e1.Y;
+				double ex2 = e2.X, ey2 = e2.Y;
 
-				float intx2 = inv3 * (0.25f * (ex1 * ex1 + ex2 * ex1 + ex2 * ex2) + (px * ex1 + px * ex2)) +
+				double intx2 = inv3 * (0.25f * (ex1 * ex1 + ex2 * ex1 + ex2 * ex2) + (px * ex1 + px * ex2)) +
 							  0.5f * px * px;
-				float inty2 = inv3 * (0.25f * (ey1 * ey1 + ey2 * ey1 + ey2 * ey2) + (py * ey1 + py * ey2)) +
+				double inty2 = inv3 * (0.25f * (ey1 * ey1 + ey2 * ey1 + ey2 * ey2) + (py * ey1 + py * ey2)) +
 							  0.5f * py * py;
 
 				I += d * (intx2 + inty2);
@@ -227,7 +227,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// </summary>
 		/// <param name="halfWidth">The half-width.</param>
 		/// <param name="halfHeight">The half-height.</param>
-		public void SetAsBox(float halfWidth, float halfHeight)
+		public void SetAsBox(double halfWidth, double halfHeight)
 		{
 			Set(PolygonTools.CreateRectangle(halfWidth, halfHeight));
 		}
@@ -239,7 +239,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="halfHeight">The half-height.</param>
 		/// <param name="center">The center of the box in local coordinates.</param>
 		/// <param name="angle">The rotation of the box in local coordinates.</param>
-		public void SetAsBox(float halfWidth, float halfHeight, Vector2 center, float angle)
+		public void SetAsBox(double halfWidth, double halfHeight, Vector2 center, double angle)
 		{
 			Set(PolygonTools.CreateRectangle(halfWidth, halfHeight, center, angle));
 		}
@@ -250,13 +250,13 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="transform">The shape world transform.</param>
 		/// <param name="point">a point in world coordinates.</param>
 		/// <returns>True if the point is inside the shape</returns>
-		public override bool TestPoint(ref Transform transform, ref Vector2 point)
+		public override bool TestPoint(ref Transform transform, ref Vector2D point)
 		{
-			Vector2 pLocal = MathUtils.MultiplyT(ref transform.R, point - transform.Position);
+			Vector2D pLocal = MathUtils.MultiplyT(ref transform.R, point - transform.Position);
 
 			for (int i = 0; i < this.Vertices.Count; ++i)
 			{
-				float dot = Vector2.Dot(this.Normals[i], pLocal - this.Vertices[i]);
+				double dot = Vector2D.Dot(this.Normals[i], pLocal - this.Vertices[i]);
 				if (dot > 0.0f)
 				{
 					return false;
@@ -280,11 +280,11 @@ namespace FarseerPhysics.Collision.Shapes
 			output = new RayCastOutput();
 
 			// Put the ray into the polygon's frame of reference.
-			Vector2 p1 = MathUtils.MultiplyT(ref transform.R, input.Point1 - transform.Position);
-			Vector2 p2 = MathUtils.MultiplyT(ref transform.R, input.Point2 - transform.Position);
-			Vector2 d = p2 - p1;
+			Vector2D p1 = MathUtils.MultiplyT(ref transform.R, input.Point1 - transform.Position);
+			Vector2D p2 = MathUtils.MultiplyT(ref transform.R, input.Point2 - transform.Position);
+			Vector2D d = p2 - p1;
 
-			float lower = 0.0f, upper = input.MaxFraction;
+			double lower = 0.0f, upper = input.MaxFraction;
 
 			int index = -1;
 
@@ -293,8 +293,8 @@ namespace FarseerPhysics.Collision.Shapes
 				// p = p1 + a * d
 				// dot(normal, p - v) = 0
 				// dot(normal, p1 - v) + a * dot(normal, d) = 0
-				float numerator = Vector2.Dot(this.Normals[i], this.Vertices[i] - p1);
-				float denominator = Vector2.Dot(this.Normals[i], d);
+				double numerator = Vector2D.Dot(this.Normals[i], this.Vertices[i] - p1);
+				double denominator = Vector2D.Dot(this.Normals[i], d);
 
 				if (denominator == 0.0f)
 				{
@@ -354,17 +354,17 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="childIndex">The child shape index.</param>
 		public override void ComputeAABB(out AABB aabb, ref Transform transform, int childIndex)
 		{
-			Vector2 lower = MathUtils.Multiply(ref transform, this.Vertices[0]);
-			Vector2 upper = lower;
+			Vector2D lower = MathUtils.Multiply(ref transform, this.Vertices[0]);
+			Vector2D upper = lower;
 
 			for (int i = 1; i < this.Vertices.Count; ++i)
 			{
-				Vector2 v = MathUtils.Multiply(ref transform, this.Vertices[i]);
-				lower = Vector2.Min(lower, v);
-				upper = Vector2.Max(upper, v);
+				Vector2D v = MathUtils.Multiply(ref transform, this.Vertices[i]);
+				lower = Vector2D.Min(lower, v);
+				upper = Vector2D.Max(upper, v);
 			}
 
-			Vector2 r = new Vector2(this.Radius, this.Radius);
+			Vector2D r = new Vector2D(this.Radius, this.Radius);
 			aabb.LowerBound = lower - r;
 			aabb.UpperBound = upper + r;
 		}
@@ -384,15 +384,15 @@ namespace FarseerPhysics.Collision.Shapes
 					this.MassData == shape.MassData);
 		}
 
-		public override float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc)
+		public override double ComputeSubmergedArea(Vector2D normal, double offset, Transform xf, out Vector2D sc)
 		{
-			sc = Vector2.Zero;
+			sc = Vector2D.Zero;
 
 			//Transform plane into shape co-ordinates
-			Vector2 normalL = MathUtils.MultiplyT(ref xf.R, normal);
-			float offsetL = offset - Vector2.Dot(normal, xf.Position);
+			Vector2D normalL = MathUtils.MultiplyT(ref xf.R, normal);
+			double offsetL = offset - Vector2D.Dot(normal, xf.Position);
 
-			float[] depths = new float[Settings.MaxPolygonVertices];
+			double[] depths = new double[Settings.MaxPolygonVertices];
 			int diveCount = 0;
 			int intoIndex = -1;
 			int outoIndex = -1;
@@ -401,7 +401,7 @@ namespace FarseerPhysics.Collision.Shapes
 			int i;
 			for (i = 0; i < this.Vertices.Count; i++)
 			{
-				depths[i] = Vector2.Dot(normalL, this.Vertices[i]) - offsetL;
+				depths[i] = Vector2D.Dot(normalL, this.Vertices[i]) - offsetL;
 				bool isSubmerged = depths[i] < -Settings.Epsilon;
 				if (i > 0)
 				{
@@ -452,23 +452,23 @@ namespace FarseerPhysics.Collision.Shapes
 			int intoIndex2 = (intoIndex + 1) % this.Vertices.Count;
 			int outoIndex2 = (outoIndex + 1) % this.Vertices.Count;
 
-			float intoLambda = (0 - depths[intoIndex]) / (depths[intoIndex2] - depths[intoIndex]);
-			float outoLambda = (0 - depths[outoIndex]) / (depths[outoIndex2] - depths[outoIndex]);
+			double intoLambda = (0 - depths[intoIndex]) / (depths[intoIndex2] - depths[intoIndex]);
+			double outoLambda = (0 - depths[outoIndex]) / (depths[outoIndex2] - depths[outoIndex]);
 
-			Vector2 intoVec = new Vector2(
+			Vector2D intoVec = new Vector2D(
 				this.Vertices[intoIndex].X * (1 - intoLambda) + this.Vertices[intoIndex2].X * intoLambda,
 				this.Vertices[intoIndex].Y * (1 - intoLambda) + this.Vertices[intoIndex2].Y * intoLambda);
-			Vector2 outoVec = new Vector2(
+			Vector2D outoVec = new Vector2D(
 				this.Vertices[outoIndex].X * (1 - outoLambda) + this.Vertices[outoIndex2].X * outoLambda,
 				this.Vertices[outoIndex].Y * (1 - outoLambda) + this.Vertices[outoIndex2].Y * outoLambda);
 
 			//Initialize accumulator
-			float area = 0;
-			Vector2 center = new Vector2(0, 0);
-			Vector2 p2 = this.Vertices[intoIndex2];
-			Vector2 p3;
+			double area = 0;
+			Vector2D center = new Vector2(0, 0);
+			Vector2D p2 = this.Vertices[intoIndex2];
+			Vector2D p3;
 
-			float k_inv3 = 1.0f / 3.0f;
+			double k_inv3 = 1.0f / 3.0f;
 
 			//An awkward loop from intoIndex2+1 to outIndex2
 			i = intoIndex2;
@@ -481,12 +481,12 @@ namespace FarseerPhysics.Collision.Shapes
 					p3 = this.Vertices[i];
 				//Add the triangle formed by intoVec,p2,p3
 				{
-					Vector2 e1 = p2 - intoVec;
-					Vector2 e2 = p3 - intoVec;
+					Vector2D e1 = p2 - intoVec;
+					Vector2D e2 = p3 - intoVec;
 
-					float D = MathUtils.Cross(e1, e2);
+					double D = MathUtils.Cross(e1, e2);
 
-					float triangleArea = 0.5f * D;
+					double triangleArea = 0.5f * D;
 
 					area += triangleArea;
 

@@ -31,14 +31,14 @@ namespace FarseerPhysics.Collision.Shapes
 {
 	public class CircleShape : Shape
 	{
-		internal Vector2 _position;
+		internal Vector2D _position;
 
-		public CircleShape(float radius, float density)
+		public CircleShape(double radius, double density)
 			: base(density)
 		{
 			this.ShapeType = ShapeType.Circle;
 			this._radius = radius;
-			this._position = Vector2.Zero;
+			this._position = Vector2D.Zero;
 			ComputeProperties();
 		}
 
@@ -47,7 +47,7 @@ namespace FarseerPhysics.Collision.Shapes
 		{
 			this.ShapeType = ShapeType.Circle;
 			this._radius = 0.0f;
-			this._position = Vector2.Zero;
+			this._position = Vector2D.Zero;
 		}
 
 		public override int ChildCount
@@ -55,7 +55,7 @@ namespace FarseerPhysics.Collision.Shapes
 			get { return 1; }
 		}
 
-		public Vector2 Position
+		public Vector2D Position
 		{
 			get { return this._position; }
 			set
@@ -82,11 +82,11 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="transform">The shape world transform.</param>
 		/// <param name="point">a point in world coordinates.</param>
 		/// <returns>True if the point is inside the shape</returns>
-		public override bool TestPoint(ref Transform transform, ref Vector2 point)
+		public override bool TestPoint(ref Transform transform, ref Vector2D point)
 		{
-			Vector2 center = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
-			Vector2 d = point - center;
-			return Vector2.Dot(d, d) <= this.Radius * this.Radius;
+			Vector2D center = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
+			Vector2D d = point - center;
+			return Vector2D.Dot(d, d) <= this.Radius * this.Radius;
 		}
 
 		/// <summary>
@@ -107,15 +107,15 @@ namespace FarseerPhysics.Collision.Shapes
 
 			output = new RayCastOutput();
 
-			Vector2 position = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
-			Vector2 s = input.Point1 - position;
-			float b = Vector2.Dot(s, s) - this.Radius * this.Radius;
+			Vector2D position = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
+			Vector2D s = input.Point1 - position;
+			double b = Vector2D.Dot(s, s) - this.Radius * this.Radius;
 
 			// Solve quadratic equation.
-			Vector2 r = input.Point2 - input.Point1;
-			float c = Vector2.Dot(s, r);
-			float rr = Vector2.Dot(r, r);
-			float sigma = c * c - rr * b;
+			Vector2D r = input.Point2 - input.Point1;
+			double c = Vector2D.Dot(s, r);
+			double rr = Vector2D.Dot(r, r);
+			double sigma = c * c - rr * b;
 
 			// Check for negative discriminant and short segment.
 			if (sigma < 0.0f || rr < Settings.Epsilon)
@@ -124,14 +124,14 @@ namespace FarseerPhysics.Collision.Shapes
 			}
 
 			// Find the point of intersection of the line with the circle.
-			float a = -(c + (float)Math.Sqrt(sigma));
+			double a = -(c + (double)Math.Sqrt(sigma));
 
 			// Is the intersection point on the segment?
 			if (0.0f <= a && a <= input.MaxFraction * rr)
 			{
 				a /= rr;
 				output.Fraction = a;
-				Vector2 norm = (s + a * r);
+				Vector2D norm = (s + a * r);
 				norm.Normalize();
 				output.Normal = norm;
 				return true;
@@ -148,9 +148,9 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="childIndex">The child shape index.</param>
 		public override void ComputeAABB(out AABB aabb, ref Transform transform, int childIndex)
 		{
-			Vector2 p = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
-			aabb.LowerBound = new Vector2(p.X - this.Radius, p.Y - this.Radius);
-			aabb.UpperBound = new Vector2(p.X + this.Radius, p.Y + this.Radius);
+			Vector2D p = transform.Position + MathUtils.Multiply(ref transform.R, this.Position);
+			aabb.LowerBound = new Vector2D(p.X - this.Radius, p.Y - this.Radius);
+			aabb.UpperBound = new Vector2D(p.X + this.Radius, p.Y + this.Radius);
 		}
 
 		/// <summary>
@@ -159,13 +159,13 @@ namespace FarseerPhysics.Collision.Shapes
 		/// </summary>
 		public override sealed void ComputeProperties()
 		{
-			float area = Settings.Pi * this.Radius * this.Radius;
+			double area = Settings.Pi * this.Radius * this.Radius;
 			this.MassData.Area = area;
 			this.MassData.Mass = this.Density * area;
 			this.MassData.Centroid = this.Position;
 
 			// inertia about the local origin
-			this.MassData.Inertia = this.MassData.Mass * (0.5f * this.Radius * this.Radius + Vector2.Dot(this.Position, this.Position));
+			this.MassData.Inertia = this.MassData.Mass * (0.5f * this.Radius * this.Radius + Vector2D.Dot(this.Position, this.Position));
 		}
 
 		public bool CompareTo(CircleShape shape)
@@ -174,12 +174,12 @@ namespace FarseerPhysics.Collision.Shapes
 					this.Position == shape.Position);
 		}
 
-		public override float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc)
+		public override double ComputeSubmergedArea(Vector2D normal, double offset, Transform xf, out Vector2D sc)
 		{
-			sc = Vector2.Zero;
+			sc = Vector2D.Zero;
 
-			Vector2 p = MathUtils.Multiply(ref xf, this.Position);
-			float l = -(Vector2.Dot(normal, p) - offset);
+			Vector2D p = MathUtils.Multiply(ref xf, this.Position);
+			double l = -(Vector2D.Dot(normal, p) - offset);
 			if (l < -this.Radius + Settings.Epsilon)
 			{
 				//Completely dry
@@ -193,10 +193,10 @@ namespace FarseerPhysics.Collision.Shapes
 			}
 
 			//Magic
-			float r2 = this.Radius * this.Radius;
-			float l2 = l * l;
-			float area = r2 * (float)((Math.Asin(l / this.Radius) + Settings.Pi / 2) + l * Math.Sqrt(r2 - l2));
-			float com = -2.0f / 3.0f * (float)Math.Pow(r2 - l2, 1.5f) / area;
+			double r2 = this.Radius * this.Radius;
+			double l2 = l * l;
+			double area = r2 * (double)((Math.Asin(l / this.Radius) + Settings.Pi / 2) + l * Math.Sqrt(r2 - l2));
+			double com = -2.0f / 3.0f * (double)Math.Pow(r2 - l2, 1.5f) / area;
 
 			sc.X = p.X + normal.X * com;
 			sc.Y = p.Y + normal.Y * com;

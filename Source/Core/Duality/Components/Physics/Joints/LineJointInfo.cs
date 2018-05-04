@@ -16,21 +16,21 @@ namespace Duality.Components.Physics
 	/// </summary>
 	public sealed class LineJointInfo : JointInfo
 	{
-		private	Vector2		localAnchorA	= Vector2.Zero;
-		private	Vector2		localAnchorB	= Vector2.Zero;
-		private	Vector2		moveAxis		= Vector2.UnitY;
+		private	Vector2D		localAnchorA	= Vector2D.Zero;
+		private	Vector2D		localAnchorB	= Vector2D.Zero;
+		private	Vector2D		moveAxis		= Vector2D.UnitY;
 		private	bool		motorEnabled	= false;
-		private float		maxMotorTorque	= 0.0f;
-		private float		motorSpeed		= 0.0f;
-		private	float		dampingRatio	= 0.5f;
-		private	float		frequency		= 5.0f;
+		private double		maxMotorTorque	= 0.0f;
+		private double		motorSpeed		= 0.0f;
+		private	double		dampingRatio	= 0.5f;
+		private	double		frequency		= 5.0f;
 
 
 		/// <summary>
 		/// [GET / SET] The car RigidBodies local anchor point.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 CarAnchor
+		public Vector2D CarAnchor
 		{
 			get { return this.localAnchorA; }
 			set { this.localAnchorA = value; this.UpdateJoint(); }
@@ -39,7 +39,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The wheel RigidBodies local anchor point.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 WheelAnchor
+		public Vector2D WheelAnchor
 		{
 			get { return this.localAnchorB; }
 			set { this.localAnchorB = value; this.UpdateJoint(); }
@@ -47,7 +47,7 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The axis on which the body may move.
 		/// </summary>
-		public Vector2 MovementAxis
+		public Vector2D MovementAxis
 		{
 			get { return this.moveAxis; }
 			set { this.moveAxis = value; this.UpdateJoint(); }
@@ -56,7 +56,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The damping ratio. Zero means "no damping", one means "critical damping".
 		/// </summary>
 		[EditorHintRange(0.0f, 1.0f)]
-		public float DampingRatio
+		public double DampingRatio
 		{
 			get { return this.dampingRatio; }
 			set { this.dampingRatio = value; this.UpdateJoint(); }
@@ -65,7 +65,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The mass spring damper frequency in hertz.
 		/// </summary>
 		[EditorHintRange(0.01f, 1000.0f)]
-		public float Frequency
+		public double Frequency
 		{
 			get { return this.frequency; }
 			set { this.frequency = value; this.UpdateJoint(); }
@@ -84,7 +84,7 @@ namespace Duality.Components.Physics
 		[EditorHintIncrement(10.0f)]
 		[EditorHintDecimalPlaces(0)]
 		[EditorHintRange(0, 100000, 0, 5000)]
-		public float MaxMotorTorque
+		public double MaxMotorTorque
 		{
 			get { return this.maxMotorTorque; }
 			set { this.maxMotorTorque = value; this.UpdateJoint(); }
@@ -92,8 +92,8 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The desired motor speed in radians per frame.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float MotorSpeed
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double MotorSpeed
 		{
 			get { return this.motorSpeed; }
 			set { this.motorSpeed = value; this.UpdateJoint(); }
@@ -102,7 +102,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint angle speed in radians per frame.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointSpeed
+		public double JointSpeed
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.AngularVelocityToDuality * (this.joint as LineJoint).JointSpeed); }
 		}
@@ -110,7 +110,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint translation.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointTranslation
+		public double JointTranslation
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.LengthToDuality * (this.joint as LineJoint).JointTranslation); }
 		}
@@ -118,7 +118,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint motor torque.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float MotorTorque
+		public double MotorTorque
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.TorqueToDuality * (this.joint as LineJoint).GetMotorTorque(1.0f)); }
 		}
@@ -126,7 +126,7 @@ namespace Duality.Components.Physics
 
 		protected override Joint CreateJoint(World world, Body bodyA, Body bodyB)
 		{
-			return bodyA != null && bodyB != null ? JointFactory.CreateLineJoint(world, bodyA, bodyB, Vector2.Zero, Vector2.UnitY) : null;
+			return bodyA != null && bodyB != null ? JointFactory.CreateLineJoint(world, bodyA, bodyB, Vector2D.Zero, Vector2D.UnitY) : null;
 		}
 		internal override void UpdateJoint()
 		{

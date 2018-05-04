@@ -22,9 +22,9 @@ namespace Duality.Plugins.Tilemaps
 		private Alignment           origin          = Alignment.Center;
 		private Tilemap             externalTilemap = null;
 		private ColorRgba           colorTint       = ColorRgba.White;
-		private float               offset          = 0.0f;
+		private double               offset          = 0.0f;
 		private int                 tileDepthOffset = 0;
-		private float               tileDepthScale  = 0.01f;
+		private double               tileDepthScale  = 0.01f;
 		private TileDepthOffsetMode tileDepthMode   = TileDepthOffsetMode.Flat;
 
 		[DontSerialize] private Tilemap localTilemap = null;
@@ -37,7 +37,7 @@ namespace Duality.Plugins.Tilemaps
 		/// For an absolute offset that is not based on per-tile depth, see <see cref="DepthOffset"/>.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float BaseDepthOffset
+		public double BaseDepthOffset
 		{
 			get
 			{
@@ -46,8 +46,8 @@ namespace Duality.Plugins.Tilemaps
 
 				Tilemap tilemap = this.ActiveTilemap;
 				Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
-				Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
-				float depthPerTile = -tileSize.Y * this.GameObj.Transform.Scale * this.tileDepthScale;
+				Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+				double depthPerTile = -tileSize.Y * this.GameObj.Transform.Scale * this.tileDepthScale;
 
 				return this.offset + this.tileDepthOffset * depthPerTile;
 			}
@@ -56,7 +56,7 @@ namespace Duality.Plugins.Tilemaps
 		/// [GET / SET] An absolute depth offset that is added to the entire <see cref="Tilemap"/> as whole.
 		/// For a relative offset based on per-tile depth, see <see cref="BaseDepthOffset"/>.
 		/// </summary>
-		public float DepthOffset
+		public double DepthOffset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
@@ -78,7 +78,7 @@ namespace Duality.Plugins.Tilemaps
 		/// [GET / SET] The depth offset scale that is used to determine how much depth each 
 		/// tile / pixel / unit adds when using non-flat depth offset generation.
 		/// </summary>
-		public float TileDepthScale
+		public double TileDepthScale
 		{
 			get { return this.tileDepthScale; }
 			set { this.tileDepthScale = value; }
@@ -139,21 +139,21 @@ namespace Duality.Plugins.Tilemaps
 		/// <summary>
 		/// [GET] The rectangular region that is occupied by the rendered <see cref="Tilemap"/>, in local / object space.
 		/// </summary>
-		public Rect LocalTilemapRect
+		public RectD LocalTilemapRect
 		{
 			get
 			{
 				Tilemap tilemap = this.ActiveTilemap;
 				Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
 				Point2 tileCount = tilemap != null ? tilemap.Size : Point2.Zero;
-				Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
-				return Rect.Align(this.origin, 0, 0, tileCount.X * tileSize.X, tileCount.Y * tileSize.Y);
+				Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+				return RectD.Align(this.origin, 0, 0, tileCount.X * tileSize.X, tileCount.Y * tileSize.Y);
 			}
 		}
 		/// <summary>
 		/// [GET] Returns the size of a single tile in local / object space.
 		/// </summary>
-		public Vector2 LocalTileSize
+		public Vector2D LocalTileSize
 		{
 			get
 			{
@@ -162,12 +162,12 @@ namespace Duality.Plugins.Tilemaps
 				return tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 			}
 		}
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get
 			{
 				Transform transform = this.GameObj.Transform;
-				Rect tilemapRect = this.LocalTilemapRect;
+				RectD tilemapRect = this.LocalTilemapRect;
 				return tilemapRect.BoundingRadius * transform.Scale;
 			}
 		}
@@ -180,22 +180,22 @@ namespace Duality.Plugins.Tilemaps
 		/// <param name="localPos"></param>
 		/// <param name="pickMode">Specifies the desired behavior when attempting to get a tile outside the rendered area.</param>
 		/// <returns></returns>
-		public Point2 GetTileAtLocalPos(Vector2 localPos, TilePickMode pickMode)
+		public Point2 GetTileAtLocalPos(Vector2D localPos, TilePickMode pickMode)
 		{
 			// Early-out, if the specified local position is not within the tilemap rect
-			Rect localRect = this.LocalTilemapRect;
+			RectD localRect = this.LocalTilemapRect;
 			if (pickMode == TilePickMode.Reject && !localRect.Contains(localPos))
 				return new Point2(-1, -1);
 
 			Tilemap tilemap = this.ActiveTilemap;
 			Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
 			Point2 tileCount = tilemap != null ? tilemap.Size : Point2.Zero;
-			Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+			Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 
 			// Determine the tile index at the specified local position
 			Point2 tileIndex = new Point2(
-				(int)MathF.Floor((localPos.X - localRect.X) / tileSize.X),
-				(int)MathF.Floor((localPos.Y - localRect.Y) / tileSize.Y));
+				(int)MathD.Floor((localPos.X - localRect.X) / tileSize.X),
+				(int)MathD.Floor((localPos.Y - localRect.Y) / tileSize.Y));
 
 			// Clamp or reject the tile index when required
 			if (pickMode != TilePickMode.Free)
@@ -204,8 +204,8 @@ namespace Duality.Plugins.Tilemaps
 					return new Point2(-1, -1);
 
 				tileIndex = new Point2(
-					MathF.Clamp(tileIndex.X, 0, tileCount.X - 1),
-					MathF.Clamp(tileIndex.Y, 0, tileCount.Y - 1));
+					MathD.Clamp(tileIndex.X, 0, tileCount.X - 1),
+					MathD.Clamp(tileIndex.Y, 0, tileCount.Y - 1));
 			}
 
 			return tileIndex;
@@ -216,15 +216,15 @@ namespace Duality.Plugins.Tilemaps
 		/// </summary>
 		/// <param name="tilePos">The index of the tile of which to calculate the local position.</param>
 		/// <returns></returns>
-		public Vector2 GetLocalPosAtTile(Point2 tilePos)
+		public Vector2D GetLocalPosAtTile(Point2 tilePos)
 		{
-			Rect localRect = this.LocalTilemapRect;
+			RectD localRect = this.LocalTilemapRect;
 			Tilemap tilemap = this.ActiveTilemap;
 			Point2 tileCount = tilemap != null ? tilemap.Size : new Point2(1, 1);
 
-			return new Vector2(
-				MathF.Lerp(localRect.LeftX, localRect.RightX, (float)tilePos.X / tileCount.X),
-				MathF.Lerp(localRect.TopY, localRect.BottomY, (float)tilePos.Y / tileCount.Y));
+			return new Vector2D(
+				MathD.Lerp(localRect.LeftX, localRect.RightX, (double)tilePos.X / tileCount.X),
+				MathD.Lerp(localRect.TopY, localRect.BottomY, (double)tilePos.Y / tileCount.Y));
 		}
 		/// <summary>
 		/// Determines the generated depth offset for the tile at the specified tile coordinates.
@@ -234,7 +234,7 @@ namespace Duality.Plugins.Tilemaps
 		/// </summary>
 		/// <param name="tilePos">The index of the tile of which to calculate the depth offset.</param>
 		/// <returns></returns>
-		public float GetTileDepthOffsetAt(Point2 tilePos)
+		public double GetTileDepthOffsetAt(Point2 tilePos)
 		{
 			if (this.tileDepthMode == TileDepthOffsetMode.Flat)
 				return this.offset;
@@ -242,13 +242,13 @@ namespace Duality.Plugins.Tilemaps
 			Tilemap tilemap = this.ActiveTilemap;
 			Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
 			Point2 tileCount = tilemap != null ? tilemap.Size : new Point2(1, 1);
-			Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+			Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 
-			float depthPerTile = -tileSize.Y * this.GameObj.Transform.Scale * this.tileDepthScale;
-			float originDepthOffset = Rect.Align(this.origin, 0, 0, 0, tileCount.Y * depthPerTile).Y;
+			double depthPerTile = -tileSize.Y * this.GameObj.Transform.Scale * this.tileDepthScale;
+			double originDepthOffset = RectD.Align(this.origin, 0, 0, 0, tileCount.Y * depthPerTile).Y;
 
 			if (this.tileDepthMode == TileDepthOffsetMode.World)
-				originDepthOffset += (this.GameObj.Transform.Pos.Y / (float)tileSize.Y) * depthPerTile;
+				originDepthOffset += (this.GameObj.Transform.Pos.Y / (double)tileSize.Y) * depthPerTile;
 
 			return this.offset + this.tileDepthOffset * depthPerTile + originDepthOffset + tilePos.Y * depthPerTile;
 		}
@@ -259,23 +259,23 @@ namespace Duality.Plugins.Tilemaps
 			Tilemap tilemap = this.ActiveTilemap;
 			Tileset tileset = tilemap != null ? tilemap.Tileset.Res : null;
 			Point2 tileCount = tilemap != null ? tilemap.Size : new Point2(1, 1);
-			Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+			Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 
 			// Early-out, if insufficient
 			if (tilemap == null) return;
 			if (tileset == null) return;
 
 			// Determine the total size and origin of the rendered Tilemap
-			Vector2 renderTotalSize = tileCount * tileSize;
-			Vector2 renderOrigin = Vector2.Zero;
+			Vector2D renderTotalSize = tileCount * tileSize;
+			Vector2D renderOrigin = Vector2D.Zero;
 			this.origin.ApplyTo(ref renderOrigin, ref renderTotalSize);
-			MathF.TransformCoord(ref renderOrigin.X, ref renderOrigin.Y, this.GameObj.Transform.Angle, this.GameObj.Transform.Scale);
+			MathD.TransformCoord(ref renderOrigin.X, ref renderOrigin.Y, this.GameObj.Transform.Angle, this.GameObj.Transform.Scale);
 
 			// Determine Tile visibility
 			TilemapCulling.TileInput cullingIn = new TilemapCulling.TileInput
 			{
 				// Remember: All these transform values are in world space
-				TilemapPos = this.GameObj.Transform.Pos + new Vector3(renderOrigin),
+				TilemapPos = this.GameObj.Transform.Pos + new Vector3D(renderOrigin),
 				TilemapScale = this.GameObj.Transform.Scale,
 				TilemapAngle = this.GameObj.Transform.Angle,
 				TileCount = tileCount,
@@ -294,22 +294,22 @@ namespace Duality.Plugins.Tilemaps
 			VertexC1P3T2[] vertexData = this.vertices.Data;
 			
 			// Determine and adjust data for Z offset generation
-			float depthPerTile = -cullingIn.TileSize.Y * cullingIn.TilemapScale * this.tileDepthScale;
+			double depthPerTile = -cullingIn.TileSize.Y * cullingIn.TilemapScale * this.tileDepthScale;
 
 			if (this.tileDepthMode == TileDepthOffsetMode.Flat)
 				depthPerTile = 0.0f;
 
-			float originDepthOffset = Rect.Align(this.origin, 0, 0, 0, tileCount.Y * depthPerTile).Y;
+			double originDepthOffset = RectD.Align(this.origin, 0, 0, 0, tileCount.Y * depthPerTile).Y;
 			if (this.tileDepthMode == TileDepthOffsetMode.World)
-				originDepthOffset += (this.GameObj.Transform.Pos.Y / (float)tileSize.Y) * depthPerTile;
+				originDepthOffset += (this.GameObj.Transform.Pos.Y / (double)tileSize.Y) * depthPerTile;
 
-			float renderBaseOffset = this.offset + this.tileDepthOffset * depthPerTile + originDepthOffset;
+			double renderBaseOffset = this.offset + this.tileDepthOffset * depthPerTile + originDepthOffset;
 
 			// Prepare vertex generation data
-			Vector2 tileXStep = cullingOut.XAxisWorld * cullingIn.TileSize.X;
-			Vector2 tileYStep = cullingOut.YAxisWorld * cullingIn.TileSize.Y;
-			Vector3 renderPos = cullingOut.RenderOriginWorld;
-			float renderOffset = renderBaseOffset;
+			Vector2D tileXStep = cullingOut.XAxisWorld * cullingIn.TileSize.X;
+			Vector2D tileYStep = cullingOut.YAxisWorld * cullingIn.TileSize.Y;
+			Vector3D renderPos = cullingOut.RenderOriginWorld;
+			double renderOffset = renderBaseOffset;
 			Point2 tileGridPos = cullingOut.VisibleTileStart;
 
 			// Prepare vertex data array for batch-submitting
@@ -322,50 +322,50 @@ namespace Duality.Plugins.Tilemaps
 				Tile tile = tiles[tileGridPos.X, tileGridPos.Y];
 				if (tile.Index < tileData.Length)
 				{
-					Rect uvRect = tileData[tile.Index].TexCoord0;
+					RectD uvRect = tileData[tile.Index].TexCoord0;
 					bool visualEmpty = tileData[tile.Index].IsVisuallyEmpty;
 					int tileBaseOffset = tileData[tile.Index].DepthOffset;
-					float localDepthOffset = (tile.DepthOffset + tileBaseOffset) * depthPerTile;
+					double localDepthOffset = (tile.DepthOffset + tileBaseOffset) * depthPerTile;
 
 					if (!visualEmpty)
 					{
-						vertexData[vertexBaseIndex + 0].Pos.X = renderPos.X;
-						vertexData[vertexBaseIndex + 0].Pos.Y = renderPos.Y;
-						vertexData[vertexBaseIndex + 0].Pos.Z = renderPos.Z;
-						vertexData[vertexBaseIndex + 0].DepthOffset = renderOffset + localDepthOffset;
-						vertexData[vertexBaseIndex + 0].TexCoord.X = uvRect.X;
-						vertexData[vertexBaseIndex + 0].TexCoord.Y = uvRect.Y;
+						vertexData[vertexBaseIndex + 0].Pos.X = (float)renderPos.X;
+						vertexData[vertexBaseIndex + 0].Pos.Y = (float)renderPos.Y;
+						vertexData[vertexBaseIndex + 0].Pos.Z = (float)renderPos.Z;
+						vertexData[vertexBaseIndex + 0].DepthOffset = (float)(renderOffset + localDepthOffset);
+						vertexData[vertexBaseIndex + 0].TexCoord.X = (float)uvRect.X;
+						vertexData[vertexBaseIndex + 0].TexCoord.Y = (float)uvRect.Y;
 						vertexData[vertexBaseIndex + 0].Color = mainColor;
 
-						vertexData[vertexBaseIndex + 1].Pos.X = renderPos.X + tileYStep.X;
-						vertexData[vertexBaseIndex + 1].Pos.Y = renderPos.Y + tileYStep.Y;
-						vertexData[vertexBaseIndex + 1].Pos.Z = renderPos.Z;
-						vertexData[vertexBaseIndex + 1].DepthOffset = renderOffset + localDepthOffset + depthPerTile;
-						vertexData[vertexBaseIndex + 1].TexCoord.X = uvRect.X;
-						vertexData[vertexBaseIndex + 1].TexCoord.Y = uvRect.Y + uvRect.H;
+						vertexData[vertexBaseIndex + 1].Pos.X = (float)(renderPos.X + tileYStep.X);
+						vertexData[vertexBaseIndex + 1].Pos.Y = (float)(renderPos.Y + tileYStep.Y);
+						vertexData[vertexBaseIndex + 1].Pos.Z = (float)renderPos.Z;
+						vertexData[vertexBaseIndex + 1].DepthOffset = (float)(renderOffset + localDepthOffset + depthPerTile);
+						vertexData[vertexBaseIndex + 1].TexCoord.X = (float)uvRect.X;
+						vertexData[vertexBaseIndex + 1].TexCoord.Y = (float)(uvRect.Y + uvRect.H);
 						vertexData[vertexBaseIndex + 1].Color = mainColor;
 
-						vertexData[vertexBaseIndex + 2].Pos.X = renderPos.X + tileXStep.X + tileYStep.X;
-						vertexData[vertexBaseIndex + 2].Pos.Y = renderPos.Y + tileXStep.Y + tileYStep.Y;
-						vertexData[vertexBaseIndex + 2].Pos.Z = renderPos.Z;
-						vertexData[vertexBaseIndex + 2].DepthOffset = renderOffset + localDepthOffset + depthPerTile;
-						vertexData[vertexBaseIndex + 2].TexCoord.X = uvRect.X + uvRect.W;
-						vertexData[vertexBaseIndex + 2].TexCoord.Y = uvRect.Y + uvRect.H;
+						vertexData[vertexBaseIndex + 2].Pos.X = (float)(renderPos.X + tileXStep.X + tileYStep.X);
+						vertexData[vertexBaseIndex + 2].Pos.Y = (float)(renderPos.Y + tileXStep.Y + tileYStep.Y);
+						vertexData[vertexBaseIndex + 2].Pos.Z = (float)renderPos.Z;
+						vertexData[vertexBaseIndex + 2].DepthOffset = (float)(renderOffset + localDepthOffset + depthPerTile);
+						vertexData[vertexBaseIndex + 2].TexCoord.X = (float)(uvRect.X + uvRect.W);
+						vertexData[vertexBaseIndex + 2].TexCoord.Y = (float)(uvRect.Y + uvRect.H);
 						vertexData[vertexBaseIndex + 2].Color = mainColor;
 				
-						vertexData[vertexBaseIndex + 3].Pos.X = renderPos.X + tileXStep.X;
-						vertexData[vertexBaseIndex + 3].Pos.Y = renderPos.Y + tileXStep.Y;
-						vertexData[vertexBaseIndex + 3].Pos.Z = renderPos.Z;
-						vertexData[vertexBaseIndex + 3].DepthOffset = renderOffset + localDepthOffset;
-						vertexData[vertexBaseIndex + 3].TexCoord.X = uvRect.X + uvRect.W;
-						vertexData[vertexBaseIndex + 3].TexCoord.Y = uvRect.Y;
+						vertexData[vertexBaseIndex + 3].Pos.X = (float)(renderPos.X + tileXStep.X);
+						vertexData[vertexBaseIndex + 3].Pos.Y = (float)(renderPos.Y + tileXStep.Y);
+						vertexData[vertexBaseIndex + 3].Pos.Z = (float)renderPos.Z;
+						vertexData[vertexBaseIndex + 3].DepthOffset = (float)(renderOffset + localDepthOffset);
+						vertexData[vertexBaseIndex + 3].TexCoord.X = (float)(uvRect.X + uvRect.W);
+						vertexData[vertexBaseIndex + 3].TexCoord.Y = (float)uvRect.Y;
 						vertexData[vertexBaseIndex + 3].Color = mainColor;
 
 						bool vertical = tileData[tile.Index].IsVertical;
 						if (vertical)
 						{
-							vertexData[vertexBaseIndex + 0].DepthOffset += depthPerTile;
-							vertexData[vertexBaseIndex + 3].DepthOffset += depthPerTile;
+							vertexData[vertexBaseIndex + 0].DepthOffset += (float)depthPerTile;
+							vertexData[vertexBaseIndex + 3].DepthOffset += (float)depthPerTile;
 						}
 
 						submittedTileCount++;

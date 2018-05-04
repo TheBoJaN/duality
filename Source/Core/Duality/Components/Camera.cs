@@ -19,10 +19,10 @@ namespace Duality.Components
 	[EditorHintImage(CoreResNames.ImageCamera)]
 	public sealed class Camera : Component, ICmpInitializable
 	{
-		private float                     nearZ            = 50.0f;
-		private float                     farZ             = 10000.0f;
-		private float                     focusDist        = DrawDevice.DefaultFocusDist;
-		private Rect                      targetRect       = new Rect(1.0f, 1.0f);
+		private double                     nearZ            = 50.0f;
+		private double                     farZ             = 10000.0f;
+		private double                     focusDist        = DrawDevice.DefaultFocusDist;
+		private RectD                      targetRect       = new RectD(1.0f, 1.0f);
 		private ProjectionMode            projection       = ProjectionMode.Perspective;
 		private VisibilityFlag            visibilityMask   = VisibilityFlag.All;
 		private ColorRgba                 clearColor       = ColorRgba.TransparentBlack;
@@ -42,7 +42,7 @@ namespace Duality.Components
 		[EditorHintDecimalPlaces(0)]
 		[EditorHintIncrement(10.0f)]
 		[EditorHintRange(0.0f, 1000000.0f, 10.0f, 200.0f)]
-		public float NearZ
+		public double NearZ
 		{
 			get { return this.nearZ; }
 			set { this.nearZ = value; }
@@ -53,7 +53,7 @@ namespace Duality.Components
 		[EditorHintDecimalPlaces(0)]
 		[EditorHintIncrement(1000.0f)]
 		[EditorHintRange(0.0f, 1000000.0f, 1000.0f, 100000.0f)]
-		public float FarZ
+		public double FarZ
 		{
 			get { return this.farZ; }
 			set { this.farZ = value; }
@@ -65,10 +65,10 @@ namespace Duality.Components
 		[EditorHintDecimalPlaces(1)]
 		[EditorHintIncrement(10.0f)]
 		[EditorHintRange(1.0f, 1000000.0f, 10.0f, 2000.0f)]
-		public float FocusDist
+		public double FocusDist
 		{
 			get { return this.focusDist; }
-			set { this.focusDist = MathF.Max(value, 0.01f); }
+			set { this.focusDist = MathD.Max(value, 0.01f); }
 		}
 		/// <summary>
 		/// [GET / SET] The rectangular area this camera will render into, relative to the
@@ -77,13 +77,13 @@ namespace Duality.Components
 		[EditorHintDecimalPlaces(2)]
 		[EditorHintIncrement(0.1f)]
 		[EditorHintRange(0.0f, 1.0f)]
-		public Rect TargetRect
+		public RectD TargetRect
 		{
 			get { return this.targetRect; }
 			set
 			{
-				Rect intersection = value.Intersection(new Rect(1.0f, 1.0f));
-				if (intersection == Rect.Empty) return;
+				RectD intersection = value.Intersection(new RectD(1.0f, 1.0f));
+				if (intersection == RectD.Empty) return;
 				this.targetRect = intersection;
 			}
 		}
@@ -176,7 +176,7 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="viewportRect">The viewport area to which will be rendered.</param>
 		/// <param name="imageSize">Target size of the rendered image before adjusting it to fit the specified viewport.</param>
-		public void Render(Rect viewportRect, Vector2 imageSize)
+		public void Render(RectD viewportRect, Vector2D imageSize)
 		{
 			string counterName = PathOp.Combine("Cameras", this.gameobj.Name);
 			Profile.BeginMeasure(counterName);
@@ -186,8 +186,8 @@ namespace Duality.Components
 			this.UpdateDrawDevice();
 			
 			// Adjust the local render size and viewport according to the camera target rect
-			Vector2 localImageSize = imageSize;
-			Rect localViewport = viewportRect;
+			Vector2D localImageSize = imageSize;
+			RectD localViewport = viewportRect;
 			localViewport.Pos += localViewport.Size * this.targetRect.Pos;
 			localViewport.Size *= this.targetRect.Size;
 			localImageSize *= this.targetRect.Size;
@@ -215,7 +215,7 @@ namespace Duality.Components
 		/// <param name="viewportSize">Size of the viewport area to which will be rendered.</param>
 		/// <param name="imageSize">Target size of the rendered image before adjusting it to fit the specified viewport.</param>
 		/// <param name="renderOverlay">Whether or not to render screen overlay renderers onto the picking target.</param>
-		public void RenderPickingMap(Point2 viewportSize, Vector2 imageSize, bool renderOverlay)
+		public void RenderPickingMap(Point2 viewportSize, Vector2D imageSize, bool renderOverlay)
 		{
 			Profile.TimeVisualPicking.BeginMeasure();
 
@@ -250,10 +250,10 @@ namespace Duality.Components
 		/// rectangular area.
 		/// The resulting information is only accurate if <see cref="RenderPickingMap"/> has been called this frame.
 		/// </summary>
-		/// <param name="x">x-Coordinate of the Rect.</param>
-		/// <param name="y">y-Coordinate of the Rect.</param>
-		/// <param name="w">Width of the Rect.</param>
-		/// <param name="h">Height of the Rect.</param>
+		/// <param name="x">x-Coordinate of the RectD.</param>
+		/// <param name="y">y-Coordinate of the RectD.</param>
+		/// <param name="w">Width of the RectD.</param>
+		/// <param name="h">Height of the RectD.</param>
 		/// <returns>A set of all <see cref="Duality.ICmpRenderer">ICmpRenderers</see> that have been picked.</returns>
 		public IEnumerable<ICmpRenderer> PickRenderersIn(int x, int y, int w, int h)
 		{
@@ -266,10 +266,10 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="z"></param>
 		/// <returns></returns>
-		public float GetScaleAtZ(float z)
+		public double GetScaleAtZ(double z)
 		{
 			this.UpdateTransformDevice();
-			return this.transformDevice.GetScaleAtZ(z);
+			return this.transformDevice.GetScaleAtZ((float)z);
 		}
 		/// <summary>
 		/// Transforms screen space to world space positions. The screen positions Z coordinate is
@@ -277,7 +277,7 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="screenPos"></param>
 		/// <returns></returns>
-		public Vector3 GetWorldPos(Vector3 screenPos)
+		public Vector3D GetWorldPos(Vector3D screenPos)
 		{
 			this.UpdateTransformDevice();
 			return this.transformDevice.GetWorldPos(screenPos);
@@ -287,7 +287,7 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="screenPos"></param>
 		/// <returns></returns>
-		public Vector3 GetWorldPos(Vector2 screenPos)
+		public Vector3D GetWorldPos(Vector2D screenPos)
 		{
 			this.UpdateTransformDevice();
 			return this.transformDevice.GetWorldPos(screenPos);
@@ -297,7 +297,7 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="spacePos"></param>
 		/// <returns></returns>
-		public Vector2 GetScreenPos(Vector3 spacePos)
+		public Vector2D GetScreenPos(Vector3D spacePos)
 		{
 			this.UpdateTransformDevice();
 			return this.transformDevice.GetScreenPos(spacePos);
@@ -307,7 +307,7 @@ namespace Duality.Components
 		/// </summary>
 		/// <param name="spacePos"></param>
 		/// <returns></returns>
-		public Vector2 GetScreenPos(Vector2 spacePos)
+		public Vector2D GetScreenPos(Vector2D spacePos)
 		{
 			this.UpdateTransformDevice();
 			return this.transformDevice.GetScreenPos(spacePos);
@@ -318,10 +318,10 @@ namespace Duality.Components
 		/// <param name="worldPos">The spheres world space center position.</param>
 		/// <param name="radius">The spheres world space radius.</param>
 		/// <returns></returns>
-		public bool IsSphereInView(Vector3 worldPos, float radius = 1.0f)
+		public bool IsSphereInView(Vector3D worldPos, double radius = 1.0f)
 		{
 			this.UpdateTransformDevice();
-			return this.transformDevice.IsSphereInView(worldPos, radius);
+			return this.transformDevice.IsSphereInView(worldPos, (float)radius);
 		}
 
 		private void SetupDrawDevice()
@@ -345,10 +345,10 @@ namespace Duality.Components
 			if (this.drawDevice == null) this.SetupDrawDevice();
 
 			this.drawDevice.ViewerPos = this.gameobj.Transform.Pos;
-			this.drawDevice.ViewerAngle = this.gameobj.Transform.Angle;
-			this.drawDevice.NearZ = this.nearZ;
-			this.drawDevice.FarZ = this.farZ;
-			this.drawDevice.FocusDist = this.focusDist;
+			this.drawDevice.ViewerAngle = (float)this.gameobj.Transform.Angle;
+			this.drawDevice.NearZ = (float)this.nearZ;
+			this.drawDevice.FarZ = (float)this.farZ;
+			this.drawDevice.FocusDist = (float)this.focusDist;
 			this.drawDevice.Projection = this.projection;
 			this.drawDevice.VisibilityMask = this.visibilityMask;
 			this.drawDevice.ClearColor = this.clearColor;
@@ -378,10 +378,10 @@ namespace Duality.Components
 			if (this.transformDevice == null) this.SetupTransformDevice();
 
 			this.transformDevice.ViewerPos = this.gameobj.Transform.Pos;
-			this.transformDevice.ViewerAngle = this.gameobj.Transform.Angle;
-			this.transformDevice.NearZ = this.nearZ;
-			this.transformDevice.FarZ = this.farZ;
-			this.transformDevice.FocusDist = this.focusDist;
+			this.transformDevice.ViewerAngle = (float)this.gameobj.Transform.Angle;
+			this.transformDevice.NearZ = (float)this.nearZ;
+			this.transformDevice.FarZ = (float)this.farZ;
+			this.transformDevice.FocusDist = (float)this.focusDist;
 			this.transformDevice.Projection = this.projection;
 		}
 

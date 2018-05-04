@@ -418,9 +418,9 @@ namespace Duality
 		public static Rect BoundingBox(this IList<Vector2> list)
 		{
 			Rect pointBoundingRect = new Rect(
-				float.MaxValue, 
-				float.MaxValue, 
-				float.MinValue, 
+				float.MaxValue,
+				float.MaxValue,
+				float.MinValue,
 				float.MinValue);
 			if (list is Vector2[])
 			{
@@ -441,6 +441,44 @@ namespace Duality
 					pointBoundingRect.Y = MathF.Min(list[i].Y, pointBoundingRect.Y);
 					pointBoundingRect.W = MathF.Max(list[i].X, pointBoundingRect.W);
 					pointBoundingRect.H = MathF.Max(list[i].Y, pointBoundingRect.H);
+				}
+			}
+			pointBoundingRect.W -= pointBoundingRect.X;
+			pointBoundingRect.H -= pointBoundingRect.Y;
+			return pointBoundingRect;
+		}
+		
+		/// <summary>
+		/// Determines the bounding box of a list of vectors.
+		/// </summary>
+		/// <param name="list"></param>
+		/// <returns></returns>
+		public static RectD BoundingBox(this IList<Vector2D> list)
+		{
+			RectD pointBoundingRect = new RectD(
+				float.MaxValue,
+				float.MaxValue,
+				float.MinValue,
+				float.MinValue);
+			if (list is Vector2D[])
+			{
+				Vector2D[] array = list as Vector2D[];
+				for (int i = 0; i < array.Length; i++)
+				{
+					pointBoundingRect.X = MathD.Min(array[i].X, pointBoundingRect.X);
+					pointBoundingRect.Y = MathD.Min(array[i].Y, pointBoundingRect.Y);
+					pointBoundingRect.W = MathD.Max(array[i].X, pointBoundingRect.W);
+					pointBoundingRect.H = MathD.Max(array[i].Y, pointBoundingRect.H);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < list.Count; i++)
+				{
+					pointBoundingRect.X = MathD.Min(list[i].X, pointBoundingRect.X);
+					pointBoundingRect.Y = MathD.Min(list[i].Y, pointBoundingRect.Y);
+					pointBoundingRect.W = MathD.Max(list[i].X, pointBoundingRect.W);
+					pointBoundingRect.H = MathD.Max(list[i].Y, pointBoundingRect.H);
 				}
 			}
 			pointBoundingRect.W -= pointBoundingRect.X;

@@ -24,7 +24,7 @@ namespace Duality.Components.Physics
 		private RigidBody otherBody  = null;
 		private bool      collide    = false;
 		private bool      enabled    = true;
-		private float     breakPoint = -1.0f;
+		private double     breakPoint = -1.0f;
 
 
 		/// <summary>
@@ -77,8 +77,8 @@ namespace Duality.Components.Physics
 		/// A value of zero or lower is interpreted as unbreakable. Note that some joints might not have breaking point support 
 		/// and will ignore this value.
 		/// </summary>
-		[EditorHintRange(-1.0f, float.MaxValue)]
-		public float BreakPoint
+		[EditorHintRange(-1.0f, double.MaxValue)]
+		public double BreakPoint
 		{
 			get { return this.breakPoint; }
 			set { this.breakPoint = value; this.UpdateJoint(); }
@@ -111,26 +111,26 @@ namespace Duality.Components.Physics
 
 			this.joint.CollideConnected = this.collide;
 			this.joint.Enabled = this.enabled;
-			this.joint.Breakpoint = this.breakPoint <= 0.0f ? float.MaxValue : this.breakPoint;
+			this.joint.Breakpoint = this.breakPoint <= 0.0f ? double.MaxValue : this.breakPoint;
 		}
-		private void joint_Broke(Joint arg1, float arg2)
+		private void joint_Broke(Joint arg1, double arg2)
 		{
 			this.enabled = false;
 		}
 
-		protected static Vector2 GetFarseerPoint(RigidBody c, Vector2 dualityPoint)
+		protected static Vector2D GetFarseerPoint(RigidBody c, Vector2D dualityPoint)
 		{
 			if (c == null) return PhysicsUnit.LengthToPhysical * dualityPoint;
 
-			float scale = (c.GameObj != null && c.GameObj.Transform != null) ? c.GameObj.Transform.Scale : 1.0f;
-			return PhysicsUnit.LengthToPhysical * dualityPoint * scale;
+			double scale = (c.GameObj != null && c.GameObj.Transform != null) ? c.GameObj.Transform.Scale : 1.0f;
+			return PhysicsUnit.LengthToPhysical * dualityPoint * (double)scale;
 		}
-		protected static Vector2 GetDualityPoint(RigidBody c, Vector2 farseerPoint)
+		protected static Vector2D GetDualityPoint(RigidBody c, Vector2D farseerPoint)
 		{
 			if (c == null) return PhysicsUnit.LengthToDuality * farseerPoint;
 
-			float scale = (c.GameObj != null && c.GameObj.Transform != null) ? c.GameObj.Transform.Scale : 1.0f;
-			return PhysicsUnit.LengthToDuality * farseerPoint / scale;
+			double scale = (c.GameObj != null && c.GameObj.Transform != null) ? c.GameObj.Transform.Scale : 1.0f;
+			return PhysicsUnit.LengthToDuality * farseerPoint / (double)scale;
 		}
 	}
 }

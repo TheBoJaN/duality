@@ -228,6 +228,18 @@ namespace Duality
 		{
 			result = new Vector3D(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
 		}
+
+		/// <summary>
+		/// Adds two vectors.
+		/// </summary>
+		/// <param name="a">Left operand.</param>
+		/// <param name="b">Right operand.</param>
+		/// <param name="result">Result of operation.</param>
+		public static void Add(ref Vector3D a, ref Vector3 b, out Vector3 result)
+		{
+			result = new Vector3D(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
+		}
+
 		/// <summary>
 		/// Subtract one Vector from another
 		/// </summary>
@@ -238,6 +250,18 @@ namespace Duality
 		{
 			result = new Vector3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
 		}
+
+		/// <summary>
+		/// Subtract one Vector from another
+		/// </summary>
+		/// <param name="a">First operand</param>
+		/// <param name="b">Second operand</param>
+		/// <param name="result">Result of subtraction</param>
+		public static void Subtract(ref Vector3D a, ref Vector3 b, out Vector3 result)
+		{
+			result = new Vector3D(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
+		}
+
 		/// <summary>
 		/// Multiplies a vector by a scalar.
 		/// </summary>
@@ -248,6 +272,7 @@ namespace Duality
 		{
 			result = new Vector3D(vector.X * scale, vector.Y * scale, vector.Z * scale);
 		}
+
 		/// <summary>
 		/// Multiplies a vector by the components of a vector (scale).
 		/// </summary>
@@ -258,6 +283,18 @@ namespace Duality
 		{
 			result = new Vector3D(vector.X * scale.X, vector.Y * scale.Y, vector.Z * scale.Z);
 		}
+
+		/// <summary>
+		/// Multiplies a vector by the components of a vector (scale).
+		/// </summary>
+		/// <param name="vector">Left operand.</param>
+		/// <param name="scale">Right operand.</param>
+		/// <param name="result">Result of the operation.</param>
+		public static void Multiply(ref Vector3D vector, ref Vector3 scale, out Vector3 result)
+		{
+			result = new Vector3D(vector.X * scale.X, vector.Y * scale.Y, vector.Z * scale.Z);
+		}
+
 		/// <summary>
 		/// Divides a vector by a scalar.
 		/// </summary>
@@ -268,6 +305,7 @@ namespace Duality
 		{
 			Multiply(ref vector, 1 / scale, out result);
 		}
+
 		/// <summary>
 		/// Divide a vector by the components of a vector (scale).
 		/// </summary>
@@ -275,6 +313,17 @@ namespace Duality
 		/// <param name="scale">Right operand.</param>
 		/// <param name="result">Result of the operation.</param>
 		public static void Divide(ref Vector3D vector, ref Vector3D scale, out Vector3D result)
+		{
+			result = new Vector3D(vector.X / scale.X, vector.Y / scale.Y, vector.Z / scale.Z);
+		}
+
+		/// <summary>
+		/// Divide a vector by the components of a vector (scale).
+		/// </summary>
+		/// <param name="vector">Left operand.</param>
+		/// <param name="scale">Right operand.</param>
+		/// <param name="result">Result of the operation.</param>
+		public static void Divide(ref Vector3D vector, ref Vector3 scale, out Vector3 result)
 		{
 			result = new Vector3D(vector.X / scale.X, vector.Y / scale.Y, vector.Z / scale.Z);
 		}

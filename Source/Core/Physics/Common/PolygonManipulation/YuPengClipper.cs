@@ -25,7 +25,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 
 	public static class YuPengClipper
 	{
-		private const float ClipperEpsilonSquared = 1.192092896e-07f;
+		private const double ClipperEpsilonSquared = 1.192092896e-07f;
 
 		public static List<Vertices> Union(Vertices polygon1, Vertices polygon2, out PolyClipError error)
 		{
@@ -72,12 +72,12 @@ namespace FarseerPhysics.Common.PolygonManipulation
 
 			// Translate polygons into upper right quadrant
 			// as the algorithm depends on it
-			Vector2 lbSubject = subject.GetCollisionBox().LowerBound;
-			Vector2 lbClip = clip.GetCollisionBox().LowerBound;
-			Vector2 translate;
-			Vector2.Min(ref lbSubject, ref lbClip, out translate);
-			translate = Vector2.One - translate;
-			if (translate != Vector2.Zero)
+			Vector2D lbSubject = subject.GetCollisionBox().LowerBound;
+			Vector2D lbClip = clip.GetCollisionBox().LowerBound;
+			Vector2D translate;
+			Vector2D.Min(ref lbSubject, ref lbClip, out translate);
+			translate = Vector2D.One - translate;
+			if (translate != Vector2D.Zero)
 			{
 				slicedSubject.Translate(ref translate);
 				slicedClip.Translate(ref translate);
@@ -88,9 +88,9 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			slicedClip.ForceCounterClockWise();
 
 			List<Edge> subjectSimplices;
-			List<float> subjectCoeff;
+			List<double> subjectCoeff;
 			List<Edge> clipSimplices;
-			List<float> clipCoeff;
+			List<double> clipCoeff;
 			// Build simplical chains from the polygons and calculate the
 			// the corresponding coefficients
 			CalculateSimplicalChain(slicedSubject, out subjectCoeff, out subjectSimplices);
@@ -136,21 +136,21 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			for (int i = 0; i < polygon1.Count; i++)
 			{
 				// Get edge vertices
-				Vector2 a = polygon1[i];
-				Vector2 b = polygon1[polygon1.NextIndex(i)];
+				Vector2D a = polygon1[i];
+				Vector2D b = polygon1[polygon1.NextIndex(i)];
 
 				// Get intersections between this edge and polygon2
 				for (int j = 0; j < polygon2.Count; j++)
 				{
-					Vector2 c = polygon2[j];
-					Vector2 d = polygon2[polygon2.NextIndex(j)];
+					Vector2D c = polygon2[j];
+					Vector2D d = polygon2[polygon2.NextIndex(j)];
 
-					Vector2 intersectionPoint;
+					Vector2D intersectionPoint;
 					// Check if the edges intersect
 					if (LineTools.LineIntersect(a, b, c, d, out intersectionPoint))
 					{
 						// calculate alpha values for sorting multiple intersections points on a edge
-						float alpha;
+						double alpha;
 						// Insert intersection point into first polygon
 						alpha = GetAlpha(a, b, intersectionPoint);
 						if (alpha > 0f && alpha < 1f)
@@ -205,15 +205,15 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// Calculates the simplical chain corresponding to the input polygon.
 		/// </summary>
 		/// <remarks>Used by method <c>Execute()</c>.</remarks>
-		private static void CalculateSimplicalChain(Vertices poly, out List<float> coeff,
+		private static void CalculateSimplicalChain(Vertices poly, out List<double> coeff,
 													out List<Edge> simplicies)
 		{
 			simplicies = new List<Edge>();
-			coeff = new List<float>();
+			coeff = new List<double>();
 			for (int i = 0; i < poly.Count; ++i)
 			{
 				simplicies.Add(new Edge(poly[i], poly[poly.NextIndex(i)]));
-				coeff.Add(CalculateSimplexCoefficient(Vector2.Zero, poly[i], poly[poly.NextIndex(i)]));
+				coeff.Add(CalculateSimplexCoefficient(Vector2D.Zero, poly[i], poly[poly.NextIndex(i)]));
 			}
 		}
 
@@ -222,15 +222,15 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// the given simplical chains and builds the result chain.
 		/// </summary>
 		/// <remarks>Used by method <c>Execute()</c>.</remarks>
-		private static void CalculateResultChain(List<float> poly1Coeff, List<Edge> poly1Simplicies,
-												   List<float> poly2Coeff, List<Edge> poly2Simplicies,
+		private static void CalculateResultChain(List<double> poly1Coeff, List<Edge> poly1Simplicies,
+												   List<double> poly2Coeff, List<Edge> poly2Simplicies,
 												   PolyClipType clipType, out List<Edge> resultSimplices)
 		{
 			resultSimplices = new List<Edge>();
 
 			for (int i = 0; i < poly1Simplicies.Count; ++i)
 			{
-				float edgeCharacter = 0f;
+				double edgeCharacter = 0f;
 				if (poly2Simplicies.Contains(poly1Simplicies[i]) ||
 					(poly2Simplicies.Contains(-poly1Simplicies[i]) && clipType == PolyClipType.Union))
 				{
@@ -267,7 +267,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 				if (!resultSimplices.Contains(poly2Simplicies[i]) &&
 					!resultSimplices.Contains(-poly2Simplicies[i]))
 				{
-					float edgeCharacter = 0f;
+					double edgeCharacter = 0f;
 					if (poly1Simplicies.Contains(poly2Simplicies[i]) ||
 						(poly1Simplicies.Contains(-poly2Simplicies[i]) && clipType == PolyClipType.Union))
 					{
@@ -377,15 +377,15 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// Needed to calculate the characteristics function of a simplex.
 		/// </summary>
 		/// <remarks>Used by method <c>CalculateEdgeCharacter()</c>.</remarks>
-		private static float CalculateBeta(Vector2 point, Edge e, float coefficient)
+		private static double CalculateBeta(Vector2D point, Edge e, double coefficient)
 		{
-			float result = 0f;
+			double result = 0f;
 			if (PointInSimplex(point, e))
 			{
 				result = coefficient;
 			}
-			if (PointOnLineSegment(Vector2.Zero, e.EdgeStart, point) ||
-				PointOnLineSegment(Vector2.Zero, e.EdgeEnd, point))
+			if (PointOnLineSegment(Vector2D.Zero, e.EdgeStart, point) ||
+				PointOnLineSegment(Vector2D.Zero, e.EdgeEnd, point))
 			{
 				result = .5f * coefficient;
 			}
@@ -396,7 +396,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// Needed for sorting multiple intersections points on the same edge.
 		/// </summary>
 		/// <remarks>Used by method <c>CalculateIntersections()</c>.</remarks>
-		private static float GetAlpha(Vector2 start, Vector2 end, Vector2 point)
+		private static double GetAlpha(Vector2D start, Vector2D end, Vector2D point)
 		{
 			return (point - start).LengthSquared / (end - start).LengthSquared;
 		}
@@ -405,9 +405,9 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// Returns the coefficient of a simplex.
 		/// </summary>
 		/// <remarks>Used by method <c>CalculateSimplicalChain()</c>.</remarks>
-		private static float CalculateSimplexCoefficient(Vector2 a, Vector2 b, Vector2 c)
+		private static double CalculateSimplexCoefficient(Vector2D a, Vector2D b, Vector2D c)
 		{
-			float isLeft = MathUtils.Area(ref a, ref b, ref c);
+			double isLeft = MathUtils.Area(ref a, ref b, ref c);
 			if (isLeft < 0f)
 			{
 				return -1f;
@@ -428,10 +428,10 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <param name="edge">The edge that the point is tested against.</param>
 		/// <returns>False if the winding number is even and the point is outside
 		/// the simplex and True otherwise.</returns>
-		private static bool PointInSimplex(Vector2 point, Edge edge)
+		private static bool PointInSimplex(Vector2D point, Edge edge)
 		{
 			Vertices polygon = new Vertices();
-			polygon.Add(Vector2.Zero);
+			polygon.Add(Vector2D.Zero);
 			polygon.Add(edge.EdgeStart);
 			polygon.Add(edge.EdgeEnd);
 			return (polygon.PointInPolygon(ref point) == 1);
@@ -441,15 +441,15 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// Tests if a point lies on a line segment.
 		/// </summary>
 		/// <remarks>Used by method <c>CalculateBeta()</c>.</remarks>
-		private static bool PointOnLineSegment(Vector2 start, Vector2 end, Vector2 point)
+		private static bool PointOnLineSegment(Vector2D start, Vector2D end, Vector2D point)
 		{
-			Vector2 segment = end - start;
+			Vector2D segment = end - start;
 			return MathUtils.Area(ref start, ref end, ref point) == 0f &&
-				   Vector2.Dot(point - start, segment) >= 0f &&
-				   Vector2.Dot(point - end, segment) <= 0f;
+				   Vector2D.Dot(point - start, segment) >= 0f &&
+				   Vector2D.Dot(point - end, segment) <= 0f;
 		}
 
-		private static bool VectorEqual(Vector2 vec1, Vector2 vec2)
+		private static bool VectorEqual(Vector2D vec1, Vector2D vec2)
 		{
 			return (vec2 - vec1).LengthSquared <= ClipperEpsilonSquared;
 		}
@@ -459,16 +459,16 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <summary>Specifies an Edge. Edges are used to represent simplicies in simplical chains</summary>
 		private sealed class Edge
 		{
-			public Edge(Vector2 edgeStart, Vector2 edgeEnd)
+			public Edge(Vector2D edgeStart, Vector2D edgeEnd)
 			{
 				this.EdgeStart = edgeStart;
 				this.EdgeEnd = edgeEnd;
 			}
 
-			public Vector2 EdgeStart { get; private set; }
-			public Vector2 EdgeEnd { get; private set; }
+			public Vector2D EdgeStart { get; private set; }
+			public Vector2D EdgeEnd { get; private set; }
 
-			public Vector2 GetCenter()
+			public Vector2D GetCenter()
 			{
 				return (this.EdgeStart + this.EdgeEnd) / 2f;
 			}

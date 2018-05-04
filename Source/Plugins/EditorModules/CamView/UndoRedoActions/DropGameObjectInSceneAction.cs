@@ -16,10 +16,10 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 {
 	public class DropGameObjectInSceneAction : GameObjectAction
 	{
-		private Vector3[]		backupPos	= null;
-		private float[]			backupAngle	= null;
-		private	Vector3			dropAt		= Vector3.Zero;
-		private	float			turnBy		= 0.0f;
+		private Vector3D[]		backupPos	= null;
+		private double[]			backupAngle	= null;
+		private	Vector3D			dropAt		= Vector3D.Zero;
+		private	double			turnBy		= 0.0f;
 
 		protected override string NameBase
 		{
@@ -30,7 +30,7 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 			get { return CamViewRes.UndoRedo_DropGameObjectInSceneMulti; }
 		}
 
-		public DropGameObjectInSceneAction(IEnumerable<GameObject> obj, Vector3 dropAt, float turnBy) : base(obj.Where(o => o != null && o.Transform != null))
+		public DropGameObjectInSceneAction(IEnumerable<GameObject> obj, Vector3D dropAt, double turnBy) : base(obj.Where(o => o != null && o.Transform != null))
 		{
 			this.dropAt = dropAt;
 			this.turnBy = turnBy;
@@ -40,8 +40,8 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 		{
 			if (this.backupPos == null)
 			{
-				this.backupPos = new Vector3[this.targetObj.Length];
-				this.backupAngle = new float[this.targetObj.Length];
+				this.backupPos = new Vector3D[this.targetObj.Length];
+				this.backupAngle = new double[this.targetObj.Length];
 				for (int i = 0; i < this.targetObj.Length; i++)
 				{
 					if (this.targetObj[i].Transform == null) continue;

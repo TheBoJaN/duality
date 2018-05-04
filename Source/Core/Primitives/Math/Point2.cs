@@ -265,5 +265,14 @@ namespace Duality
 		{
 			return new Point2(MathF.RoundToInt(r.X), MathF.RoundToInt(r.Y));
 		}
+
+		public static implicit operator Vector2D(Point2 r)
+		{
+			return new Vector2D(r.X, r.Y);
+		}
+		public static explicit operator Point2(Vector2D r)
+		{
+			return new Point2(MathD.RoundToInt(r.X), MathD.RoundToInt(r.Y));
+		}
 	}
 }

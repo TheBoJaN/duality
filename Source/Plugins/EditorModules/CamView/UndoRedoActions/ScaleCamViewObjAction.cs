@@ -14,9 +14,9 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 {
 	public class ScaleCamViewObjAction : CamViewObjAction
 	{
-		private Vector3[]	backupPos	= null;
-		private Vector3[]	backupScale	= null;
-		private	float		scaleBy		= 0.0f;
+		private Vector3D[]	backupPos	= null;
+		private Vector3D[]	backupScale	= null;
+		private	double		scaleBy		= 0.0f;
 
 		public override string Name
 		{
@@ -29,7 +29,7 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 			get { return base.IsVoid || this.scaleBy == 1.0f; }
 		}
 
-		public ScaleCamViewObjAction(IEnumerable<ObjectEditorSelObj> obj, PostPerformAction postPerform, float scaleBy) : base(obj, postPerform)
+		public ScaleCamViewObjAction(IEnumerable<ObjectEditorSelObj> obj, PostPerformAction postPerform, double scaleBy) : base(obj, postPerform)
 		{
 			this.scaleBy = scaleBy;
 		}
@@ -54,8 +54,8 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 		{
 			if (this.backupPos == null)
 			{
-				this.backupPos = new Vector3[this.targetObj.Length];
-				this.backupScale = new Vector3[this.targetObj.Length];
+				this.backupPos = new Vector3D[this.targetObj.Length];
+				this.backupScale = new Vector3D[this.targetObj.Length];
 				for (int i = 0; i < this.targetObj.Length; i++)
 				{
 					this.backupPos[i] = this.targetObj[i].Pos;
@@ -63,7 +63,7 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 				}
 			}
 			
-			Vector3 center = Vector3.Zero;
+			Vector3D center = Vector3D.Zero;
 			foreach (ObjectEditorSelObj s in this.targetObj)
 			{
 				center += s.Pos;
@@ -72,10 +72,10 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 			
 			foreach (ObjectEditorSelObj s in this.targetObj)
 			{
-				Vector3 scaleVec = new Vector3(this.scaleBy, this.scaleBy, this.scaleBy);
-				Vector3 posRelCenter = s.Pos - center;
-				Vector3 posRelCenterTarget;
-				Vector3.Multiply(ref posRelCenter, ref scaleVec, out posRelCenterTarget);
+				Vector3D scaleVec = new Vector3D(this.scaleBy, this.scaleBy, this.scaleBy);
+				Vector3D posRelCenter = s.Pos - center;
+				Vector3D posRelCenterTarget;
+				Vector3D.Multiply(ref posRelCenter, ref scaleVec, out posRelCenterTarget);
 
 				s.Pos = center + posRelCenterTarget;
 				s.Scale *= scaleVec;

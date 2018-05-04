@@ -12,78 +12,78 @@ namespace Duality
 	/// </summary>
 	public class CollisionData
 	{
-		private	Vector2 pos;
-		private	Vector2	normal;
-		private	float	normalImpulse;
-		private	float	normalMass;
-		private	float	tangentImpulse;
-		private	float	tangentMass;
+		private	Vector2D pos;
+		private	Vector2D	normal;
+		private	double	normalImpulse;
+		private	double	normalMass;
+		private	double	tangentImpulse;
+		private	double	tangentMass;
 
 		/// <summary>
 		/// [GET] The position at which the collision occurred in absolute world coordinates.
 		/// </summary>
-		public Vector2 Pos
+		public Vector2D Pos
 		{
 			get { return this.pos; }
 		}
 		/// <summary>
 		/// [GET] The normal vector of the collision impulse, in the global coordinate system.
 		/// </summary>
-		public Vector2 Normal
+		public Vector2D Normal
 		{
 			get { return this.normal; }
 		}
 		/// <summary>
 		/// [GET] The impulse that is delivered along the provided normal vector.
 		/// </summary>
-		public float NormalImpulse
+		public double NormalImpulse
 		{
 			get { return this.normalImpulse; }
 		}
 		/// <summary>
 		/// [GET] The mass that is interacting along the provided normal vector.
 		/// </summary>
-		public float NormalMass
+		public double NormalMass
 		{
 			get { return this.normalMass; }
 		}
 		/// <summary>
 		/// [GET] The speed change that will occur when applying <see cref="NormalImpulse"/> to <see cref="NormalMass"/>.
 		/// </summary>
-		public float NormalSpeed
+		public double NormalSpeed
 		{
 			get { return this.normalImpulse / this.normalMass; }
 		}
 		/// <summary>
 		/// [GET] The tangent vector of the collision impulse, in the global coordinate system.
 		/// </summary>
-		public Vector2 Tangent
+		public Vector2D Tangent
 		{
 			get { return this.normal.PerpendicularRight; }
 		}
 		/// <summary>
 		/// [GET] The impulse that is delivered along the provided tangent vector.
 		/// </summary>
-		public float TangentImpulse
+		public double TangentImpulse
 		{
 			get { return this.tangentImpulse; }
 		}
 		/// <summary>
 		/// [GET] The mass that is interacting along the provided tangent vector.
 		/// </summary>
-		public float TangentMass
+		public double TangentMass
 		{
 			get { return this.tangentMass; }
 		}
 		/// <summary>
 		/// [GET] The speed change that will occur when applying <see cref="TangentImpulse"/> to <see cref="TangentMass"/>.
 		/// </summary>
-		public float TangentSpeed
+		public double TangentSpeed
 		{
 			get { return this.tangentImpulse / this.tangentMass; }
 		}
 
-		public CollisionData(Vector2 pos, Vector2 normal, float normalImpulse, float tangentImpulse, float normalMass, float tangentMass)
+		public CollisionData(Vector2D pos, Vector2D normal, double normalImpulse, double tangentImpulse, double normalMass, double tangentMass)
 		{
 			this.pos = pos;
 			this.normal = normal;

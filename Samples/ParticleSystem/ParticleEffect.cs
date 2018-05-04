@@ -137,8 +137,8 @@ namespace ParticleSystem
 			if (tex == null) return;
 
 			Vector2 particleHalfSize = this.particleSize * 0.5f;
-			float objAngle = this.GameObj.Transform.Angle;
-			float objScale = this.GameObj.Transform.Scale;
+			float objAngle = (float)this.GameObj.Transform.Angle;
+			float objScale = (float)this.GameObj.Transform.Scale;
 			Vector3 objPos = this.GameObj.Transform.Pos;
 			
 			Vector2 objXDot, objYDot;

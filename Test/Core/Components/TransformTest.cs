@@ -241,10 +241,10 @@ namespace Duality.Tests.Components
 			AssertEqual(Vector3.Zero, transform.GetLocalPoint(Vector3.Zero), "GetLocalPoint with applied parent");
 		}
 
-		private static void AssertEqual(float expected, float actual, string message)
+		private static void AssertEqual(double expected, double actual, string message)
 		{
 			float threshold = 0.00001f;
-			if (MathF.Abs(expected - actual) > threshold)
+			if (MathD.Abs(expected - actual) > threshold)
 			{
 				Assert.Fail("{0}: Expected {1}, but got {2} instead.",
 					message,
@@ -252,11 +252,11 @@ namespace Duality.Tests.Components
 					actual);
 			}
 		}
-		private static void AssertEqual(Vector2 expected, Vector2 actual, string message)
+		private static void AssertEqual(Vector2D expected, Vector2D actual, string message)
 		{
 			float threshold = 0.00001f;
-			if (MathF.Abs(expected.X - actual.X) > threshold ||
-				MathF.Abs(expected.Y - actual.Y) > threshold)
+			if (MathD.Abs(expected.X - actual.X) > threshold ||
+				MathD.Abs(expected.Y - actual.Y) > threshold)
 			{
 				Assert.Fail("{0}: Expected {1}, but got {2} instead.",
 					message,
@@ -264,12 +264,12 @@ namespace Duality.Tests.Components
 					actual);
 			}
 		}
-		private static void AssertEqual(Vector3 expected, Vector3 actual, string message)
+		private static void AssertEqual(Vector3D expected, Vector3D actual, string message)
 		{
 			float threshold = 0.00001f;
-			if (MathF.Abs(expected.X - actual.X) > threshold ||
-				MathF.Abs(expected.Y - actual.Y) > threshold ||
-				MathF.Abs(expected.Z - actual.Z) > threshold)
+			if (MathD.Abs(expected.X - actual.X) > threshold ||
+				MathD.Abs(expected.Y - actual.Y) > threshold ||
+				MathD.Abs(expected.Z - actual.Z) > threshold)
 			{
 				Assert.Fail("{0}: Expected {1}, but got {2} instead.",
 					message,

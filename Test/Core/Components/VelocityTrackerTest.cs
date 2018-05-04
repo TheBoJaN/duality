@@ -160,10 +160,10 @@ namespace Duality.Tests.Components
 			}
 		}
 
-		private static void AssertEqual(float expected, float actual, string message)
+		private static void AssertEqual(double expected, double actual, string message)
 		{
 			float threshold = 0.00001f;
-			if (MathF.Abs(expected - actual) > threshold)
+			if (MathD.Abs(expected - actual) > threshold)
 			{
 				Assert.Fail("{0}: Expected {1}, but got {2} instead.",
 					message,
@@ -174,8 +174,8 @@ namespace Duality.Tests.Components
 		private static void AssertEqual(Vector2 expected, Vector2 actual, string message)
 		{
 			float threshold = 0.00001f;
-			if (MathF.Abs(expected.X - actual.X) > threshold ||
-				MathF.Abs(expected.Y - actual.Y) > threshold)
+			if (MathD.Abs(expected.X - actual.X) > threshold ||
+				MathD.Abs(expected.Y - actual.Y) > threshold)
 			{
 				Assert.Fail("{0}: Expected {1}, but got {2} instead.",
 					message,

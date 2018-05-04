@@ -22,13 +22,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private   bool                 actionAllowed       = true;
 		private   bool                 actionIsClone       = false;
 		private   Point                actionBeginLoc      = Point.Empty;
-		private   Vector3              actionBeginLocSpace = Vector3.Zero;
-		private   Vector3              actionLastLocSpace  = Vector3.Zero;
+		private   Vector3D              actionBeginLocSpace = Vector3D.Zero;
+		private   Vector3D              actionLastLocSpace  = Vector3D.Zero;
 		private   ObjectEditorAxisLock actionLockedAxis    = ObjectEditorAxisLock.None;
 		private   ObjectEditorAction   action              = ObjectEditorAction.None;
 		private   bool                 selectionStatsValid = false;
-		private   Vector3              selectionCenter     = Vector3.Zero;
-		private   float                selectionRadius     = 0.0f;
+		private   Vector3D              selectionCenter     = Vector3D.Zero;
+		private   double                selectionRadius     = 0.0f;
 		private   ObjectSelection      activeRectSel       = new ObjectSelection();
 		private   ObjectEditorAction   mouseoverAction     = ObjectEditorAction.None;
 		private   ObjectEditorSelObj   mouseoverObject     = null;
@@ -82,7 +82,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return this.allObjSel.Any(); }
 		}
-		protected override Vector3 CameraFocusPosition
+		protected override Vector3D CameraFocusPosition
 		{
 			get { return this.selectionCenter; }
 		}
@@ -106,9 +106,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 		public virtual void DeleteObjects(IEnumerable<ObjectEditorSelObj> objEnum) {}
 		public virtual List<ObjectEditorSelObj> CloneObjects(IEnumerable<ObjectEditorSelObj> objEnum) { return new List<ObjectEditorSelObj>(); }
-		public void MoveSelectionBy(Vector3 move)
+		public void MoveSelectionBy(Vector3D move)
 		{
-			if (move == Vector3.Zero) return;
+			if (move == Vector3D.Zero) return;
 
 			UndoRedoManager.Do(new MoveCamViewObjAction(
 				this.actionObjSel, 
@@ -119,14 +119,14 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.InvalidateSelectionStats();
 			this.Invalidate();
 		}
-		public void MoveSelectionTo(Vector3 target)
+		public void MoveSelectionTo(Vector3D target)
 		{
 			this.MoveSelectionBy(target - this.selectionCenter);
 		}
 		public void MoveSelectionToCursor()
 		{
 			Point mousePos = this.PointToClient(Cursor.Position);
-			Vector3 mouseSpaceCoord = this.GetWorldPos(new Vector3(mousePos.X, mousePos.Y, this.selectionCenter.Z));
+			Vector3D mouseSpaceCoord = this.GetWorldPos(new Vector3D(mousePos.X, mousePos.Y, this.selectionCenter.Z));
 
 			// Apply user guide snapping
 			if ((this.SnapToUserGuides & UserGuideType.Position) != UserGuideType.None)
@@ -136,7 +136,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			this.MoveSelectionTo(mouseSpaceCoord);
 		}
-		public void RotateSelectionBy(float rotation)
+		public void RotateSelectionBy(double rotation)
 		{
 			if (rotation == 0.0f) return;
 			
@@ -149,7 +149,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.InvalidateSelectionStats();
 			this.Invalidate();
 		}
-		public void ScaleSelectionBy(float scale)
+		public void ScaleSelectionBy(double scale)
 		{
 			if (scale == 1.0f) return;
 
@@ -166,23 +166,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		protected void DrawSelectionMarkers(Canvas canvas, IEnumerable<ObjectEditorSelObj> obj)
 		{
 			// Determine turned Camera axes for angle-independent drawing
-			Vector2 catDotX, catDotY;
-			float camAngle = this.CameraObj.Transform.Angle;
-			MathF.GetTransformDotVec(camAngle, out catDotX, out catDotY);
-			Vector3 right = new Vector3(1.0f, 0.0f, 0.0f);
-			Vector3 down = new Vector3(0.0f, 1.0f, 0.0f);
-			MathF.TransformDotVec(ref right, ref catDotX, ref catDotY);
-			MathF.TransformDotVec(ref down, ref catDotX, ref catDotY);
+			Vector2D catDotX, catDotY;
+			double camAngle = this.CameraObj.Transform.Angle;
+			MathD.GetTransformDotVec(camAngle, out catDotX, out catDotY);
+			Vector3D right = new Vector3D(1.0f, 0.0f, 0.0f);
+			Vector3D down = new Vector3D(0.0f, 1.0f, 0.0f);
+			MathD.TransformDotVec(ref right, ref catDotX, ref catDotY);
+			MathD.TransformDotVec(ref down, ref catDotX, ref catDotY);
 
 			canvas.PushState();
 			canvas.State.DepthOffset = -1.0f;
 			foreach (ObjectEditorSelObj selObj in obj)
 			{
 				if (!selObj.HasTransform) continue;
-				Vector3 posTemp = selObj.Pos;
-				float radTemp = selObj.BoundRadius;
+				Vector3D posTemp = selObj.Pos;
+				double radTemp = selObj.BoundRadius;
 
-				if (!canvas.DrawDevice.IsSphereInView(posTemp, radTemp)) continue;
+				if (!canvas.DrawDevice.IsSphereInView(posTemp, (float)radTemp)) continue;
 
 				// Draw selection marker
 				if (selObj.ShowPos)
@@ -207,8 +207,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				if (selObj.ShowAngle)
 				{
 					posTemp = selObj.Pos + 
-						radTemp * right * MathF.Sin(selObj.Angle - camAngle) - 
-						radTemp * down * MathF.Cos(selObj.Angle - camAngle);
+						radTemp * right * MathD.Sin(selObj.Angle - camAngle) - 
+						radTemp * down * MathD.Cos(selObj.Angle - camAngle);
 					canvas.DrawLine(selObj.Pos.X, selObj.Pos.Y, selObj.Pos.Z, posTemp.X, posTemp.Y, posTemp.Z);
 				}
 
@@ -218,10 +218,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			canvas.PopState();
 		}
-		protected void DrawLockedAxes(Canvas canvas, float x, float y, float z, float r)
+		protected void DrawLockedAxes(Canvas canvas, double x, double y, double z, double r)
 		{
-			Vector3 refPos = canvas.DrawDevice.ViewerPos;
-			float nearZ = canvas.DrawDevice.NearZ;
+			Vector3D refPos = canvas.DrawDevice.ViewerPos;
+			double nearZ = canvas.DrawDevice.NearZ;
 
 			canvas.PushState();
 			if (this.actionLockedAxis == ObjectEditorAxisLock.X)
@@ -240,7 +240,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				canvas.State.SetMaterial(DrawTechnique.Solid);
 				canvas.State.ColorTint = ColorRgba.Lerp(this.FgColor, ColorRgba.Blue, 0.5f);
-				canvas.DrawLine(x, y, MathF.Max(z - r, refPos.Z + nearZ + 10), x, y, z);
+				canvas.DrawLine(x, y, MathD.Max(z - r, refPos.Z + nearZ + 10), x, y, z);
 				canvas.DrawLine(x, y, z, x, y, z + r);
 			}
 			canvas.PopState();
@@ -254,7 +254,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		/// <param name="lockedVec">A reference vector that represents the base vector being locked to all axes at once.</param>
 		/// <param name="beginToTarget">The movement vector to evaluate in order to determine the axes to which the base vector will be locked.</param>
 		/// <returns></returns>
-		protected Vector3 ApplyAxisLock(Vector3 baseVec, Vector3 lockedVec, Vector3 beginToTarget)
+		protected Vector3D ApplyAxisLock(Vector3D baseVec, Vector3D lockedVec, Vector3D beginToTarget)
 		{
 			bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
 			if (!shift)
@@ -264,39 +264,39 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			else
 			{
-				float xWeight = MathF.Abs(Vector3.Dot(beginToTarget.Normalized, Vector3.UnitX));
-				float yWeight = MathF.Abs(Vector3.Dot(beginToTarget.Normalized, Vector3.UnitY));
-				float zWeight = MathF.Abs(Vector3.Dot(beginToTarget.Normalized, Vector3.UnitZ));
+				double xWeight = MathD.Abs(Vector3D.Dot(beginToTarget.Normalized, Vector3D.UnitX));
+				double yWeight = MathD.Abs(Vector3D.Dot(beginToTarget.Normalized, Vector3D.UnitY));
+				double zWeight = MathD.Abs(Vector3D.Dot(beginToTarget.Normalized, Vector3D.UnitZ));
 				
 				if (xWeight >= yWeight && xWeight >= zWeight)
 				{
 					this.actionLockedAxis = ObjectEditorAxisLock.X;
-					return new Vector3(baseVec.X, lockedVec.Y, lockedVec.Z);
+					return new Vector3D(baseVec.X, lockedVec.Y, lockedVec.Z);
 				}
 				else if (yWeight >= xWeight && yWeight >= zWeight)
 				{
 					this.actionLockedAxis = ObjectEditorAxisLock.Y;
-					return new Vector3(lockedVec.X, baseVec.Y, lockedVec.Z);
+					return new Vector3D(lockedVec.X, baseVec.Y, lockedVec.Z);
 				}
 				else if (zWeight >= yWeight && zWeight >= xWeight)
 				{
 					this.actionLockedAxis = ObjectEditorAxisLock.Z;
-					return new Vector3(lockedVec.X, lockedVec.Y, baseVec.Z);
+					return new Vector3D(lockedVec.X, lockedVec.Y, baseVec.Z);
 				}
 				return lockedVec;
 			}
 		}
-		protected Vector2 ApplyAxisLock(Vector2 baseVec, Vector2 lockedVec, Vector2 beginToTarget)
+		protected Vector2D ApplyAxisLock(Vector2D baseVec, Vector2D lockedVec, Vector2D beginToTarget)
 		{
-			return this.ApplyAxisLock(new Vector3(baseVec), new Vector3(lockedVec), new Vector3(beginToTarget)).Xy;
+			return this.ApplyAxisLock(new Vector3D(baseVec), new Vector3D(lockedVec), new Vector3D(beginToTarget)).Xy;
 		}
-		protected Vector3 ApplyAxisLock(Vector3 targetVec, Vector3 lockedVec)
+		protected Vector3D ApplyAxisLock(Vector3D targetVec, Vector3D lockedVec)
 		{
-			return targetVec + this.ApplyAxisLock(Vector3.Zero, lockedVec - targetVec, lockedVec - targetVec);
+			return targetVec + this.ApplyAxisLock(Vector3D.Zero, lockedVec - targetVec, lockedVec - targetVec);
 		}
-		protected Vector2 ApplyAxisLock(Vector2 targetVec, Vector2 lockedVec)
+		protected Vector2D ApplyAxisLock(Vector2D targetVec, Vector2D lockedVec)
 		{
-			return targetVec + this.ApplyAxisLock(Vector2.Zero, lockedVec - targetVec, lockedVec - targetVec);
+			return targetVec + this.ApplyAxisLock(Vector2D.Zero, lockedVec - targetVec, lockedVec - targetVec);
 		}
 		
 		protected void BeginAction(ObjectEditorAction action)
@@ -310,7 +310,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			this.action = action;
 			this.actionBeginLoc = mouseLoc;
-			this.actionBeginLocSpace = this.GetWorldPos(new Vector3(
+			this.actionBeginLocSpace = this.GetWorldPos(new Vector3D(
 				mouseLoc.X, 
 				mouseLoc.Y, 
 				(this.action == ObjectEditorAction.RectSelect) ? 0.0f : this.selectionCenter.Z));
@@ -325,12 +325,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				// When moving multiple objects, snap only relative to the original selection center, so individual grid alignment is retained
 				this.EditingUserGuide.SnapPosOrigin = this.selectionCenter;
-				this.EditingUserGuide.SnapScaleOrigin = Vector3.One;
+				this.EditingUserGuide.SnapScaleOrigin = Vector3D.One;
 			}
 			else
 			{
-				this.EditingUserGuide.SnapPosOrigin = Vector3.Zero;
-				this.EditingUserGuide.SnapScaleOrigin = Vector3.One;
+				this.EditingUserGuide.SnapPosOrigin = Vector3D.Zero;
+				this.EditingUserGuide.SnapScaleOrigin = Vector3D.One;
 			}
 
 			if (Sandbox.State == SandboxState.Playing)
@@ -390,7 +390,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			
 			List<ObjectEditorSelObj> transformObjSel = this.allObjSel.Where(s => s.HasTransform).ToList();
 
-			this.selectionCenter = Vector3.Zero;
+			this.selectionCenter = Vector3D.Zero;
 			this.selectionRadius = 0.0f;
 
 			foreach (ObjectEditorSelObj s in transformObjSel)
@@ -398,7 +398,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			if (transformObjSel.Count > 0) this.selectionCenter /= transformObjSel.Count;
 
 			foreach (ObjectEditorSelObj s in transformObjSel)
-				this.selectionRadius = MathF.Max(this.selectionRadius, s.BoundRadius + (s.Pos - this.selectionCenter).Length);
+				this.selectionRadius = MathD.Max(this.selectionRadius, s.BoundRadius + (s.Pos - this.selectionCenter).Length);
 
 			this.selectionStatsValid = true;
 		}
@@ -417,15 +417,15 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.mouseoverObject = this.PickSelObjAt(mouseLoc.X, mouseLoc.Y);
 
 				// Determine action variables
-				Vector3 mouseSpaceCoord = this.GetWorldPos(new Vector3(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
-				float scale = this.GetScaleAtZ(this.selectionCenter.Z);
-				const float boundaryThickness = 10.0f;
+				Vector3D mouseSpaceCoord = this.GetWorldPos(new Vector3D(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
+				double scale = this.GetScaleAtZ(this.selectionCenter.Z);
+				const double boundaryThickness = 10.0f;
 				bool tooSmall = this.selectionRadius * scale <= boundaryThickness * 2.0f;
-				bool mouseOverBoundary = MathF.Abs((mouseSpaceCoord - this.selectionCenter).Length - this.selectionRadius) * scale < boundaryThickness;
+				bool mouseOverBoundary = MathD.Abs((mouseSpaceCoord - this.selectionCenter).Length - this.selectionRadius) * scale < boundaryThickness;
 				bool mouseInsideBoundary = !mouseOverBoundary && (mouseSpaceCoord - this.selectionCenter).Length < this.selectionRadius;
 				bool mouseAtCenterAxis = 
-					MathF.Abs(mouseSpaceCoord.X - this.selectionCenter.X) * scale < boundaryThickness || 
-					MathF.Abs(mouseSpaceCoord.Y - this.selectionCenter.Y) * scale < boundaryThickness;
+					MathD.Abs(mouseSpaceCoord.X - this.selectionCenter.X) * scale < boundaryThickness || 
+					MathD.Abs(mouseSpaceCoord.Y - this.selectionCenter.Y) * scale < boundaryThickness;
 				bool shift = (Control.ModifierKeys & Keys.Shift) != Keys.None;
 				bool ctrl = (Control.ModifierKeys & Keys.Control) != Keys.None;
 
@@ -524,23 +524,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.ValidateSelectionStats();
 
 			// Determine where to move the object
-			float zMovement = this.CameraObj.Transform.Pos.Z - this.actionLastLocSpace.Z;
-			Vector3 mousePosSpace = this.GetWorldPos(new Vector3(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z + zMovement)); mousePosSpace.Z = 0;
-			Vector3 resetMovement = this.actionBeginLocSpace - this.actionLastLocSpace;
-			Vector3 targetMovement = mousePosSpace - this.actionLastLocSpace; targetMovement.Z = zMovement;
+			double zMovement = this.CameraObj.Transform.Pos.Z - this.actionLastLocSpace.Z;
+			Vector3D mousePosSpace = this.GetWorldPos(new Vector3D(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z + zMovement)); mousePosSpace.Z = 0;
+			Vector3D resetMovement = this.actionBeginLocSpace - this.actionLastLocSpace;
+			Vector3D targetMovement = mousePosSpace - this.actionLastLocSpace; targetMovement.Z = zMovement;
 
 			// Apply user guide snapping
 			if ((this.SnapToUserGuides & UserGuideType.Position) != UserGuideType.None)
 			{
-				Vector3 snappedCenter = this.selectionCenter;
-				Vector3 targetPosSpace = snappedCenter + targetMovement;
+				Vector3D snappedCenter = this.selectionCenter;
+				Vector3D targetPosSpace = snappedCenter + targetMovement;
 
 				targetPosSpace = this.EditingUserGuide.SnapPosition(targetPosSpace);
 				targetMovement = targetPosSpace - snappedCenter;
 			}
 
 			// Apply user axis locks
-			targetMovement = this.ApplyAxisLock(targetMovement, resetMovement, mousePosSpace - this.actionBeginLocSpace + new Vector3(0.0f, 0.0f, this.CameraObj.Transform.Pos.Z));
+			targetMovement = this.ApplyAxisLock(targetMovement, resetMovement, mousePosSpace - this.actionBeginLocSpace + new Vector3D(0.0f, 0.0f, this.CameraObj.Transform.Pos.Z));
 
 			// Move the selected objects accordingly
 			this.MoveSelectionBy(targetMovement);
@@ -551,10 +551,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			this.ValidateSelectionStats();
 
-			Vector3 spaceCoord = this.GetWorldPos(new Vector3(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
-			float lastAngle = MathF.Angle(this.selectionCenter.X, this.selectionCenter.Y, this.actionLastLocSpace.X, this.actionLastLocSpace.Y);
-			float curAngle = MathF.Angle(this.selectionCenter.X, this.selectionCenter.Y, spaceCoord.X, spaceCoord.Y);
-			float rotation = curAngle - lastAngle;
+			Vector3D spaceCoord = this.GetWorldPos(new Vector3D(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
+			double lastAngle = MathD.Angle(this.selectionCenter.X, this.selectionCenter.Y, this.actionLastLocSpace.X, this.actionLastLocSpace.Y);
+			double curAngle = MathD.Angle(this.selectionCenter.X, this.selectionCenter.Y, spaceCoord.X, spaceCoord.Y);
+			double rotation = curAngle - lastAngle;
 
 			this.RotateSelectionBy(rotation);
 
@@ -565,16 +565,16 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.ValidateSelectionStats();
 			if (this.selectionRadius == 0.0f) return;
 
-			Vector3 spaceCoord = this.GetWorldPos(new Vector3(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
-			float lastRadius = this.selectionRadius;
-			float curRadius = (this.selectionCenter - spaceCoord).Length;
+			Vector3D spaceCoord = this.GetWorldPos(new Vector3D(mouseLoc.X, mouseLoc.Y, this.selectionCenter.Z));
+			double lastRadius = this.selectionRadius;
+			double curRadius = (this.selectionCenter - spaceCoord).Length;
 
 			if ((this.SnapToUserGuides & UserGuideType.Scale) != UserGuideType.None)
 			{
 				curRadius = this.EditingUserGuide.SnapSize(curRadius);
 			}
 
-			float scale = MathF.Clamp(curRadius / lastRadius, 0.0001f, 10000.0f);
+			double scale = MathD.Clamp(curRadius / lastRadius, 0.0001f, 10000.0f);
 			this.ScaleSelectionBy(scale);
 
 			this.actionLastLocSpace = spaceCoord;
@@ -619,8 +619,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Draw overall selection boundary
 			if (transformObjSel.Count > 1)
 			{
-				float midZ = transformObjSel.Average(t => t.Pos.Z);
-				float maxZDiff = transformObjSel.Max(t => MathF.Abs(t.Pos.Z - midZ));
+				double midZ = transformObjSel.Average(t => t.Pos.Z);
+				double maxZDiff = transformObjSel.Max(t => MathD.Abs(t.Pos.Z - midZ));
 				if (maxZDiff > 0.001f)
 				{
 					canvas.State.ColorTint = ColorRgba.Lerp(this.FgColor, this.BgColor, 0.5f);
@@ -646,7 +646,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			bool canScale = (canMove && this.actionObjSel.Count > 1) || this.actionObjSel.Any(s => s.IsActionAvailable(ObjectEditorAction.Scale));
 			if (canScale)
 			{
-				float dotR = 3.0f / this.GetScaleAtZ(this.selectionCenter.Z);
+				double dotR = 3.0f / this.GetScaleAtZ(this.selectionCenter.Z);
 				canvas.State.DepthOffset -= 0.1f;
 				canvas.State.ColorTint = this.FgColor;
 				canvas.FillCircle(
@@ -694,7 +694,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			canvas.PopState();
 		}
 
-		protected override string UpdateActionText(ref Vector2 actionTextPos)
+		protected override string UpdateActionText(ref Vector2D actionTextPos)
 		{
 			string actionText = null;
 			ObjectEditorAction visibleObjectAction = this.VisibleObjAction;
@@ -840,12 +840,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					}
 					this.MoveSelectionToCursor();
 				}
-				else if (!e.Control && e.KeyCode == Keys.Left)		this.MoveSelectionBy(-Vector3.UnitX);
-				else if (!e.Control && e.KeyCode == Keys.Right)		this.MoveSelectionBy(Vector3.UnitX);
-				else if (!e.Control && e.KeyCode == Keys.Up)		this.MoveSelectionBy(-Vector3.UnitY);
-				else if (!e.Control && e.KeyCode == Keys.Down)		this.MoveSelectionBy(Vector3.UnitY);
-				else if (!e.Control && e.KeyCode == Keys.Add)		this.MoveSelectionBy(Vector3.UnitZ);
-				else if (!e.Control && e.KeyCode == Keys.Subtract)	this.MoveSelectionBy(-Vector3.UnitZ);
+				else if (!e.Control && e.KeyCode == Keys.Left)		this.MoveSelectionBy(-Vector3D.UnitX);
+				else if (!e.Control && e.KeyCode == Keys.Right)		this.MoveSelectionBy(Vector3D.UnitX);
+				else if (!e.Control && e.KeyCode == Keys.Up)		this.MoveSelectionBy(-Vector3D.UnitY);
+				else if (!e.Control && e.KeyCode == Keys.Down)		this.MoveSelectionBy(Vector3D.UnitY);
+				else if (!e.Control && e.KeyCode == Keys.Add)		this.MoveSelectionBy(Vector3D.UnitZ);
+				else if (!e.Control && e.KeyCode == Keys.Subtract)	this.MoveSelectionBy(-Vector3D.UnitZ);
 				else if (e.KeyCode == Keys.ShiftKey)				this.UpdateAction();
 				else if (e.KeyCode == Keys.ControlKey)				this.UpdateAction();
 			}

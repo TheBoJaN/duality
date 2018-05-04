@@ -200,7 +200,7 @@ namespace FarseerPhysics.Dynamics
 		/// </summary>
 		public JointDelegate JointRemoved;
 
-		private float _invDt0;
+		private double _invDt0;
 		public Island Island = new Island();
 		private Body[] _stack = new Body[64];
 		private bool _stepComplete;
@@ -228,7 +228,7 @@ namespace FarseerPhysics.Dynamics
 			this.JointList = new List<Joint>(32);
 		}
 
-		public World(Vector2 gravity, AABB span)
+		public World(Vector2D gravity, AABB span)
 			: this()
 		{
 			this.Gravity = gravity;
@@ -239,24 +239,24 @@ namespace FarseerPhysics.Dynamics
 		/// Initializes a new instance of the <see cref="World"/> class.
 		/// </summary>
 		/// <param name="gravity">The gravity.</param>
-		public World(Vector2 gravity)
+		public World(Vector2D gravity)
 			: this()
 		{
 			this.ContactManager = new ContactManager(new DynamicTreeBroadPhase());
 			this.Gravity = gravity;
 		}
 
-		public float UpdateTime { get; private set; }
+		public double UpdateTime { get; private set; }
 
-		public float ContinuousPhysicsTime { get; private set; }
+		public double ContinuousPhysicsTime { get; private set; }
 
-		public float ControllersUpdateTime { get; private set; }
+		public double ControllersUpdateTime { get; private set; }
 
-		public float AddRemoveTime { get; private set; }
+		public double AddRemoveTime { get; private set; }
 
-		public float ContactsUpdateTime { get; private set; }
+		public double ContactsUpdateTime { get; private set; }
 
-		public float SolveUpdateTime { get; private set; }
+		public double SolveUpdateTime { get; private set; }
 
 		/// <summary>
 		/// Get the number of broad-phase proxies.
@@ -271,7 +271,7 @@ namespace FarseerPhysics.Dynamics
 		/// Change the global gravity vector.
 		/// </summary>
 		/// <value>The gravity.</value>
-		public Vector2 Gravity;
+		public Vector2D Gravity;
 
 		/// <summary>
 		/// Set flag to control automatic clearing of forces after each time step.
@@ -631,7 +631,7 @@ namespace FarseerPhysics.Dynamics
 		/// and consraint solution.
 		/// </summary>
 		/// <param name="dt">The amount of time to simulate, this should not vary.</param>
-		public void Step(float dt)
+		public void Step(double dt)
 		{
 			if (Settings.EnableDiagnostics)
 				this._watch.Start();
@@ -715,7 +715,7 @@ namespace FarseerPhysics.Dynamics
 			for (int i = 0; i < this.BodyList.Count; i++)
 			{
 				Body body = this.BodyList[i];
-				body.Force = Vector2.Zero;
+				body.Force = Vector2D.Zero;
 				body.Torque = 0.0f;
 			}
 		}
@@ -753,7 +753,7 @@ namespace FarseerPhysics.Dynamics
 		/// <param name="callback">A user implemented callback class.</param>
 		/// <param name="point1">The ray starting point.</param>
 		/// <param name="point2">The ray ending point.</param>
-		public void RayCast(RayCastCallback callback, Vector2 point1, Vector2 point2)
+		public void RayCast(RayCastCallback callback, Vector2D point1, Vector2D point2)
 		{
 			RayCastInput input = new RayCastInput();
 			input.MaxFraction = 1.0f;
@@ -770,8 +770,8 @@ namespace FarseerPhysics.Dynamics
 
 				if (hit)
 				{
-					float fraction = output.Fraction;
-					Vector2 point = (1.0f - fraction) * rayCastInput.Point1 + fraction * rayCastInput.Point2;
+					double fraction = output.Fraction;
+					Vector2D point = (1.0f - fraction) * rayCastInput.Point1 + fraction * rayCastInput.Point2;
 					return callback(fixture, point, output.Normal, fraction);
 				}
 
@@ -1000,7 +1000,7 @@ namespace FarseerPhysics.Dynamics
 			{
 				// Find the first TOI.
 				Contact minContact = null;
-				float minAlpha = 1.0f;
+				double minAlpha = 1.0f;
 
 				for (int i = 0; i < this.ContactManager.ContactList.Count; i++)
 				{
@@ -1018,7 +1018,7 @@ namespace FarseerPhysics.Dynamics
 						continue;
 					}
 
-					float alpha;
+					double alpha;
 					if ((c.Flags & ContactFlags.TOI) == ContactFlags.TOI)
 					{
 						// This contact has a valid cached TOI.
@@ -1062,7 +1062,7 @@ namespace FarseerPhysics.Dynamics
 
 						// Compute the TOI for this contact.
 						// Put the sweeps onto the same time interval.
-						float alpha0 = bA.Sweep.Alpha0;
+						double alpha0 = bA.Sweep.Alpha0;
 
 						if (bA.Sweep.Alpha0 < bB.Sweep.Alpha0)
 						{
@@ -1088,7 +1088,7 @@ namespace FarseerPhysics.Dynamics
 						TimeOfImpact.CalculateTimeOfImpact(out output, this._input);
 
 						// Beta is the fraction of the remaining portion of the .
-						float beta = output.T;
+						double beta = output.T;
 						if (output.State == TOIOutputState.Touching)
 						{
 							alpha = Math.Min(alpha0 + (1.0f - alpha0) * beta, 1.0f);
@@ -1281,10 +1281,10 @@ namespace FarseerPhysics.Dynamics
 			}
 		}
 
-		public Fixture TestPoint(Vector2 point)
+		public Fixture TestPoint(Vector2D point)
 		{
 			AABB aabb;
-			Vector2 d = new Vector2(Settings.Epsilon, Settings.Epsilon);
+			Vector2D d = new Vector2D(Settings.Epsilon, Settings.Epsilon);
 			aabb.LowerBound = point - d;
 			aabb.UpperBound = point + d;
 
@@ -1313,10 +1313,10 @@ namespace FarseerPhysics.Dynamics
 		/// </summary>
 		/// <param name="point">The point.</param>
 		/// <returns></returns>
-		public List<Fixture> TestPointAll(Vector2 point)
+		public List<Fixture> TestPointAll(Vector2D point)
 		{
 			AABB aabb;
-			Vector2 d = new Vector2(Settings.Epsilon, Settings.Epsilon);
+			Vector2D d = new Vector2D(Settings.Epsilon, Settings.Epsilon);
 			aabb.LowerBound = point - d;
 			aabb.UpperBound = point + d;
 

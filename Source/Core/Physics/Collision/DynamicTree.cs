@@ -111,7 +111,7 @@ namespace FarseerPhysics.Collision
 			int proxyId = AllocateNode();
 
 			// Fatten the aabb.
-			Vector2 r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
+			Vector2D r = new Vector2D(Settings.AABBExtension, Settings.AABBExtension);
 			this._nodes[proxyId].AABB.LowerBound = aabb.LowerBound - r;
 			this._nodes[proxyId].AABB.UpperBound = aabb.UpperBound + r;
 			this._nodes[proxyId].UserData = userData;
@@ -144,7 +144,7 @@ namespace FarseerPhysics.Collision
 		/// <param name="aabb">The aabb.</param>
 		/// <param name="displacement">The displacement.</param>
 		/// <returns>true if the proxy was re-inserted.</returns>
-		public bool MoveProxy(int proxyId, ref AABB aabb, Vector2 displacement)
+		public bool MoveProxy(int proxyId, ref AABB aabb, Vector2D displacement)
 		{
 			Debug.Assert(0 <= proxyId && proxyId < this._nodeCapacity);
 
@@ -159,12 +159,12 @@ namespace FarseerPhysics.Collision
 
 			// Extend AABB.
 			AABB b = aabb;
-			Vector2 r = new Vector2(Settings.AABBExtension, Settings.AABBExtension);
+			Vector2D r = new Vector2D(Settings.AABBExtension, Settings.AABBExtension);
 			b.LowerBound = b.LowerBound - r;
 			b.UpperBound = b.UpperBound + r;
 
 			// Predict AABB displacement.
-			Vector2 d = Settings.AABBMultiplier * displacement;
+			Vector2D d = Settings.AABBMultiplier * displacement;
 
 			if (d.X < 0.0f)
 			{
@@ -307,28 +307,28 @@ namespace FarseerPhysics.Collision
 		/// </summary>
 		/// <param name="callback">A callback class that is called for each proxy that is hit by the ray.</param>
 		/// <param name="input">The ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).</param>
-		public void RayCast(Func<RayCastInput, int, float> callback, ref RayCastInput input)
+		public void RayCast(Func<RayCastInput, int, double> callback, ref RayCastInput input)
 		{
-			Vector2 p1 = input.Point1;
-			Vector2 p2 = input.Point2;
-			Vector2 r = p2 - p1;
+			Vector2D p1 = input.Point1;
+			Vector2D p2 = input.Point2;
+			Vector2D r = p2 - p1;
 			Debug.Assert(r.LengthSquared > 0.0f);
 			r.Normalize();
 
 			// v is perpendicular to the segment.
-			Vector2 absV = MathUtils.Abs(new Vector2(-r.Y, r.X));
+			Vector2D absV = MathUtils.Abs(new Vector2D(-r.Y, r.X));
 
 			// Separating axis for segment (Gino, p80).
 			// |dot(v, p1 - c)| > dot(|v|, h)
 
-			float maxFraction = input.MaxFraction;
+			double maxFraction = input.MaxFraction;
 
 			// Build a bounding box for the segment.
 			AABB segmentAABB = new AABB();
 			{
-				Vector2 t = p1 + maxFraction * (p2 - p1);
-				Vector2.Min(ref p1, ref t, out segmentAABB.LowerBound);
-				Vector2.Max(ref p1, ref t, out segmentAABB.UpperBound);
+				Vector2D t = p1 + maxFraction * (p2 - p1);
+				Vector2D.Min(ref p1, ref t, out segmentAABB.LowerBound);
+				Vector2D.Max(ref p1, ref t, out segmentAABB.UpperBound);
 			}
 
 			_stack.Clear();
@@ -351,9 +351,9 @@ namespace FarseerPhysics.Collision
 
 				// Separating axis for segment (Gino, p80).
 				// |dot(v, p1 - c)| > dot(|v|, h)
-				Vector2 c = node.AABB.Center;
-				Vector2 h = node.AABB.Extents;
-				float separation = Math.Abs(Vector2.Dot(new Vector2(-r.Y, r.X), p1 - c)) - Vector2.Dot(absV, h);
+				Vector2D c = node.AABB.Center;
+				Vector2D h = node.AABB.Extents;
+				double separation = Math.Abs(Vector2D.Dot(new Vector2D(-r.Y, r.X), p1 - c)) - Vector2D.Dot(absV, h);
 				if (separation > 0.0f)
 				{
 					continue;
@@ -366,7 +366,7 @@ namespace FarseerPhysics.Collision
 					subInput.Point2 = input.Point2;
 					subInput.MaxFraction = maxFraction;
 
-					float value = callback(subInput, nodeId);
+					double value = callback(subInput, nodeId);
 
 					if (value == 0.0f)
 					{
@@ -378,9 +378,9 @@ namespace FarseerPhysics.Collision
 					{
 						// Update segment bounding box.
 						maxFraction = value;
-						Vector2 t = p1 + maxFraction * (p2 - p1);
-						segmentAABB.LowerBound = Vector2.Min(p1, t);
-						segmentAABB.UpperBound = Vector2.Max(p1, t);
+						Vector2D t = p1 + maxFraction * (p2 - p1);
+						segmentAABB.LowerBound = Vector2D.Min(p1, t);
+						segmentAABB.UpperBound = Vector2D.Max(p1, t);
 					}
 				}
 				else
@@ -485,15 +485,15 @@ namespace FarseerPhysics.Collision
 				this._nodes[sibling].AABB.Combine(ref leafAABB);
 				this._nodes[sibling].LeafCount += 1;
 
-				float siblingArea = this._nodes[sibling].AABB.Perimeter;
+				double siblingArea = this._nodes[sibling].AABB.Perimeter;
 				AABB parentAABB = new AABB();
 				parentAABB.Combine(ref this._nodes[sibling].AABB, ref leafAABB);
-				float parentArea = parentAABB.Perimeter;
-				float cost1 = 2.0f * parentArea;
+				double parentArea = parentAABB.Perimeter;
+				double cost1 = 2.0f * parentArea;
 
-				float inheritanceCost = 2.0f * (parentArea - siblingArea);
+				double inheritanceCost = 2.0f * (parentArea - siblingArea);
 
-				float cost2;
+				double cost2;
 				if (this._nodes[child1].IsLeaf())
 				{
 					AABB aabb = new AABB();
@@ -504,12 +504,12 @@ namespace FarseerPhysics.Collision
 				{
 					AABB aabb = new AABB();
 					aabb.Combine(ref leafAABB, ref this._nodes[child1].AABB);
-					float oldArea = this._nodes[child1].AABB.Perimeter;
-					float newArea = aabb.Perimeter;
+					double oldArea = this._nodes[child1].AABB.Perimeter;
+					double newArea = aabb.Perimeter;
 					cost2 = (newArea - oldArea) + inheritanceCost;
 				}
 
-				float cost3;
+				double cost3;
 				if (this._nodes[child2].IsLeaf())
 				{
 					AABB aabb = new AABB();
@@ -520,8 +520,8 @@ namespace FarseerPhysics.Collision
 				{
 					AABB aabb = new AABB();
 					aabb.Combine(ref leafAABB, ref this._nodes[child2].AABB);
-					float oldArea = this._nodes[child2].AABB.Perimeter;
-					float newArea = aabb.Perimeter;
+					double oldArea = this._nodes[child2].AABB.Perimeter;
+					double newArea = aabb.Perimeter;
 					cost3 = newArea - oldArea + inheritanceCost;
 				}
 

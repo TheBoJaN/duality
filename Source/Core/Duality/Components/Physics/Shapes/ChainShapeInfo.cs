@@ -39,7 +39,7 @@ namespace Duality.Components.Physics
 		/// the specified vertex array, so no copy will be made.
 		/// </summary>
 		/// <param name="vertices"></param>
-		public ChainShapeInfo(Vector2[] vertices) : base(vertices) { }
+		public ChainShapeInfo(Vector2D[] vertices) : base(vertices) { }
 		
 
 		protected override void DestroyFixtures()
@@ -92,7 +92,7 @@ namespace Duality.Components.Physics
 
 			return this.fixture != null;
 		}
-		private void UpdateVertices(ChainShape shape, float scale)
+		private void UpdateVertices(ChainShape shape, double scale)
 		{
 			shape.Vertices.Clear();
 

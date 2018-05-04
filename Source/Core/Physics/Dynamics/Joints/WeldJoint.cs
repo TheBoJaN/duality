@@ -50,13 +50,13 @@ namespace FarseerPhysics.Dynamics.Joints
 	/// </summary>
 	public class WeldJoint : Joint
 	{
-		public Vector2 LocalAnchorA;
-		public Vector2 LocalAnchorB;
+		public Vector2D LocalAnchorA;
+		public Vector2D LocalAnchorB;
 		/// <summary>
 		/// The body2 angle minus body1 angle in the reference state (radians).
 		/// </summary>
-		public float ReferenceAngle;
-		private Vector3 _impulse;
+		public double ReferenceAngle;
+		private Vector3D _impulse;
 		private Mat33 _mass;
 
 		internal WeldJoint()
@@ -75,7 +75,7 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// <param name="bodyB">The second body</param>
 		/// <param name="localAnchorA">The first body anchor.</param>
 		/// <param name="localAnchorB">The second body anchor.</param>
-		public WeldJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB)
+		public WeldJoint(Body bodyA, Body bodyB, Vector2D localAnchorA, Vector2D localAnchorB)
 			: base(bodyA, bodyB)
 		{
 			this.JointType = JointType.Weld;
@@ -85,23 +85,23 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.ReferenceAngle = this.BodyB.Rotation - this.BodyA.Rotation;
 		}
 
-		public override Vector2 WorldAnchorA
+		public override Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.GetWorldPoint(this.LocalAnchorA); }
 		}
 
-		public override Vector2 WorldAnchorB
+		public override Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.GetWorldPoint(this.LocalAnchorB); }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
 		}
 
-		public override Vector2 GetReactionForce(float inv_dt)
+		public override Vector2D GetReactionForce(double inv_dt)
 		{
-			return inv_dt * new Vector2(this._impulse.X, this._impulse.Y);
+			return inv_dt * new Vector2D(this._impulse.X, this._impulse.Y);
 		}
 
-		public override float GetReactionTorque(float inv_dt)
+		public override double GetReactionTorque(double inv_dt)
 		{
 			return inv_dt * this._impulse.Z;
 		}
@@ -116,8 +116,8 @@ namespace FarseerPhysics.Dynamics.Joints
 			bB.GetTransform(out xfB);
 
 			// Compute the effective mass matrix.
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
 
 			// J = [-I -r1_skew I r2_skew]
 			//     [ 0       -1 0       1]
@@ -128,8 +128,8 @@ namespace FarseerPhysics.Dynamics.Joints
 			//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 			//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-			float mA = bA.InvMass, mB = bB.InvMass;
-			float iA = bA.InvI, iB = bB.InvI;
+			double mA = bA.InvMass, mB = bB.InvMass;
+			double iA = bA.InvI, iB = bB.InvI;
 
 			this._mass.Col1.X = mA + mB + rA.Y * rA.Y * iA + rB.Y * rB.Y * iB;
 			this._mass.Col2.X = -rA.Y * rA.X * iA - rB.Y * rB.X * iB;
@@ -147,7 +147,7 @@ namespace FarseerPhysics.Dynamics.Joints
 				// Scale impulses to support a variable time step.
 				this._impulse *= step.dtRatio;
 
-				Vector2 P = new Vector2(this._impulse.X, this._impulse.Y);
+				Vector2D P = new Vector2D(this._impulse.X, this._impulse.Y);
 
 				bA.LinearVelocityInternal -= mA * P;
 				bA.AngularVelocityInternal -= iA * (MathUtils.Cross(rA, P) + this._impulse.Z);
@@ -157,7 +157,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 			else
 			{
-				this._impulse = Vector3.Zero;
+				this._impulse = Vector3D.Zero;
 			}
 #pragma warning restore 0162 // Unreachable code detected
 		}
@@ -167,30 +167,30 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bA = this.BodyA;
 			Body bB = this.BodyB;
 
-			Vector2 vA = bA.LinearVelocityInternal;
-			float wA = bA.AngularVelocityInternal;
-			Vector2 vB = bB.LinearVelocityInternal;
-			float wB = bB.AngularVelocityInternal;
+			Vector2D vA = bA.LinearVelocityInternal;
+			double wA = bA.AngularVelocityInternal;
+			Vector2D vB = bB.LinearVelocityInternal;
+			double wB = bB.AngularVelocityInternal;
 
-			float mA = bA.InvMass, mB = bB.InvMass;
-			float iA = bA.InvI, iB = bB.InvI;
+			double mA = bA.InvMass, mB = bB.InvMass;
+			double iA = bA.InvI, iB = bB.InvI;
 
 			Transform xfA, xfB;
 			bA.GetTransform(out xfA);
 			bB.GetTransform(out xfB);
 
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
 
 			//  Solve point-to-point constraint
-			Vector2 Cdot1 = vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA);
-			float Cdot2 = wB - wA;
-			Vector3 Cdot = new Vector3(Cdot1.X, Cdot1.Y, Cdot2);
+			Vector2D Cdot1 = vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA);
+			double Cdot2 = wB - wA;
+			Vector3D Cdot = new Vector3D(Cdot1.X, Cdot1.Y, Cdot2);
 
-			Vector3 impulse = this._mass.Solve33(-Cdot);
+			Vector3D impulse = this._mass.Solve33(-Cdot);
 			this._impulse += impulse;
 
-			Vector2 P = new Vector2(impulse.X, impulse.Y);
+			Vector2D P = new Vector2D(impulse.X, impulse.Y);
 
 			vA -= mA * P;
 			wA -= iA * (MathUtils.Cross(rA, P) + impulse.Z);
@@ -209,24 +209,24 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bA = this.BodyA;
 			Body bB = this.BodyB;
 
-			float mA = bA.InvMass, mB = bB.InvMass;
-			float iA = bA.InvI, iB = bB.InvI;
+			double mA = bA.InvMass, mB = bB.InvMass;
+			double iA = bA.InvI, iB = bB.InvI;
 
 			Transform xfA;
 			Transform xfB;
 			bA.GetTransform(out xfA);
 			bB.GetTransform(out xfB);
 
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
 
-			Vector2 C1 = bB.Sweep.C + rB - bA.Sweep.C - rA;
-			float C2 = bB.Sweep.A - bA.Sweep.A - this.ReferenceAngle;
+			Vector2D C1 = bB.Sweep.C + rB - bA.Sweep.C - rA;
+			double C2 = bB.Sweep.A - bA.Sweep.A - this.ReferenceAngle;
 
 			// Handle large detachment.
-			const float k_allowedStretch = 10.0f * Settings.LinearSlop;
-			float positionError = C1.Length;
-			float angularError = Math.Abs(C2);
+			const double k_allowedStretch = 10.0f * Settings.LinearSlop;
+			double positionError = C1.Length;
+			double angularError = Math.Abs(C2);
 			if (positionError > k_allowedStretch)
 			{
 				iA *= 1.0f;
@@ -243,11 +243,11 @@ namespace FarseerPhysics.Dynamics.Joints
 			this._mass.Col2.Z = this._mass.Col3.Y;
 			this._mass.Col3.Z = iA + iB;
 
-			Vector3 C = new Vector3(C1.X, C1.Y, C2);
+			Vector3D C = new Vector3D(C1.X, C1.Y, C2);
 
-			Vector3 impulse = this._mass.Solve33(-C);
+			Vector3D impulse = this._mass.Solve33(-C);
 
-			Vector2 P = new Vector2(impulse.X, impulse.Y);
+			Vector2D P = new Vector2D(impulse.X, impulse.Y);
 
 			bA.Sweep.C -= mA * P;
 			bA.Sweep.A -= iA * (MathUtils.Cross(rA, P) + impulse.Z);

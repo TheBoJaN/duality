@@ -12,14 +12,14 @@ namespace Duality
 	/// </summary>
 	public sealed class VisualLogPolygonEntry : VisualLogEntry
 	{
-		private	Vector3		pos				= Vector3.Zero;
-		private	Vector2[]	vertices		= null;
+		private	Vector3D		pos				= Vector3D.Zero;
+		private	Vector2D[]	vertices		= null;
 		private	bool		invariantScale	= false;
 		
 		/// <summary>
 		/// [GET / SET] The polygons origin in space.
 		/// </summary>
-		public Vector3 Pos
+		public Vector3D Pos
 		{
 			get { return this.pos; }
 			set { this.pos = value; }
@@ -27,7 +27,7 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The vertices that form the displayed polygon.
 		/// </summary>
-		public Vector2[] Vertices
+		public Vector2D[] Vertices
 		{
 			get { return this.vertices; }
 			set { this.vertices = value; }
@@ -41,28 +41,28 @@ namespace Duality
 			set { this.invariantScale = value; }
 		}
 
-		public override void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale)
+		public override void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale)
 		{
-			float borderRadius = DefaultOutlineWidth;
-			float polyScale = 1.0f;
+			double borderRadius = DefaultOutlineWidth;
+			double polyScale = 1.0f;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.pos.Z + basePos.Z);
+				double scale = target.DrawDevice.GetScaleAtZ((float)(this.pos.Z + basePos.Z));
 				borderRadius /= scale;
 				if (this.invariantScale) polyScale /= scale;
 			}
 
 			// Determine base position
-			Vector3 circlePos = this.pos;
-			MathF.TransformCoord(ref circlePos.X, ref circlePos.Y, baseRotation, baseScale);
+			Vector3D circlePos = this.pos;
+			MathD.TransformCoord(ref circlePos.X, ref circlePos.Y, baseRotation, baseScale);
 			circlePos += basePos;
 
 			// Draw polygon and outline
 			target.State.ColorTint *= this.Color;
-			target.State.TransformAngle = baseRotation;
-			target.State.TransformScale = new Vector2(baseScale, baseScale) * polyScale;
+			target.State.TransformAngle = (float)baseRotation;
+			target.State.TransformScale = new Vector2D(baseScale, baseScale) * polyScale;
 			target.FillPolygon(
 				this.vertices,
 				circlePos.X, 

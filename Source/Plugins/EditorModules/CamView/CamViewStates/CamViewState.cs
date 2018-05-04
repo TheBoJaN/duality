@@ -42,9 +42,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 		private static readonly ContentRef<Duality.Resources.Font> OverlayFont = Duality.Resources.Font.GenericMonospace8;
 
-		private Vector3       camVel                 = Vector3.Zero;
+		private Vector3D       camVel                 = Vector3D.Zero;
 		private Point         camActionBeginLoc      = Point.Empty;
-		private Vector3       camActionBeginLocSpace = Vector3.Zero;
+		private Vector3D       camActionBeginLocSpace = Vector3D.Zero;
 		private CameraAction  camAction              = CameraAction.None;
 		private bool          camActionAllowed       = true;
 		private bool          camTransformChanged    = false;
@@ -77,9 +77,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return false; }
 		}
-		protected virtual Vector3 CameraFocusPosition
+		protected virtual Vector3D CameraFocusPosition
 		{
-			get { return Vector3.Zero; }
+			get { return Vector3D.Zero; }
 		}
 
 		public bool IsActive
@@ -155,7 +155,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		public virtual void GetDisplayedGridData(Point cursorPos, ref GridLayerData data)
 		{
 			data.GridBaseSize = this.View.EditingUserGuides.GridSize.Xy;
-			data.DisplayedGridPos = this.GetWorldPos(new Vector2(cursorPos.X, cursorPos.Y));
+			data.DisplayedGridPos = this.GetWorldPos(new Vector2D(cursorPos.X, cursorPos.Y));
 		}
 
 		/// <summary>
@@ -379,7 +379,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			Point cursorPos = this.PointToClient(Cursor.Position);
 
 			// Update action text from hovered / selection / action object
-			Vector2 actionTextPos = new Vector2(cursorPos.X + 30, cursorPos.Y + 10);
+			Vector2D actionTextPos = new Vector2D(cursorPos.X + 30, cursorPos.Y + 10);
 			this.actionText.SourceText = this.UpdateActionText(ref actionTextPos);
 
 			// Collect the views overlay layer drawcalls
@@ -408,8 +408,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				// Normalize action text position
 				if (this.actionText.Fonts != null && this.actionText.Fonts.Any(r => r.IsAvailable && r.Res.IsPixelGridAligned))
 				{
-					actionTextPos.X = MathF.Round(actionTextPos.X);
-					actionTextPos.Y = MathF.Round(actionTextPos.Y);
+					actionTextPos.X = MathD.Round(actionTextPos.X);
+					actionTextPos.Y = MathD.Round(actionTextPos.Y);
 				}
 
 				// Draw current action text
@@ -423,7 +423,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					this.statusText.SourceText = this.UpdateStatusText();
 					if (!this.statusText.IsEmpty)
 					{
-						Vector2 statusTextSize = this.statusText.Size;
+						Vector2D statusTextSize = this.statusText.Size;
 						canvas.DrawText(this.statusText, 10, this.ClientSize.Height - statusTextSize.Y - 10, drawBackground: true);
 					}
 				}
@@ -468,7 +468,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Unhandled
 			return null;
 		}
-		protected virtual string UpdateActionText(ref Vector2 actionTextPos)
+		protected virtual string UpdateActionText(ref Vector2D actionTextPos)
 		{
 			return null;
 		}
@@ -484,8 +484,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			renderSetup.AddRenderStep(this.camPassEdWorldNoDepth.Id, RenderStepPosition.After, this.camPassEdScreen);
 			
 			// Render CamView
-			Point2 clientSize = new Point2(this.ClientSize.Width, this.ClientSize.Height);
-			this.CameraComponent.Render(new Rect(clientSize), clientSize);
+			Vector2D clientSize = new Vector2D(this.ClientSize.Width, this.ClientSize.Height);
+			this.CameraComponent.Render(new RectD(clientSize), clientSize);
 
 			renderSetup.Steps.Remove(this.camPassBg);
 			renderSetup.Steps.Remove(this.camPassEdWorld);
@@ -500,47 +500,47 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			GameObject camObj = this.CameraObj;
 			Point cursorPos = this.PointToClient(Cursor.Position);
 
-			float unscaledTimeMult = Time.TimeMult / Time.TimeScale;
+			double unscaledTimeMult = Time.TimeMult / Time.TimeScale;
 
 			this.camTransformChanged = false;
 			
 			if (this.camAction == CameraAction.DragScene)
 			{
-				Vector2 curPos = new Vector2(cursorPos.X, cursorPos.Y);
-				Vector2 lastPos = new Vector2(this.camActionBeginLoc.X, this.camActionBeginLoc.Y);
+				Vector2D curPos = new Vector2D(cursorPos.X, cursorPos.Y);
+				Vector2D lastPos = new Vector2D(this.camActionBeginLoc.X, this.camActionBeginLoc.Y);
 				this.camActionBeginLoc = new Point((int)curPos.X, (int)curPos.Y);
 
-				float refZ = (this.HasCameraFocusPosition && camObj.Transform.Pos.Z < this.CameraFocusPosition.Z - cam.NearZ) ? this.CameraFocusPosition.Z : 0.0f;
+				double refZ = (this.HasCameraFocusPosition && camObj.Transform.Pos.Z < this.CameraFocusPosition.Z - cam.NearZ) ? this.CameraFocusPosition.Z : 0.0f;
 				if (camObj.Transform.Pos.Z >= refZ - cam.NearZ)
-					refZ = camObj.Transform.Pos.Z + MathF.Abs(cam.FocusDist);
+					refZ = camObj.Transform.Pos.Z + MathD.Abs(cam.FocusDist);
 
-				Vector2 targetOff = (-(curPos - lastPos) / this.GetScaleAtZ(refZ));
-				Vector2 targetVel = targetOff / unscaledTimeMult;
-				MathF.TransformCoord(ref targetVel.X, ref targetVel.Y, camObj.Transform.Angle);
-				this.camVel.Z *= MathF.Pow(0.9f, unscaledTimeMult);
-				this.camVel += (new Vector3(targetVel, this.camVel.Z) - this.camVel) * unscaledTimeMult;
+				Vector2D targetOff = (-(curPos - lastPos) / this.GetScaleAtZ(refZ));
+				Vector2D targetVel = targetOff / unscaledTimeMult;
+				MathD.TransformCoord(ref targetVel.X, ref targetVel.Y, camObj.Transform.Angle);
+				this.camVel.Z *= MathD.Pow(0.9f, unscaledTimeMult);
+				this.camVel += (new Vector3D(targetVel, this.camVel.Z) - this.camVel) * unscaledTimeMult;
 				this.camTransformChanged = true;
 			}
 			else if (this.camAction == CameraAction.Move)
 			{
-				Vector3 moveVec = new Vector3(
+				Vector3D moveVec = new Vector3D(
 					cursorPos.X - this.camActionBeginLoc.X,
 					cursorPos.Y - this.camActionBeginLoc.Y,
 					this.camVel.Z);
 
-				const float BaseSpeedCursorLen = 25.0f;
-				const float BaseSpeed = 3.0f;
-				moveVec.X = BaseSpeed * MathF.Sign(moveVec.X) * MathF.Pow(MathF.Abs(moveVec.X) / BaseSpeedCursorLen, 1.5f);
-				moveVec.Y = BaseSpeed * MathF.Sign(moveVec.Y) * MathF.Pow(MathF.Abs(moveVec.Y) / BaseSpeedCursorLen, 1.5f);
+				const double BaseSpeedCursorLen = 25.0f;
+				const double BaseSpeed = 3.0f;
+				moveVec.X = BaseSpeed * MathD.Sign(moveVec.X) * MathD.Pow(MathD.Abs(moveVec.X) / BaseSpeedCursorLen, 1.5f);
+				moveVec.Y = BaseSpeed * MathD.Sign(moveVec.Y) * MathD.Pow(MathD.Abs(moveVec.Y) / BaseSpeedCursorLen, 1.5f);
 
-				MathF.TransformCoord(ref moveVec.X, ref moveVec.Y, camObj.Transform.Angle);
+				MathD.TransformCoord(ref moveVec.X, ref moveVec.Y, camObj.Transform.Angle);
 
 				if (this.camBeginDragScene)
 				{
-					float refZ = (this.HasCameraFocusPosition && camObj.Transform.Pos.Z < this.CameraFocusPosition.Z - cam.NearZ) ? this.CameraFocusPosition.Z : 0.0f;
+					double refZ = (this.HasCameraFocusPosition && camObj.Transform.Pos.Z < this.CameraFocusPosition.Z - cam.NearZ) ? this.CameraFocusPosition.Z : 0.0f;
 					if (camObj.Transform.Pos.Z >= refZ - cam.NearZ)
-						refZ = camObj.Transform.Pos.Z + MathF.Abs(cam.FocusDist);
-					moveVec = new Vector3(moveVec.Xy * 0.5f / this.GetScaleAtZ(refZ), moveVec.Z);
+						refZ = camObj.Transform.Pos.Z + MathD.Abs(cam.FocusDist);
+					moveVec = new Vector3D(moveVec.Xy * 0.5f / this.GetScaleAtZ(refZ), moveVec.Z);
 				}
 
 				this.camVel = moveVec;
@@ -548,13 +548,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			else if (this.camVel.Length > 0.01f)
 			{
-				this.camVel *= MathF.Pow(0.9f, unscaledTimeMult);
+				this.camVel *= MathD.Pow(0.9f, unscaledTimeMult);
 				this.camTransformChanged = true;
 			}
 			else
 			{
-				this.camTransformChanged = this.camTransformChanged || (this.camVel != Vector3.Zero);
-				this.camVel = Vector3.Zero;
+				this.camTransformChanged = this.camTransformChanged || (this.camVel != Vector3D.Zero);
+				this.camVel = Vector3D.Zero;
 			}
 			if (this.camTransformChanged)
 			{
@@ -610,7 +610,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 		protected void StopCameraMovement()
 		{
-			this.camVel = Vector3.Zero;
+			this.camVel = Vector3D.Zero;
 		}
 
 		protected void SetDefaultActiveLayers(params Type[] activeLayers)
@@ -700,8 +700,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.statusText.MaxWidth = this.ClientSize.Width - 20;
 			this.statusText.MaxHeight = this.ClientSize.Height - 20;
 			this.statusText.Fonts = new [] { OverlayFont };
-			this.actionText.MaxWidth = MathF.Min(500, this.ClientSize.Width / 2);
-			this.actionText.MaxHeight = MathF.Min(500, this.ClientSize.Height / 2);
+			this.actionText.MaxWidth = MathD.Min(500, this.ClientSize.Width / 2);
+			this.actionText.MaxHeight = MathD.Min(500, this.ClientSize.Height / 2);
 			this.actionText.Fonts = new [] { OverlayFont };
 		}
 		private void ForceDragDropRenderUpdate()
@@ -839,22 +839,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				if (this.View.PerspectiveMode == ProjectionMode.Perspective)
 				{
 					GameObject camObj = this.CameraObj;
-					float curVel = this.camVel.Length * MathF.Sign(this.camVel.Z);
-					Vector2 curTemp = new Vector2(
+					double curVel = this.camVel.Length * MathD.Sign(this.camVel.Z);
+					Vector2D curTemp = new Vector2D(
 						(e.X * 2.0f / this.ClientSize.Width) - 1.0f,
 						(e.Y * 2.0f / this.ClientSize.Height) - 1.0f);
-					MathF.TransformCoord(ref curTemp.X, ref curTemp.Y, camObj.Transform.LocalAngle);
+					MathD.TransformCoord(ref curTemp.X, ref curTemp.Y, camObj.Transform.LocalAngle);
 
-					if (MathF.Sign(e.Delta) != MathF.Sign(curVel))
+					if (MathD.Sign(e.Delta) != MathD.Sign(curVel))
 						curVel = 0.0f;
 					else
 						curVel *= 1.5f;
 					curVel += 0.015f * e.Delta;
-					curVel = MathF.Sign(curVel) * MathF.Min(MathF.Abs(curVel), 500.0f);
+					curVel = MathD.Sign(curVel) * MathD.Min(MathD.Abs(curVel), 500.0f);
 
-					Vector3 movVec = new Vector3(
-						MathF.Sign(e.Delta) * MathF.Sign(curTemp.X) * MathF.Pow(curTemp.X, 2.0f), 
-						MathF.Sign(e.Delta) * MathF.Sign(curTemp.Y) * MathF.Pow(curTemp.Y, 2.0f), 
+					Vector3D movVec = new Vector3D(
+						MathD.Sign(e.Delta) * MathD.Sign(curTemp.X) * MathD.Pow(curTemp.X, 2.0f), 
+						MathD.Sign(e.Delta) * MathD.Sign(curTemp.Y) * MathD.Pow(curTemp.Y, 2.0f), 
 						1.0f);
 					movVec.Normalize();
 					this.camVel = movVec * curVel;
@@ -895,48 +895,48 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				else if (e.Control && e.KeyCode == Keys.Left)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.X = MathF.Round(pos.X - 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.X = MathD.Round(pos.X - 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
 				else if (e.Control && e.KeyCode == Keys.Right)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.X = MathF.Round(pos.X + 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.X = MathD.Round(pos.X + 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
 				else if (e.Control && e.KeyCode == Keys.Up)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.Y = MathF.Round(pos.Y - 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.Y = MathD.Round(pos.Y - 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
 				else if (e.Control && e.KeyCode == Keys.Down)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.Y = MathF.Round(pos.Y + 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.Y = MathD.Round(pos.Y + 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
 				else if (e.Control && e.KeyCode == Keys.Add)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.Z = MathF.Round(pos.Z + 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.Z = MathD.Round(pos.Z + 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}
 				else if (e.Control && e.KeyCode == Keys.Subtract)
 				{
 					this.drawCamGizmoState = CameraAction.Move;
-					Vector3 pos = this.CameraObj.Transform.Pos;
-					pos.Z = MathF.Round(pos.Z - 1.0f);
+					Vector3D pos = this.CameraObj.Transform.Pos;
+					pos.Z = MathD.Round(pos.Z - 1.0f);
 					this.CameraObj.Transform.Pos = pos;
 					this.Invalidate();
 				}

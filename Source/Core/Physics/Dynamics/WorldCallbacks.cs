@@ -32,10 +32,10 @@ namespace FarseerPhysics.Dynamics
 {
 	/// <summary>
 	/// Called for each fixture found in the query. You control how the ray cast
-	/// proceeds by returning a float:
+	/// proceeds by returning a double:
 	/// <returns>-1 to filter, 0 to terminate, fraction to clip the ray for closest hit, 1 to continue</returns>
 	/// </summary>
-	public delegate float RayCastCallback(Fixture fixture, Vector2 point, Vector2 normal, float fraction);
+	public delegate double RayCastCallback(Fixture fixture, Vector2D point, Vector2D normal, double fraction);
 
 	/// <summary>
 	/// This delegate is called when a contact is deleted

@@ -54,20 +54,20 @@ namespace FarseerPhysics.Dynamics.Joints
 
 	internal struct Jacobian
 	{
-		public float AngularA;
-		public float AngularB;
-		public Vector2 LinearA;
-		public Vector2 LinearB;
+		public double AngularA;
+		public double AngularB;
+		public Vector2D LinearA;
+		public Vector2D LinearB;
 
 		public void SetZero()
 		{
-			this.LinearA = Vector2.Zero;
+			this.LinearA = Vector2D.Zero;
 			this.AngularA = 0.0f;
-			this.LinearB = Vector2.Zero;
+			this.LinearB = Vector2D.Zero;
 			this.AngularB = 0.0f;
 		}
 
-		public void Set(Vector2 x1, float a1, Vector2 x2, float a2)
+		public void Set(Vector2D x1, double a1, Vector2D x2, double a2)
 		{
 			this.LinearA = x1;
 			this.AngularA = a1;
@@ -75,9 +75,9 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.AngularB = a2;
 		}
 
-		public float Compute(Vector2 x1, float a1, Vector2 x2, float a2)
+		public double Compute(Vector2D x1, double a1, Vector2D x2, double a2)
 		{
-			return Vector2.Dot(this.LinearA, x1) + this.AngularA * a1 + Vector2.Dot(this.LinearB, x2) + this.AngularB * a2;
+			return Vector2D.Dot(this.LinearA, x1) + this.AngularA * a1 + Vector2D.Dot(this.LinearB, x2) + this.AngularB * a2;
 		}
 	}
 
@@ -115,19 +115,19 @@ namespace FarseerPhysics.Dynamics.Joints
 	{
 		/// <summary>
 		/// The Breakpoint simply indicates the maximum Value the JointError can be before it breaks.
-		/// The default value is float.MaxValue
+		/// The default value is double.MaxValue
 		/// </summary>
-		public float Breakpoint = float.MaxValue;
+		public double Breakpoint = double.MaxValue;
 
 		internal JointEdge EdgeA = new JointEdge();
 		internal JointEdge EdgeB = new JointEdge();
 		public bool Enabled = true;
-		protected float InvIA;
-		protected float InvIB;
-		protected float InvMassA;
-		protected float InvMassB;
+		protected double InvIA;
+		protected double InvIB;
+		protected double InvMassA;
+		protected double InvMassB;
 		internal bool IslandFlag;
-		protected Vector2 LocalCenterA, LocalCenterB;
+		protected Vector2D LocalCenterA, LocalCenterB;
 
 		protected Joint()
 		{
@@ -177,13 +177,13 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// Get the anchor point on body1 in world coordinates.
 		/// </summary>
 		/// <value></value>
-		public abstract Vector2 WorldAnchorA { get; }
+		public abstract Vector2D WorldAnchorA { get; }
 
 		/// <summary>
 		/// Get the anchor point on body2 in world coordinates.
 		/// </summary>
 		/// <value></value>
-		public abstract Vector2 WorldAnchorB { get; set; }
+		public abstract Vector2D WorldAnchorB { get; set; }
 
 		/// <summary>
 		/// Set the user data pointer.
@@ -208,21 +208,21 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// <summary>
 		/// Fires when the joint is broken.
 		/// </summary>
-		public event Action<Joint, float> Broke;
+		public event Action<Joint, double> Broke;
 
 		/// <summary>
 		/// Get the reaction force on body2 at the joint anchor in Newtons.
 		/// </summary>
 		/// <param name="inv_dt">The inv_dt.</param>
 		/// <returns></returns>
-		public abstract Vector2 GetReactionForce(float inv_dt);
+		public abstract Vector2D GetReactionForce(double inv_dt);
 
 		/// <summary>
 		/// Get the reaction torque on body2 in N*m.
 		/// </summary>
 		/// <param name="inv_dt">The inv_dt.</param>
 		/// <returns></returns>
-		public abstract float GetReactionTorque(float inv_dt);
+		public abstract double GetReactionTorque(double inv_dt);
 
 		protected void WakeBodies()
 		{
@@ -235,12 +235,12 @@ namespace FarseerPhysics.Dynamics.Joints
 
 		internal abstract void InitVelocityConstraints(ref TimeStep step);
 
-		internal void Validate(float invDT)
+		internal void Validate(double invDT)
 		{
 			if (!this.Enabled)
 				return;
 
-			float jointError = GetReactionForce(invDT).Length;
+			double jointError = GetReactionForce(invDT).Length;
 			if (Math.Abs(jointError) <= this.Breakpoint)
 				return;
 

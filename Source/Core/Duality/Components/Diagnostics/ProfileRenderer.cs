@@ -21,7 +21,7 @@ namespace Duality.Components.Diagnostics
 		private class GraphCacheEntry
 		{
 			public bool WasUsed;
-			public float[] GraphValues;
+			public double[] GraphValues;
 			public ColorRgba[] GraphColors;
 			public VertexC1P3[] VertGraph;
 			public VertexC1P3T2[][] VertText;
@@ -130,8 +130,8 @@ namespace Duality.Components.Diagnostics
 
 		void ICmpRenderer.GetCullingInfo(out CullingInfo info)
 		{
-			info.Position = Vector3.Zero;
-			info.Radius = float.MaxValue;
+			info.Position = Vector3D.Zero;
+			info.Radius = double.MaxValue;
 			info.Visibility = VisibilityFlag.AllGroups | VisibilityFlag.ScreenOverlay;
 		}
 		void ICmpRenderer.Draw(IDrawDevice device)
@@ -185,7 +185,7 @@ namespace Duality.Components.Diagnostics
 				}
 
 				// Draw Report
-				this.canvas.DrawText(textReport, ref textReportTextVert, ref textReportIconVert, textReportRect.X, textReportRect.Y, drawBackground: true);
+				this.canvas.DrawText(this.textReport, ref this.textReportTextVert, ref this.textReportIconVert, textReportRect.X, textReportRect.Y, drawBackground: true);
 			}
 
 			// Counter Graphs
@@ -199,7 +199,7 @@ namespace Duality.Components.Diagnostics
 
 				int space = 5;
 				int graphY = (int)graphRect.Y;
-				int graphH = MathF.Min((int)(graphRect.H / this.counterGraphs.Count) - space, (int)graphRect.W / 2);
+				int graphH = MathD.Min((int)(graphRect.H / this.counterGraphs.Count) - space, (int)graphRect.W / 2);
 				foreach (string counterName in this.counterGraphs)
 				{
 					ProfileCounter counter = Profile.GetCounter<ProfileCounter>(counterName);
@@ -210,28 +210,28 @@ namespace Duality.Components.Diagnostics
 					if (!this.graphCache.TryGetValue(counterName, out cache))
 					{
 						cache = new GraphCacheEntry();
-						cache.GraphValues = new float[ProfileCounter.ValueHistoryLen];
+						cache.GraphValues = new double[ProfileCounter.ValueHistoryLen];
 						cache.GraphColors = new ColorRgba[ProfileCounter.ValueHistoryLen];
 						this.graphCache[counterName] = cache;
 					}
 					cache.WasUsed = true;
 
-					float cursorRatio = 0.0f;
+					double cursorRatio = 0.0f;
 					if (counter is TimeCounter)
 					{
 						TimeCounter timeCounter = counter as TimeCounter;
 						int cursorPos = timeCounter.ValueGraphCursor;
 						for (int i = Math.Max(cursorPos - 1, 0); i <= Math.Min(cursorPos, ProfileCounter.ValueHistoryLen - 1); i++)
 						{
-							float factor = timeCounter.ValueGraph[i] / Time.MillisecondsPerFrame;
+							double factor = timeCounter.ValueGraph[i] / Time.MillisecondsPerFrame;
 							cache.GraphValues[i] = factor * 0.75f;
 							cache.GraphColors[i] = ColorRgba.Lerp(ColorRgba.White, ColorRgba.Red, factor);
 						}
 						this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
 						this.canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
 						this.canvas.State.ColorTint = ColorRgba.White;
-						this.DrawHorizontalGraph(canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
-						cursorRatio = (float)cursorPos / (float)ProfileCounter.ValueHistoryLen;
+						this.DrawHorizontalGraph(this.canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
+						cursorRatio = (double)cursorPos / (double)ProfileCounter.ValueHistoryLen;
 					}
 					else if (counter is StatCounter)
 					{
@@ -239,14 +239,14 @@ namespace Duality.Components.Diagnostics
 						int cursorPos = statCounter.ValueGraphCursor;
 						for (int i = Math.Max(cursorPos - 1, 0); i <= Math.Min(cursorPos, ProfileCounter.ValueHistoryLen - 1); i++)
 						{
-							cache.GraphValues[i] = (float)(statCounter.ValueGraph[i] - statCounter.MinValue) / statCounter.MaxValue;
+							cache.GraphValues[i] = (double)(statCounter.ValueGraph[i] - statCounter.MinValue) / statCounter.MaxValue;
 							cache.GraphColors[i] = ColorRgba.White;
 						}
 						this.canvas.State.ColorTint = ColorRgba.Black.WithAlpha(0.5f);
 						this.canvas.FillRect(graphRect.X, graphY, graphRect.W, graphH);
 						this.canvas.State.ColorTint = ColorRgba.White;
 						this.DrawHorizontalGraph(this.canvas, cache.GraphValues, cache.GraphColors, ref cache.VertGraph, graphRect.X, graphY, graphRect.W, graphH);
-						cursorRatio = (float)cursorPos / (float)ProfileCounter.ValueHistoryLen;
+						cursorRatio = (double)cursorPos / (double)ProfileCounter.ValueHistoryLen;
 					}
 					
 					this.canvas.DrawText(new string[] { counter.FullName }, ref cache.VertText, graphRect.X, graphY);
@@ -284,7 +284,7 @@ namespace Duality.Components.Diagnostics
 				Profile.ResetCounters();
 		}
 		
-		private void DrawHorizontalGraph(Canvas canvas, float[] values, ColorRgba[] colors, ref VertexC1P3[] vertices, float x, float y, float w, float h)
+		private void DrawHorizontalGraph(Canvas canvas, double[] values, ColorRgba[] colors, ref VertexC1P3[] vertices, double x, double y, double w, double h)
 		{
 			if (h > 0.0f) h--;
 			if (h < 0.0f) h++;
@@ -292,17 +292,17 @@ namespace Duality.Components.Diagnostics
 			IDrawDevice device = canvas.DrawDevice;
 
 			ColorRgba baseColor = canvas.State.ColorTint;
-			float sampleXRatio = w / (float)(values.Length - 1);
+			double sampleXRatio = w / (double)(values.Length - 1);
 			
 			if (vertices == null)
-				vertices = new VertexC1P3[MathF.Max(values.Length, 16)];
+				vertices = new VertexC1P3[MathD.Max(values.Length, 16)];
 			else if (vertices.Length < values.Length)
-				vertices = new VertexC1P3[MathF.Max(vertices.Length * 2, values.Length, 16)];
+				vertices = new VertexC1P3[MathD.Max(vertices.Length * 2, values.Length, 16)];
 
 			for (int i = 0; i < values.Length; i++)
 			{
-				vertices[i].Pos.X = x + 0.5f + i * sampleXRatio;
-				vertices[i].Pos.Y = y + 0.5f + (1.0f - values[i]) * h;
+				vertices[i].Pos.X = (float)(x + 0.5f + i * sampleXRatio);
+				vertices[i].Pos.Y = (float)(y + 0.5f + (1.0f - values[i]) * h);
 				vertices[i].Pos.Z = 0.0f;
 				vertices[i].Color = baseColor * colors[i];
 			}

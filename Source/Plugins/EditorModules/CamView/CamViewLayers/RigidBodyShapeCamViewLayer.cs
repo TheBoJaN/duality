@@ -17,8 +17,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 {
 	public class RigidBodyShapeCamViewLayer : CamViewLayer
 	{
-		private float shapeOutlineWidth = 2.0f;
-		private float depthOffset = -0.5f;
+		private double shapeOutlineWidth = 2.0f;
+		private double depthOffset = -0.5f;
 
 		public override string LayerName
 		{
@@ -32,7 +32,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				float fgLum = this.FgColor.GetLuminance();
+				double fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return new ColorRgba(255, 128, 255);
 				else
@@ -43,7 +43,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				float fgLum = this.FgColor.GetLuminance();
+				double fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return new ColorRgba(255, 255, 128);
 				else
@@ -54,7 +54,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				float fgLum = this.FgColor.GetLuminance();
+				double fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return ColorRgba.Lerp(ColorRgba.Blue, ColorRgba.VeryLightGrey, 0.5f);
 				else
@@ -65,7 +65,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				float fgLum = this.FgColor.GetLuminance();
+				double fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return ColorRgba.Lerp(new ColorRgba(255, 128, 0), ColorRgba.VeryLightGrey, 0.5f);
 				else
@@ -76,7 +76,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 		{
 			get
 			{
-				float fgLum = this.FgColor.GetLuminance();
+				double fgLum = this.FgColor.GetLuminance();
 				if (fgLum > 0.5f)
 					return ColorRgba.Lerp(ColorRgba.Red, ColorRgba.VeryLightGrey, 0.5f);
 				else
@@ -93,7 +93,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 
 			canvas.State.SetMaterial(DrawTechnique.Alpha);
 			canvas.State.TextFont = Font.GenericMonospace10;
-			canvas.State.DepthOffset = this.depthOffset;
+			canvas.State.DepthOffset = (float)this.depthOffset;
 			Font textFont = canvas.State.TextFont.Res;
 
 			// Retrieve selected shapes
@@ -108,24 +108,24 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 			{
 				if (!body.Shapes.Any()) continue;
 
-				Vector3 objPos = body.GameObj.Transform.Pos;
-				float objAngle = body.GameObj.Transform.Angle;
-				float objScale = body.GameObj.Transform.Scale;
+				Vector3D objPos = body.GameObj.Transform.Pos;
+				double objAngle = body.GameObj.Transform.Angle;
+				double objScale = body.GameObj.Transform.Scale;
 
 				bool isBodySelected = (body == selectedBody);
 
-				float bodyAlpha = isBodySelected ? 1.0f : (isAnyBodySelected ? 0.5f : 1.0f);
-				float maxDensity = body.Shapes.Max(s => s.Density);
-				float minDensity = body.Shapes.Min(s => s.Density);
-				float avgDensity = (maxDensity + minDensity) * 0.5f;
+				double bodyAlpha = isBodySelected ? 1.0f : (isAnyBodySelected ? 0.5f : 1.0f);
+				double maxDensity = body.Shapes.Max(s => s.Density);
+				double minDensity = body.Shapes.Min(s => s.Density);
+				double avgDensity = (maxDensity + minDensity) * 0.5f;
 
 				int shapeIndex = 0;
 				foreach (ShapeInfo shape in body.Shapes)
 				{
 					bool isShapeSelected = isBodySelected && editorSelectedObjects.Contains(shape);
 
-					float shapeAlpha = bodyAlpha * (isShapeSelected ? 1.0f : (isAnyShapeSelected && isBodySelected ? 0.75f : 1.0f));
-					float densityRelative = MathF.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : shape.Density / avgDensity;
+					double shapeAlpha = bodyAlpha * (isShapeSelected ? 1.0f : (isAnyShapeSelected && isBodySelected ? 0.75f : 1.0f));
+					double densityRelative = MathD.Abs(maxDensity - minDensity) < 0.01f ? 1.0f : shape.Density / avgDensity;
 					ColorRgba shapeColor = shape.IsSensor ? this.ShapeSensorColor : this.ShapeColor;
 					ColorRgba fontColor = this.FgColor;
 
@@ -138,7 +138,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					this.DrawShape(canvas, body.GameObj.Transform, shape, fillColor, outlineColor);
 
 					// Calculate the center coordinate 
-					Vector2 shapeCenter = Vector2.Zero;
+					Vector2D shapeCenter = Vector2D.Zero;
 					if (shape is CircleShapeInfo)
 					{
 						CircleShapeInfo circleShape = shape as CircleShapeInfo;
@@ -147,27 +147,27 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					else if (shape is VertexBasedShapeInfo)
 					{
 						VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-						Vector2[] shapeVertices = vertexShape.Vertices;
+						Vector2D[] shapeVertices = vertexShape.Vertices;
 
 						for (int i = 0; i < shapeVertices.Length; i++)
 							shapeCenter += shapeVertices[i];
 
 						shapeCenter /= shapeVertices.Length;
 					}
-					MathF.TransformCoord(ref shapeCenter.X, ref shapeCenter.Y, objAngle, objScale);
+					MathD.TransformCoord(ref shapeCenter.X, ref shapeCenter.Y, objAngle, objScale);
 
 					// Draw shape index
 					if (body == selectedBody)
 					{
 						string indexText = shapeIndex.ToString();
-						Vector2 textSize = textFont.MeasureText(indexText);
+						Vector2D textSize = textFont.MeasureText(indexText);
 						canvas.State.ColorTint = fontColor.WithAlpha((shapeAlpha + 1.0f) * 0.5f);
-						canvas.State.TransformScale = Vector2.One / canvas.DrawDevice.GetScaleAtZ(0.0f);
+						canvas.State.TransformScale = Vector2D.One / canvas.DrawDevice.GetScaleAtZ(0.0f);
 						canvas.DrawText(indexText, 
 							objPos.X + shapeCenter.X, 
 							objPos.Y + shapeCenter.Y,
 							0.0f);
-						canvas.State.TransformScale = Vector2.One;
+						canvas.State.TransformScale = Vector2D.One;
 					}
 
 					shapeIndex++;
@@ -176,10 +176,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				// Draw center of mass
 				if (body.BodyType == BodyType.Dynamic)
 				{
-					Vector2 localMassCenter = body.LocalMassCenter;
-					MathF.TransformCoord(ref localMassCenter.X, ref localMassCenter.Y, objAngle, objScale);
+					Vector2D localMassCenter = body.LocalMassCenter;
+					MathD.TransformCoord(ref localMassCenter.X, ref localMassCenter.Y, objAngle, objScale);
 
-					float size = this.GetScreenConstantScale(canvas, 6.0f);
+					double size = this.GetScreenConstantScale(canvas, 6.0f);
 
 					canvas.State.ColorTint = this.MassCenterColor.WithAlpha(bodyAlpha);
 					canvas.DrawLine(
@@ -200,7 +200,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				
 				// Draw transform center
 				{
-					float size = this.GetScreenConstantScale(canvas, 3.0f);
+					double size = this.GetScreenConstantScale(canvas, 3.0f);
 					canvas.State.ColorTint = this.ObjectCenterColor.WithAlpha(bodyAlpha);
 					canvas.FillCircle(objPos.X, objPos.Y, 0.0f, size);
 				}
@@ -230,31 +230,31 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 			if (shape.ConvexPolygons != null)
 			{
 				// Fill each convex polygon individually
-				foreach (Vector2[] polygon in shape.ConvexPolygons)
+				foreach (Vector2D[] polygon in shape.ConvexPolygons)
 				{
 					this.FillPolygon(canvas, transform, polygon, fillColor);
 				}
 
 				// Draw all convex polygon edges that are not outlines
-				canvas.State.DepthOffset = this.depthOffset - 0.05f;
+				canvas.State.DepthOffset = (float)this.depthOffset - 0.05f;
 				this.DrawPolygonInternals(canvas, transform, shape.Vertices, shape.ConvexPolygons, outlineColor);
-				canvas.State.DepthOffset = this.depthOffset;
+				canvas.State.DepthOffset = (float)this.depthOffset;
 			}
 
 
 			// Draw the polygon outline
-			canvas.State.DepthOffset = this.depthOffset - 0.1f;
+			canvas.State.DepthOffset = (float)this.depthOffset - 0.1f;
 			this.DrawPolygonOutline(canvas, transform, shape.Vertices, outlineColor, true);
-			canvas.State.DepthOffset = this.depthOffset;
+			canvas.State.DepthOffset = (float)this.depthOffset;
 		}
 		private void DrawShape(Canvas canvas, Transform transform, CircleShapeInfo shape, ColorRgba fillColor, ColorRgba outlineColor)
 		{
-			Vector3 objPos = transform.Pos;
-			float objAngle = transform.Angle;
-			float objScale = transform.Scale;
+			Vector3D objPos = transform.Pos;
+			double objAngle = transform.Angle;
+			double objScale = transform.Scale;
 
-			Vector2 circlePos = shape.Position * objScale;
-						MathF.TransformCoord(ref circlePos.X, ref circlePos.Y, objAngle);
+			Vector2D circlePos = shape.Position * objScale;
+						MathD.TransformCoord(ref circlePos.X, ref circlePos.Y, objAngle);
 
 			if (fillColor.A > 0)
 						{
@@ -266,46 +266,46 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					shape.Radius * objScale);
 						}
 
-			float outlineWidth = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth);
+			double outlineWidth = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth);
 			canvas.State.ColorTint = outlineColor;
-			canvas.State.DepthOffset = this.depthOffset - 0.1f;
+			canvas.State.DepthOffset = (float)this.depthOffset - 0.1f;
 			canvas.FillCircleSegment(
 							objPos.X + circlePos.X,
 							objPos.Y + circlePos.Y,
 				0.0f, 
 				shape.Radius * objScale,
 				0.0f,
-				MathF.RadAngle360,
+				MathD.RadAngle360,
 				outlineWidth);
-			canvas.State.DepthOffset = this.depthOffset;
+			canvas.State.DepthOffset = (float)this.depthOffset;
 		}
 
-		private void FillPolygon(Canvas canvas, Transform transform, Vector2[] polygon, ColorRgba fillColor)
+		private void FillPolygon(Canvas canvas, Transform transform, Vector2D[] polygon, ColorRgba fillColor)
 		{
-			Vector3 objPos = transform.Pos;
-			float objAngle = transform.Angle;
-			float objScale = transform.Scale;
+			Vector3D objPos = transform.Pos;
+			double objAngle = transform.Angle;
+			double objScale = transform.Scale;
 
 			canvas.State.ColorTint = fillColor;
-			canvas.State.TransformAngle = objAngle;
-			canvas.State.TransformScale = new Vector2(objScale, objScale);
+			canvas.State.TransformAngle = (float)objAngle;
+			canvas.State.TransformScale = new Vector2D(objScale, objScale);
 
 			canvas.FillPolygon(polygon, objPos.X, objPos.Y, 0.0f);
 
 			canvas.State.TransformAngle = 0.0f;
-			canvas.State.TransformScale = Vector2.One;
-					}
-		private void DrawPolygonOutline(Canvas canvas, Transform transform, Vector2[] polygon, ColorRgba outlineColor, bool closedLoop)
-					{
-			Vector3 objPos = transform.Pos;
-			float objAngle = transform.Angle;
-			float objScale = transform.Scale;
+			canvas.State.TransformScale = Vector2D.One;
+		}
+		private void DrawPolygonOutline(Canvas canvas, Transform transform, Vector2D[] polygon, ColorRgba outlineColor, bool closedLoop)
+		{
+			Vector3D objPos = transform.Pos;
+			double objAngle = transform.Angle;
+			double objScale = transform.Scale;
 
-			canvas.State.TransformAngle = objAngle;
-			canvas.State.TransformScale = new Vector2(objScale, objScale);
+			canvas.State.TransformAngle = (float)objAngle;
+			canvas.State.TransformScale = new Vector2D(objScale, objScale);
 			canvas.State.ColorTint = outlineColor;
 
-			float outlineWidth = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth);
+			double outlineWidth = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth);
 			outlineWidth /= objScale;
 			if (closedLoop)
 				canvas.FillPolygonOutline(polygon, outlineWidth, objPos.X, objPos.Y, 0.0f);
@@ -313,21 +313,21 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				canvas.FillThickLineStrip(polygon, outlineWidth, objPos.X, objPos.Y, 0.0f);
 
 			canvas.State.TransformAngle = 0.0f;
-			canvas.State.TransformScale = Vector2.One;
+			canvas.State.TransformScale = Vector2D.One;
 		}
-		private void DrawPolygonInternals(Canvas canvas, Transform transform, Vector2[] hullVertices, IReadOnlyList<Vector2[]> convexPolygons, ColorRgba outlineColor)
-						{
+		private void DrawPolygonInternals(Canvas canvas, Transform transform, Vector2D[] hullVertices, IReadOnlyList<Vector2D[]> convexPolygons, ColorRgba outlineColor)
+		{
 			if (convexPolygons.Count <= 1) return;
 
-			Vector3 objPos = transform.Pos;
-			float objAngle = transform.Angle;
-			float objScale = transform.Scale;
+			Vector3D objPos = transform.Pos;
+			double objAngle = transform.Angle;
+			double objScale = transform.Scale;
 
-			Vector2 xDot;
-			Vector2 yDot;
-			MathF.GetTransformDotVec(objAngle, objScale, out xDot, out yDot);
+			Vector2D xDot;
+			Vector2D yDot;
+			MathD.GetTransformDotVec(objAngle, objScale, out xDot, out yDot);
 
-			float dashPatternLength = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth * 0.5f);
+			double dashPatternLength = this.GetScreenConstantScale(canvas, this.shapeOutlineWidth * 0.5f);
 
 			// Generate a lookup of drawn vertex indices, so we can
 			// avoid drawing the same edge twice. Every item is a combination
@@ -341,11 +341,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 					((uint)currentHullIndex << 16) | (uint)nextHullIndex :
 					((uint)nextHullIndex << 16) | (uint)currentHullIndex;
 				drawnEdges.Add(edgeId);
-						}
+			}
 
 			canvas.State.ColorTint = outlineColor;
 
-			foreach (Vector2[] polygon in convexPolygons)
+			foreach (Vector2D[] polygon in convexPolygons)
 			{
 				if (polygon.Length < 2) continue;
 
@@ -359,22 +359,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 
 					// Filter out edges that have already been drawn
 					if (currentHullIndex >= 0 && nextHullIndex >= 0)
-						{
+					{
 						uint edgeId = (currentHullIndex > nextHullIndex) ?
 							((uint)currentHullIndex << 16) | (uint)nextHullIndex :
 							((uint)nextHullIndex << 16) | (uint)currentHullIndex;
 						if (!drawnEdges.Add(edgeId))
 							continue;
-						}
+					}
 
-					Vector2 lineStart = new Vector2(
+					Vector2D lineStart = new Vector2D(
 						polygon[i].X, 
 						polygon[i].Y);
-					Vector2 lineEnd = new Vector2(
+					Vector2D lineEnd = new Vector2D(
 						polygon[nextIndex].X, 
 						polygon[nextIndex].Y);
-					MathF.TransformDotVec(ref lineStart, ref xDot, ref yDot);
-					MathF.TransformDotVec(ref lineEnd, ref xDot, ref yDot);
+					MathD.TransformDotVec(ref lineStart, ref xDot, ref yDot);
+					MathD.TransformDotVec(ref lineEnd, ref xDot, ref yDot);
 
 					canvas.DrawDashLine(
 						objPos.X + lineStart.X, 
@@ -385,14 +385,14 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 						0.0f, 
 						DashPattern.Dash, 
 						1.0f / dashPatternLength);
-					}
-					}
 				}
+			}
+		}
 
-		private float GetScreenConstantScale(Canvas canvas, float baseScale)
-				{
-			return baseScale / MathF.Max(0.0001f, canvas.DrawDevice.GetScaleAtZ(0.0f));
-				}
+		private double GetScreenConstantScale(Canvas canvas, double baseScale)
+		{
+			return baseScale / MathD.Max(0.0001f, canvas.DrawDevice.GetScaleAtZ(0.0f));
+		}
 
 		private IEnumerable<RigidBody> QueryVisibleColliders()
 		{
@@ -409,7 +409,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewLayers
 				DualityEditorApp.Selection.GameObjects.GetComponents<RigidBody>().FirstOrDefault();
 		}
 
-		private static int VertexListIndex(Vector2[] vertices, Vector2 checkVertex)
+		private static int VertexListIndex(Vector2D[] vertices, Vector2D checkVertex)
 		{
 			for (int i = 0; i < vertices.Length; i++)
 			{

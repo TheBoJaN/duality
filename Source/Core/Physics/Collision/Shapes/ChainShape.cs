@@ -43,8 +43,8 @@ namespace FarseerPhysics.Collision.Shapes
 		/// The vertices. These are not owned/freed by the loop Shape.
 		/// </summary>
 		public Vertices Vertices;
-		public Vector2 PrevVertex;
-		public Vector2 NextVertex;
+		public Vector2D PrevVertex;
+		public Vector2D NextVertex;
 		public bool HasPrevVertex;
 		public bool HasNextVertex;
 
@@ -159,8 +159,8 @@ namespace FarseerPhysics.Collision.Shapes
 
 			// Old hack-fix for jittery collision at sharp (<90°) angles.
 			// See here: https://github.com/AdamsLair/duality/commit/924b25119a6634c77e71175e7f275db3d3d4e9dd
-			edge.HasVertex0 = edge.HasVertex0 && Vector2.AngleBetween(edge.Vertex0, edge.Vertex1) > MathHelper.PiOver2;
-			edge.HasVertex3 = edge.HasVertex3 && Vector2.AngleBetween(edge.Vertex2, edge.Vertex3) > MathHelper.PiOver2;
+			edge.HasVertex0 = edge.HasVertex0 && Vector2D.AngleBetween(edge.Vertex0, edge.Vertex1) > MathHelper.PiOver2;
+			edge.HasVertex3 = edge.HasVertex3 && Vector2D.AngleBetween(edge.Vertex2, edge.Vertex3) > MathHelper.PiOver2;
 		}
 
 		/// <summary>
@@ -169,7 +169,7 @@ namespace FarseerPhysics.Collision.Shapes
 		/// <param name="transform">The shape world transform.</param>
 		/// <param name="point">a point in world coordinates.</param>
 		/// <returns>True if the point is inside the shape</returns>
-		public override bool TestPoint(ref Transform transform, ref Vector2 point)
+		public override bool TestPoint(ref Transform transform, ref Vector2D point)
 		{
 			return false;
 		}
@@ -215,11 +215,11 @@ namespace FarseerPhysics.Collision.Shapes
 				i2 = 0;
 			}
 
-			Vector2 v1 = MathUtils.Multiply(ref transform, this.Vertices[i1]);
-			Vector2 v2 = MathUtils.Multiply(ref transform, this.Vertices[i2]);
+			Vector2D v1 = MathUtils.Multiply(ref transform, this.Vertices[i1]);
+			Vector2D v2 = MathUtils.Multiply(ref transform, this.Vertices[i2]);
 
-			aabb.LowerBound = Vector2.Min(v1, v2);
-			aabb.UpperBound = Vector2.Max(v1, v2);
+			aabb.LowerBound = Vector2D.Min(v1, v2);
+			aabb.UpperBound = Vector2D.Max(v1, v2);
 		}
 		/// <summary>
 		/// Chains have zero mass.
@@ -228,9 +228,9 @@ namespace FarseerPhysics.Collision.Shapes
 		{
 			// Does nothing. Loop shapes don't have properties.
 		}
-		public override float ComputeSubmergedArea(Vector2 normal, float offset, Transform xf, out Vector2 sc)
+		public override double ComputeSubmergedArea(Vector2D normal, double offset, Transform xf, out Vector2D sc)
 		{
-			sc = Vector2.Zero;
+			sc = Vector2D.Zero;
 			return 0;
 		}
 	}

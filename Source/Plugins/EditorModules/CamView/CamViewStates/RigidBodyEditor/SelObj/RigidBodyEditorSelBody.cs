@@ -24,22 +24,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return this.bodyObj != null && !this.bodyObj.Disposed && this.bodyObj.Transform != null; }
 		}
-		public override Vector3 Pos
+		public override Vector3D Pos
 		{
 			get { return this.bodyObj.Transform.Pos; }
 			set { }
 		}
-		public override float Angle
+		public override double Angle
 		{
 			get { return this.bodyObj.Transform.Angle; }
 			set { }
 		}
-		public override Vector3 Scale
+		public override Vector3D Scale
 		{
-			get { return Vector3.One * this.bodyObj.Transform.Scale; }
+			get { return Vector3D.One * this.bodyObj.Transform.Scale; }
 			set { }
 		}
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get
 			{

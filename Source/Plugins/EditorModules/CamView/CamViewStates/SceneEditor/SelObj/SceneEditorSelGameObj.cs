@@ -27,22 +27,22 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return this.gameObj != null && !this.gameObj.Disposed && this.gameObj.Transform != null; }
 		}
-		public override Vector3 Pos
+		public override Vector3D Pos
 		{
 			get { return this.gameObj.Transform.Pos; }
 			set { this.gameObj.Transform.Pos = value; }
 		}
-		public override float Angle
+		public override double Angle
 		{
 			get { return this.gameObj.Transform.Angle; }
 			set { this.gameObj.Transform.Angle = value; }
 		}
-		public override Vector3 Scale
+		public override Vector3D Scale
 		{
-			get { return Vector3.One * this.gameObj.Transform.Scale; }
-			set { this.gameObj.Transform.Scale = value.Length / MathF.Sqrt(3.0f); }
+			get { return Vector3D.One * this.gameObj.Transform.Scale; }
+			set { this.gameObj.Transform.Scale = value.Length / MathD.Sqrt(3.0f); }
 		}
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get
 			{
@@ -93,7 +93,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			else if (action == ObjectEditorAction.Rotate)
 			{
-				return string.Format("Angle:{0,5:0}°", MathF.RadToDeg(this.gameObj.Transform.LocalAngle));
+				return string.Format("Angle:{0,5:0}°", MathD.RadToDeg(this.gameObj.Transform.LocalAngle));
 			}
 
 			return base.UpdateActionText(action, performing);

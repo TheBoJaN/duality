@@ -14,11 +14,11 @@ namespace Duality.Drawing
 		/// <summary>
 		/// The renderers reference position in world space coordinates.
 		/// </summary>
-		public Vector3 Position;
+		public Vector3D Position;
 		/// <summary>
 		/// Radius of the renderers bounding sphere originating at its world space <see cref="Position"/>.
 		/// </summary>
-		public float Radius;
+		public double Radius;
 		/// <summary>
 		/// A bitmask that describes the renderers visibility in each rendering group.
 		/// </summary>

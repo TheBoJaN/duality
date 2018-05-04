@@ -12,13 +12,13 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		/// <param name="hx">the half-width.</param>
 		/// <param name="hy">the half-height.</param>
-		public static Vertices CreateRectangle(float hx, float hy)
+		public static Vertices CreateRectangle(double hx, double hy)
 		{
 			Vertices vertices = new Vertices(4);
-			vertices.Add(new Vector2(-hx, -hy));
-			vertices.Add(new Vector2(hx, -hy));
-			vertices.Add(new Vector2(hx, hy));
-			vertices.Add(new Vector2(-hx, hy));
+			vertices.Add(new Vector2D(-hx, -hy));
+			vertices.Add(new Vector2D(hx, -hy));
+			vertices.Add(new Vector2D(hx, hy));
+			vertices.Add(new Vector2D(-hx, hy));
 
 			return vertices;
 		}
@@ -30,7 +30,7 @@ namespace FarseerPhysics.Common
 		/// <param name="hy">the half-height.</param>
 		/// <param name="center">the center of the box in local coordinates.</param>
 		/// <param name="angle">the rotation of the box in local coordinates.</param>
-		public static Vertices CreateRectangle(float hx, float hy, Vector2 center, float angle)
+		public static Vertices CreateRectangle(double hx, double hy, Vector2D center, double angle)
 		{
 			Vertices vertices = CreateRectangle(hx, hy);
 
@@ -58,7 +58,7 @@ namespace FarseerPhysics.Common
 		/// <param name="yRadius">The rounding Y radius.</param>
 		/// <param name="segments">The number of segments to subdivide the edges.</param>
 		/// <returns></returns>
-		public static Vertices CreateRoundedRectangle(float width, float height, float xRadius, float yRadius,
+		public static Vertices CreateRoundedRectangle(double width, double height, double xRadius, double yRadius,
 													  int segments)
 		{
 			if (yRadius > height / 2 || xRadius > width / 2)
@@ -72,27 +72,27 @@ namespace FarseerPhysics.Common
 			Vertices vertices = new Vertices();
 			if (segments == 0)
 			{
-				vertices.Add(new Vector2(width * .5f - xRadius, -height * .5f));
-				vertices.Add(new Vector2(width * .5f, -height * .5f + yRadius));
+				vertices.Add(new Vector2D(width * .5f - xRadius, -height * .5f));
+				vertices.Add(new Vector2D(width * .5f, -height * .5f + yRadius));
 
-				vertices.Add(new Vector2(width * .5f, height * .5f - yRadius));
-				vertices.Add(new Vector2(width * .5f - xRadius, height * .5f));
+				vertices.Add(new Vector2D(width * .5f, height * .5f - yRadius));
+				vertices.Add(new Vector2D(width * .5f - xRadius, height * .5f));
 
-				vertices.Add(new Vector2(-width * .5f + xRadius, height * .5f));
-				vertices.Add(new Vector2(-width * .5f, height * .5f - yRadius));
+				vertices.Add(new Vector2D(-width * .5f + xRadius, height * .5f));
+				vertices.Add(new Vector2D(-width * .5f, height * .5f - yRadius));
 
-				vertices.Add(new Vector2(-width * .5f, -height * .5f + yRadius));
-				vertices.Add(new Vector2(-width * .5f + xRadius, -height * .5f));
+				vertices.Add(new Vector2D(-width * .5f, -height * .5f + yRadius));
+				vertices.Add(new Vector2D(-width * .5f + xRadius, -height * .5f));
 			}
 			else
 			{
 				int numberOfEdges = (segments * 4 + 8);
 
-				float stepSize = MathHelper.TwoPi / (numberOfEdges - 4);
+				double stepSize = MathHelper.TwoPi / (numberOfEdges - 4);
 				int perPhase = numberOfEdges / 4;
 
-				Vector2 posOffset = new Vector2(width / 2 - xRadius, height / 2 - yRadius);
-				vertices.Add(posOffset + new Vector2(xRadius, -yRadius + yRadius));
+				Vector2D posOffset = new Vector2D(width / 2 - xRadius, height / 2 - yRadius);
+				vertices.Add(posOffset + new Vector2D(xRadius, -yRadius + yRadius));
 				short phase = 0;
 				for (int i = 1; i < numberOfEdges; i++)
 				{
@@ -107,8 +107,8 @@ namespace FarseerPhysics.Common
 						phase--;
 					}
 
-					vertices.Add(posOffset + new Vector2(xRadius * (float)Math.Cos(stepSize * -(i + phase)),
-														 -yRadius * (float)Math.Sin(stepSize * -(i + phase))));
+					vertices.Add(posOffset + new Vector2D(xRadius * (double)Math.Cos(stepSize * -(i + phase)),
+														 -yRadius * (double)Math.Sin(stepSize * -(i + phase))));
 				}
 			}
 
@@ -120,7 +120,7 @@ namespace FarseerPhysics.Common
 		/// </summary>
 		/// <param name="start">The first point.</param>
 		/// <param name="end">The second point.</param>
-		public static Vertices CreateLine(Vector2 start, Vector2 end)
+		public static Vertices CreateLine(Vector2D start, Vector2D end)
 		{
 			Vertices vertices = new Vertices(2);
 			vertices.Add(start);
@@ -135,7 +135,7 @@ namespace FarseerPhysics.Common
 		/// <param name="radius">The radius.</param>
 		/// <param name="numberOfEdges">The number of edges. The more edges, the more it resembles a circle</param>
 		/// <returns></returns>
-		public static Vertices CreateCircle(float radius, int numberOfEdges)
+		public static Vertices CreateCircle(double radius, int numberOfEdges)
 		{
 			return CreateEllipse(radius, radius, numberOfEdges);
 		}
@@ -147,21 +147,21 @@ namespace FarseerPhysics.Common
 		/// <param name="yRadius">Height of the ellipse.</param>
 		/// <param name="numberOfEdges">The number of edges. The more edges, the more it resembles an ellipse</param>
 		/// <returns></returns>
-		public static Vertices CreateEllipse(float xRadius, float yRadius, int numberOfEdges)
+		public static Vertices CreateEllipse(double xRadius, double yRadius, int numberOfEdges)
 		{
 			Vertices vertices = new Vertices();
 
-			float stepSize = MathHelper.TwoPi / numberOfEdges;
+			double stepSize = MathHelper.TwoPi / numberOfEdges;
 
-			vertices.Add(new Vector2(xRadius, 0));
+			vertices.Add(new Vector2D(xRadius, 0));
 			for (int i = numberOfEdges - 1; i > 0; --i)
-				vertices.Add(new Vector2(xRadius * (float)Math.Cos(stepSize * i),
-										 -yRadius * (float)Math.Sin(stepSize * i)));
+				vertices.Add(new Vector2D(xRadius * (double)Math.Cos(stepSize * i),
+										 -yRadius * (double)Math.Sin(stepSize * i)));
 
 			return vertices;
 		}
 
-		public static Vertices CreateArc(float radians, int sides, float radius)
+		public static Vertices CreateArc(double radians, int sides, double radius)
 		{
 			Debug.Assert(radians > 0, "The arc needs to be larger than 0");
 			Debug.Assert(sides > 1, "The arc needs to have more than 1 sides");
@@ -169,11 +169,11 @@ namespace FarseerPhysics.Common
 
 			Vertices vertices = new Vertices();
 
-			float stepSize = radians / sides;
+			double stepSize = radians / sides;
 			for (int i = sides - 1; i > 0; i--)
 			{
-				vertices.Add(new Vector2(radius * (float)Math.Cos(stepSize * i),
-										 radius * (float)Math.Sin(stepSize * i)));
+				vertices.Add(new Vector2D(radius * (double)Math.Cos(stepSize * i),
+										 radius * (double)Math.Sin(stepSize * i)));
 			}
 
 			return vertices;
@@ -189,7 +189,7 @@ namespace FarseerPhysics.Common
 		/// <param name="endRadius">Radius of the capsule ends.</param>
 		/// <param name="edges">The number of edges of the capsule ends. The more edges, the more it resembles an capsule</param>
 		/// <returns></returns>
-		public static Vertices CreateCapsule(float height, float endRadius, int edges)
+		public static Vertices CreateCapsule(double height, double endRadius, int edges)
 		{
 			if (endRadius >= height / 2)
 				throw new ArgumentException(
@@ -209,7 +209,7 @@ namespace FarseerPhysics.Common
 		/// <param name="bottomRadius">Radius of bottom.</param>
 		/// <param name="bottomEdges">The number of edges of the bottom. The more edges, the more it resembles an capsule</param>
 		/// <returns></returns>
-		public static Vertices CreateCapsule(float height, float topRadius, int topEdges, float bottomRadius,
+		public static Vertices CreateCapsule(double height, double topRadius, int topEdges, double bottomRadius,
 											 int bottomEdges)
 		{
 			if (height <= 0)
@@ -239,31 +239,31 @@ namespace FarseerPhysics.Common
 
 			Vertices vertices = new Vertices();
 
-			float newHeight = (height - topRadius - bottomRadius) * 0.5f;
+			double newHeight = (height - topRadius - bottomRadius) * 0.5f;
 
 			// top
-			vertices.Add(new Vector2(topRadius, newHeight));
+			vertices.Add(new Vector2D(topRadius, newHeight));
 
-			float stepSize = MathHelper.Pi / topEdges;
+			double stepSize = MathHelper.Pi / topEdges;
 			for (int i = 1; i < topEdges; i++)
 			{
-				vertices.Add(new Vector2(topRadius * (float)Math.Cos(stepSize * i),
-										 topRadius * (float)Math.Sin(stepSize * i) + newHeight));
+				vertices.Add(new Vector2D(topRadius * (double)Math.Cos(stepSize * i),
+										 topRadius * (double)Math.Sin(stepSize * i) + newHeight));
 			}
 
-			vertices.Add(new Vector2(-topRadius, newHeight));
+			vertices.Add(new Vector2D(-topRadius, newHeight));
 
 			// bottom
-			vertices.Add(new Vector2(-bottomRadius, -newHeight));
+			vertices.Add(new Vector2D(-bottomRadius, -newHeight));
 
 			stepSize = MathHelper.Pi / bottomEdges;
 			for (int i = 1; i < bottomEdges; i++)
 			{
-				vertices.Add(new Vector2(-bottomRadius * (float)Math.Cos(stepSize * i),
-										 -bottomRadius * (float)Math.Sin(stepSize * i) - newHeight));
+				vertices.Add(new Vector2D(-bottomRadius * (double)Math.Cos(stepSize * i),
+										 -bottomRadius * (double)Math.Sin(stepSize * i) - newHeight));
 			}
 
-			vertices.Add(new Vector2(bottomRadius, -newHeight));
+			vertices.Add(new Vector2D(bottomRadius, -newHeight));
 
 			return vertices;
 		}
@@ -276,41 +276,41 @@ namespace FarseerPhysics.Common
 		/// <param name="tipPercentage">The tip percentage.</param>
 		/// <param name="toothHeight">Height of the tooth.</param>
 		/// <returns></returns>
-		public static Vertices CreateGear(float radius, int numberOfTeeth, float tipPercentage, float toothHeight)
+		public static Vertices CreateGear(double radius, int numberOfTeeth, double tipPercentage, double toothHeight)
 		{
 			Vertices vertices = new Vertices();
 
-			float stepSize = MathHelper.TwoPi / numberOfTeeth;
+			double stepSize = MathHelper.TwoPi / numberOfTeeth;
 			tipPercentage /= 100f;
 			tipPercentage = System.Math.Min(System.Math.Max(tipPercentage, 0f), 1f);
-			float toothTipStepSize = (stepSize / 2f) * tipPercentage;
+			double toothTipStepSize = (stepSize / 2f) * tipPercentage;
 
-			float toothAngleStepSize = (stepSize - (toothTipStepSize * 2f)) / 2f;
+			double toothAngleStepSize = (stepSize - (toothTipStepSize * 2f)) / 2f;
 
 			for (int i = numberOfTeeth - 1; i >= 0; --i)
 			{
 				if (toothTipStepSize > 0f)
 				{
 					vertices.Add(
-						new Vector2(radius *
-									(float)Math.Cos(stepSize * i + toothAngleStepSize * 2f + toothTipStepSize),
+						new Vector2D(radius *
+									(double)Math.Cos(stepSize * i + toothAngleStepSize * 2f + toothTipStepSize),
 									-radius *
-									(float)Math.Sin(stepSize * i + toothAngleStepSize * 2f + toothTipStepSize)));
+									(double)Math.Sin(stepSize * i + toothAngleStepSize * 2f + toothTipStepSize)));
 
 					vertices.Add(
-						new Vector2((radius + toothHeight) *
-									(float)Math.Cos(stepSize * i + toothAngleStepSize + toothTipStepSize),
+						new Vector2D((radius + toothHeight) *
+									(double)Math.Cos(stepSize * i + toothAngleStepSize + toothTipStepSize),
 									-(radius + toothHeight) *
-									(float)Math.Sin(stepSize * i + toothAngleStepSize + toothTipStepSize)));
+									(double)Math.Sin(stepSize * i + toothAngleStepSize + toothTipStepSize)));
 				}
 
-				vertices.Add(new Vector2((radius + toothHeight) *
-										 (float)Math.Cos(stepSize * i + toothAngleStepSize),
+				vertices.Add(new Vector2D((radius + toothHeight) *
+										 (double)Math.Cos(stepSize * i + toothAngleStepSize),
 										 -(radius + toothHeight) *
-										 (float)Math.Sin(stepSize * i + toothAngleStepSize)));
+										 (double)Math.Sin(stepSize * i + toothAngleStepSize)));
 
-				vertices.Add(new Vector2(radius * (float)Math.Cos(stepSize * i),
-										 -radius * (float)Math.Sin(stepSize * i)));
+				vertices.Add(new Vector2D(radius * (double)Math.Cos(stepSize * i),
+										 -radius * (double)Math.Sin(stepSize * i)));
 			}
 
 			return vertices;
@@ -349,7 +349,7 @@ namespace FarseerPhysics.Common
 		/// <param name="multiPartDetection">if set to <c>true</c> it will perform multi part detection.</param>
 		/// <param name="holeDetection">if set to <c>true</c> it will perform hole detection.</param>
 		/// <returns></returns>
-		public static List<Vertices> CreatePolygon(uint[] data, int width, float hullTolerance,
+		public static List<Vertices> CreatePolygon(uint[] data, int width, double hullTolerance,
 												   byte alphaTolerance, bool multiPartDetection, bool holeDetection)
 		{
 			return TextureConverter.DetectVertices(data, width, hullTolerance, alphaTolerance,

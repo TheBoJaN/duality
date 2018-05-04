@@ -47,11 +47,11 @@ namespace FarseerPhysics.Dynamics.Joints
 	/// </summary>
 	public class FrictionJoint : Joint
 	{
-		public Vector2 LocalAnchorA;
-		public Vector2 LocalAnchorB;
-		private float _angularImpulse;
-		private float _angularMass;
-		private Vector2 _linearImpulse;
+		public Vector2D LocalAnchorA;
+		public Vector2D LocalAnchorB;
+		private double _angularImpulse;
+		private double _angularMass;
+		private Vector2D _linearImpulse;
 		private Mat22 _linearMass;
 
 		internal FrictionJoint()
@@ -59,7 +59,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.JointType = JointType.Friction;
 		}
 
-		public FrictionJoint(Body bodyA, Body bodyB, Vector2 localAnchorA, Vector2 localAnchorB)
+		public FrictionJoint(Body bodyA, Body bodyB, Vector2D localAnchorA, Vector2D localAnchorB)
 			: base(bodyA, bodyB)
 		{
 			this.JointType = JointType.Friction;
@@ -67,12 +67,12 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.LocalAnchorB = localAnchorB;
 		}
 
-		public override Vector2 WorldAnchorA
+		public override Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.GetWorldPoint(this.LocalAnchorA); }
 		}
 
-		public override Vector2 WorldAnchorB
+		public override Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.GetWorldPoint(this.LocalAnchorB); }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
@@ -81,19 +81,19 @@ namespace FarseerPhysics.Dynamics.Joints
 		/// <summary>
 		/// The maximum friction force in N.
 		/// </summary>
-		public float MaxForce { get; set; }
+		public double MaxForce { get; set; }
 
 		/// <summary>
 		/// The maximum friction torque in N-m.
 		/// </summary>
-		public float MaxTorque { get; set; }
+		public double MaxTorque { get; set; }
 
-		public override Vector2 GetReactionForce(float inv_dt)
+		public override Vector2D GetReactionForce(double inv_dt)
 		{
 			return inv_dt * this._linearImpulse;
 		}
 
-		public override float GetReactionTorque(float inv_dt)
+		public override double GetReactionTorque(double inv_dt)
 		{
 			return inv_dt * this._angularImpulse;
 		}
@@ -108,8 +108,8 @@ namespace FarseerPhysics.Dynamics.Joints
 			bB.GetTransform(out xfB);
 
 			// Compute the effective mass matrix.
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
 
 			// J = [-I -r1_skew I r2_skew]
 			//     [ 0       -1 0       1]
@@ -120,8 +120,8 @@ namespace FarseerPhysics.Dynamics.Joints
 			//     [  -r1y*iA*r1x-r2y*iB*r2x, mA+r1x^2*iA+mB+r2x^2*iB,           r1x*iA+r2x*iB]
 			//     [          -r1y*iA-r2y*iB,           r1x*iA+r2x*iB,                   iA+iB]
 
-			float mA = bA.InvMass, mB = bB.InvMass;
-			float iA = bA.InvI, iB = bB.InvI;
+			double mA = bA.InvMass, mB = bB.InvMass;
+			double iA = bA.InvI, iB = bB.InvI;
 
 			Mat22 K1 = new Mat22();
 			K1.Col1.X = mA + mB;
@@ -162,7 +162,7 @@ namespace FarseerPhysics.Dynamics.Joints
 				this._linearImpulse *= step.dtRatio;
 				this._angularImpulse *= step.dtRatio;
 
-				Vector2 P = new Vector2(this._linearImpulse.X, this._linearImpulse.Y);
+				Vector2D P = new Vector2D(this._linearImpulse.X, this._linearImpulse.Y);
 
 				bA.LinearVelocityInternal -= mA * P;
 				bA.AngularVelocityInternal -= iA * (MathUtils.Cross(rA, P) + this._angularImpulse);
@@ -172,7 +172,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 			else
 			{
-				this._linearImpulse = Vector2.Zero;
+				this._linearImpulse = Vector2D.Zero;
 				this._angularImpulse = 0.0f;
 			}
 #pragma warning restore 0162 // Unreachable code detected
@@ -183,28 +183,28 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bA = this.BodyA;
 			Body bB = this.BodyB;
 
-			Vector2 vA = bA.LinearVelocityInternal;
-			float wA = bA.AngularVelocityInternal;
-			Vector2 vB = bB.LinearVelocityInternal;
-			float wB = bB.AngularVelocityInternal;
+			Vector2D vA = bA.LinearVelocityInternal;
+			double wA = bA.AngularVelocityInternal;
+			Vector2D vB = bB.LinearVelocityInternal;
+			double wB = bB.AngularVelocityInternal;
 
-			float mA = bA.InvMass, mB = bB.InvMass;
-			float iA = bA.InvI, iB = bB.InvI;
+			double mA = bA.InvMass, mB = bB.InvMass;
+			double iA = bA.InvI, iB = bB.InvI;
 
 			Transform xfA, xfB;
 			bA.GetTransform(out xfA);
 			bB.GetTransform(out xfB);
 
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - bA.LocalCenter);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - bB.LocalCenter);
 
 			// Solve angular friction
 			{
-				float Cdot = wB - wA;
-				float impulse = -this._angularMass * Cdot;
+				double Cdot = wB - wA;
+				double impulse = -this._angularMass * Cdot;
 
-				float oldImpulse = this._angularImpulse;
-				float maxImpulse = step.dt * this.MaxTorque;
+				double oldImpulse = this._angularImpulse;
+				double maxImpulse = step.dt * this.MaxTorque;
 				this._angularImpulse = MathUtils.Clamp(this._angularImpulse + impulse, -maxImpulse, maxImpulse);
 				impulse = this._angularImpulse - oldImpulse;
 
@@ -214,13 +214,13 @@ namespace FarseerPhysics.Dynamics.Joints
 
 			// Solve linear friction
 			{
-				Vector2 Cdot = vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA);
+				Vector2D Cdot = vB + MathUtils.Cross(wB, rB) - vA - MathUtils.Cross(wA, rA);
 
-				Vector2 impulse = -MathUtils.Multiply(ref this._linearMass, Cdot);
-				Vector2 oldImpulse = this._linearImpulse;
+				Vector2D impulse = -MathUtils.Multiply(ref this._linearMass, Cdot);
+				Vector2D oldImpulse = this._linearImpulse;
 				this._linearImpulse += impulse;
 
-				float maxImpulse = step.dt * this.MaxForce;
+				double maxImpulse = step.dt * this.MaxForce;
 
 				if (this._linearImpulse.LengthSquared > maxImpulse * maxImpulse)
 				{

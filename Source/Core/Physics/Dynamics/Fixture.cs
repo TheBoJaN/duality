@@ -100,8 +100,8 @@ namespace FarseerPhysics.Dynamics
 		internal Category _collisionCategories;
 		internal short _collisionGroup;
 		internal Dictionary<int, bool> _collisionIgnores;
-		private float _friction;
-		private float _restitution;
+		private double _friction;
+		private double _restitution;
 
 		internal Fixture()
 		{
@@ -242,12 +242,12 @@ namespace FarseerPhysics.Dynamics
 		/// Get or set the coefficient of friction.
 		/// </summary>
 		/// <value>The friction.</value>
-		public float Friction
+		public double Friction
 		{
 			get { return this._friction; }
 			set
 			{
-				Debug.Assert(!float.IsNaN(value));
+				Debug.Assert(!double.IsNaN(value));
 
 				this._friction = value;
 			}
@@ -257,12 +257,12 @@ namespace FarseerPhysics.Dynamics
 		/// Get or set the coefficient of restitution.
 		/// </summary>
 		/// <value>The restitution.</value>
-		public float Restitution
+		public double Restitution
 		{
 			get { return this._restitution; }
 			set
 			{
-				Debug.Assert(!float.IsNaN(value));
+				Debug.Assert(!double.IsNaN(value));
 
 				this._restitution = value;
 			}
@@ -415,7 +415,7 @@ namespace FarseerPhysics.Dynamics
 		/// </summary>
 		/// <param name="point">A point in world coordinates.</param>
 		/// <returns></returns>
-		public bool TestPoint(ref Vector2 point)
+		public bool TestPoint(ref Vector2D point)
 		{
 			return this.Shape.TestPoint(ref this.Body.Xf, ref point);
 		}
@@ -549,7 +549,7 @@ namespace FarseerPhysics.Dynamics
 
 				proxy.AABB.Combine(ref aabb1, ref aabb2);
 
-				Vector2 displacement = transform2.Position - transform1.Position;
+				Vector2D displacement = transform2.Position - transform1.Position;
 
 				broadPhase.MoveProxy(proxy.ProxyId, ref proxy.AABB, displacement);
 			}

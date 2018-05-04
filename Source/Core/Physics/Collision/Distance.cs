@@ -37,7 +37,7 @@ namespace FarseerPhysics.Collision
 	/// </summary>
 	public class DistanceProxy
 	{
-		internal float Radius;
+		internal double Radius;
 		internal Vertices Vertices = new Vertices();
 
 		/// <summary>
@@ -104,13 +104,13 @@ namespace FarseerPhysics.Collision
 		/// </summary>
 		/// <param name="direction">The direction.</param>
 		/// <returns></returns>
-		public int GetSupport(Vector2 direction)
+		public int GetSupport(Vector2D direction)
 		{
 			int bestIndex = 0;
-			float bestValue = Vector2.Dot(this.Vertices[0], direction);
+			double bestValue = Vector2D.Dot(this.Vertices[0], direction);
 			for (int i = 1; i < this.Vertices.Count; ++i)
 			{
-				float value = Vector2.Dot(this.Vertices[i], direction);
+				double value = Vector2D.Dot(this.Vertices[i], direction);
 				if (value > bestValue)
 				{
 					bestIndex = i;
@@ -126,13 +126,13 @@ namespace FarseerPhysics.Collision
 		/// </summary>
 		/// <param name="direction">The direction.</param>
 		/// <returns></returns>
-		public Vector2 GetSupportVertex(Vector2 direction)
+		public Vector2D GetSupportVertex(Vector2D direction)
 		{
 			int bestIndex = 0;
-			float bestValue = Vector2.Dot(this.Vertices[0], direction);
+			double bestValue = Vector2D.Dot(this.Vertices[0], direction);
 			for (int i = 1; i < this.Vertices.Count; ++i)
 			{
-				float value = Vector2.Dot(this.Vertices[i], direction);
+				double value = Vector2D.Dot(this.Vertices[i], direction);
 				if (value > bestValue)
 				{
 					bestIndex = i;
@@ -165,7 +165,7 @@ namespace FarseerPhysics.Collision
 		/// </summary>
 		public FixedArray3<byte> IndexB;
 
-		public float Metric;
+		public double Metric;
 	}
 
 	/// <summary>
@@ -187,7 +187,7 @@ namespace FarseerPhysics.Collision
 	/// </summary>
 	public struct DistanceOutput
 	{
-		public float Distance;
+		public double Distance;
 
 		/// <summary>
 		/// Number of GJK iterations used
@@ -197,12 +197,12 @@ namespace FarseerPhysics.Collision
 		/// <summary>
 		/// Closest point on shapeA
 		/// </summary>
-		public Vector2 PointA;
+		public Vector2D PointA;
 
 		/// <summary>
 		/// Closest point on shapeB
 		/// </summary>
-		public Vector2 PointB;
+		public Vector2D PointB;
 	}
 
 	internal struct SimplexVertex
@@ -210,7 +210,7 @@ namespace FarseerPhysics.Collision
 		/// <summary>
 		/// Barycentric coordinate for closest point 
 		/// </summary>
-		public float A;
+		public double A;
 
 		/// <summary>
 		/// wA index
@@ -225,17 +225,17 @@ namespace FarseerPhysics.Collision
 		/// <summary>
 		/// wB - wA
 		/// </summary>
-		public Vector2 W;
+		public Vector2D W;
 
 		/// <summary>
 		/// Support point in proxyA
 		/// </summary>
-		public Vector2 WA;
+		public Vector2D WA;
 
 		/// <summary>
 		/// Support point in proxyB
 		/// </summary>
-		public Vector2 WB;
+		public Vector2D WB;
 	}
 
 	internal struct Simplex
@@ -256,8 +256,8 @@ namespace FarseerPhysics.Collision
 				SimplexVertex v = this.V[i];
 				v.IndexA = cache.IndexA[i];
 				v.IndexB = cache.IndexB[i];
-				Vector2 wALocal = proxyA.Vertices[v.IndexA];
-				Vector2 wBLocal = proxyB.Vertices[v.IndexB];
+				Vector2D wALocal = proxyA.Vertices[v.IndexA];
+				Vector2D wBLocal = proxyB.Vertices[v.IndexB];
 				v.WA = MathUtils.Multiply(ref transformA, wALocal);
 				v.WB = MathUtils.Multiply(ref transformB, wBLocal);
 				v.W = v.WB - v.WA;
@@ -269,8 +269,8 @@ namespace FarseerPhysics.Collision
 			// old metric then flush the simplex.
 			if (this.Count > 1)
 			{
-				float metric1 = cache.Metric;
-				float metric2 = GetMetric();
+				double metric1 = cache.Metric;
+				double metric2 = GetMetric();
 				if (metric2 < 0.5f * metric1 || 2.0f * metric1 < metric2 || metric2 < Settings.Epsilon)
 				{
 					// Reset the simplex.
@@ -284,8 +284,8 @@ namespace FarseerPhysics.Collision
 				SimplexVertex v = this.V[0];
 				v.IndexA = 0;
 				v.IndexB = 0;
-				Vector2 wALocal = proxyA.Vertices[0];
-				Vector2 wBLocal = proxyB.Vertices[0];
+				Vector2D wALocal = proxyA.Vertices[0];
+				Vector2D wBLocal = proxyB.Vertices[0];
 				v.WA = MathUtils.Multiply(ref transformA, wALocal);
 				v.WB = MathUtils.Multiply(ref transformB, wBLocal);
 				v.W = v.WB - v.WA;
@@ -305,7 +305,7 @@ namespace FarseerPhysics.Collision
 			}
 		}
 
-		internal Vector2 GetSearchDirection()
+		internal Vector2D GetSearchDirection()
 		{
 			switch (this.Count)
 			{
@@ -314,33 +314,33 @@ namespace FarseerPhysics.Collision
 
 				case 2:
 					{
-						Vector2 e12 = this.V[1].W - this.V[0].W;
-						float sgn = MathUtils.Cross(e12, -this.V[0].W);
+						Vector2D e12 = this.V[1].W - this.V[0].W;
+						double sgn = MathUtils.Cross(e12, -this.V[0].W);
 						if (sgn > 0.0f)
 						{
 							// Origin is left of e12.
-							return new Vector2(-e12.Y, e12.X);
+							return new Vector2D(-e12.Y, e12.X);
 						}
 						else
 						{
 							// Origin is right of e12.
-							return new Vector2(e12.Y, -e12.X);
+							return new Vector2D(e12.Y, -e12.X);
 						}
 					}
 
 				default:
 					Debug.Assert(false);
-					return Vector2.Zero;
+					return Vector2D.Zero;
 			}
 		}
 
-		internal Vector2 GetClosestPoint()
+		internal Vector2D GetClosestPoint()
 		{
 			switch (this.Count)
 			{
 				case 0:
 					Debug.Assert(false);
-					return Vector2.Zero;
+					return Vector2D.Zero;
 
 				case 1:
 					return this.V[0].W;
@@ -349,21 +349,21 @@ namespace FarseerPhysics.Collision
 					return this.V[0].A * this.V[0].W + this.V[1].A * this.V[1].W;
 
 				case 3:
-					return Vector2.Zero;
+					return Vector2D.Zero;
 
 				default:
 					Debug.Assert(false);
-					return Vector2.Zero;
+					return Vector2D.Zero;
 			}
 		}
 
-		internal void GetWitnessPoints(out Vector2 pA, out Vector2 pB)
+		internal void GetWitnessPoints(out Vector2D pA, out Vector2D pB)
 		{
 			switch (this.Count)
 			{
 				case 0:
-					pA = Vector2.Zero;
-					pB = Vector2.Zero;
+					pA = Vector2D.Zero;
+					pB = Vector2D.Zero;
 					Debug.Assert(false);
 					break;
 
@@ -387,7 +387,7 @@ namespace FarseerPhysics.Collision
 			}
 		}
 
-		internal float GetMetric()
+		internal double GetMetric()
 		{
 			switch (this.Count)
 			{
@@ -436,12 +436,12 @@ namespace FarseerPhysics.Collision
 
 		internal void Solve2()
 		{
-			Vector2 w1 = this.V[0].W;
-			Vector2 w2 = this.V[1].W;
-			Vector2 e12 = w2 - w1;
+			Vector2D w1 = this.V[0].W;
+			Vector2D w2 = this.V[1].W;
+			Vector2D e12 = w2 - w1;
 
 			// w1 region
-			float d12_2 = -Vector2.Dot(w1, e12);
+			double d12_2 = -Vector2D.Dot(w1, e12);
 			if (d12_2 <= 0.0f)
 			{
 				// a2 <= 0, so we clamp it to 0
@@ -453,7 +453,7 @@ namespace FarseerPhysics.Collision
 			}
 
 			// w2 region
-			float d12_1 = Vector2.Dot(w2, e12);
+			double d12_1 = Vector2D.Dot(w2, e12);
 			if (d12_1 <= 0.0f)
 			{
 				// a1 <= 0, so we clamp it to 0
@@ -466,7 +466,7 @@ namespace FarseerPhysics.Collision
 			}
 
 			// Must be in e12 region.
-			float inv_d12 = 1.0f / (d12_1 + d12_2);
+			double inv_d12 = 1.0f / (d12_1 + d12_2);
 			SimplexVertex v0_2 = this.V[0];
 			SimplexVertex v1_2 = this.V[1];
 			v0_2.A = d12_1 * inv_d12;
@@ -483,46 +483,46 @@ namespace FarseerPhysics.Collision
 		// - inside the triangle
 		internal void Solve3()
 		{
-			Vector2 w1 = this.V[0].W;
-			Vector2 w2 = this.V[1].W;
-			Vector2 w3 = this.V[2].W;
+			Vector2D w1 = this.V[0].W;
+			Vector2D w2 = this.V[1].W;
+			Vector2D w3 = this.V[2].W;
 
 			// Edge12
 			// [1      1     ][a1] = [1]
 			// [w1.e12 w2.e12][a2] = [0]
 			// a3 = 0
-			Vector2 e12 = w2 - w1;
-			float w1e12 = Vector2.Dot(w1, e12);
-			float w2e12 = Vector2.Dot(w2, e12);
-			float d12_1 = w2e12;
-			float d12_2 = -w1e12;
+			Vector2D e12 = w2 - w1;
+			double w1e12 = Vector2D.Dot(w1, e12);
+			double w2e12 = Vector2D.Dot(w2, e12);
+			double d12_1 = w2e12;
+			double d12_2 = -w1e12;
 
 			// Edge13
 			// [1      1     ][a1] = [1]
 			// [w1.e13 w3.e13][a3] = [0]
 			// a2 = 0
-			Vector2 e13 = w3 - w1;
-			float w1e13 = Vector2.Dot(w1, e13);
-			float w3e13 = Vector2.Dot(w3, e13);
-			float d13_1 = w3e13;
-			float d13_2 = -w1e13;
+			Vector2D e13 = w3 - w1;
+			double w1e13 = Vector2D.Dot(w1, e13);
+			double w3e13 = Vector2D.Dot(w3, e13);
+			double d13_1 = w3e13;
+			double d13_2 = -w1e13;
 
 			// Edge23
 			// [1      1     ][a2] = [1]
 			// [w2.e23 w3.e23][a3] = [0]
 			// a1 = 0
-			Vector2 e23 = w3 - w2;
-			float w2e23 = Vector2.Dot(w2, e23);
-			float w3e23 = Vector2.Dot(w3, e23);
-			float d23_1 = w3e23;
-			float d23_2 = -w2e23;
+			Vector2D e23 = w3 - w2;
+			double w2e23 = Vector2D.Dot(w2, e23);
+			double w3e23 = Vector2D.Dot(w3, e23);
+			double d23_1 = w3e23;
+			double d23_2 = -w2e23;
 
 			// Triangle123
-			float n123 = MathUtils.Cross(e12, e13);
+			double n123 = MathUtils.Cross(e12, e13);
 
-			float d123_1 = n123 * MathUtils.Cross(w2, w3);
-			float d123_2 = n123 * MathUtils.Cross(w3, w1);
-			float d123_3 = n123 * MathUtils.Cross(w1, w2);
+			double d123_1 = n123 * MathUtils.Cross(w2, w3);
+			double d123_2 = n123 * MathUtils.Cross(w3, w1);
+			double d123_3 = n123 * MathUtils.Cross(w1, w2);
 
 			// w1 region
 			if (d12_2 <= 0.0f && d13_2 <= 0.0f)
@@ -537,7 +537,7 @@ namespace FarseerPhysics.Collision
 			// e12
 			if (d12_1 > 0.0f && d12_2 > 0.0f && d123_3 <= 0.0f)
 			{
-				float inv_d12 = 1.0f / (d12_1 + d12_2);
+				double inv_d12 = 1.0f / (d12_1 + d12_2);
 				SimplexVertex v0_2 = this.V[0];
 				SimplexVertex v1_2 = this.V[1];
 				v0_2.A = d12_1 * inv_d12;
@@ -551,7 +551,7 @@ namespace FarseerPhysics.Collision
 			// e13
 			if (d13_1 > 0.0f && d13_2 > 0.0f && d123_2 <= 0.0f)
 			{
-				float inv_d13 = 1.0f / (d13_1 + d13_2);
+				double inv_d13 = 1.0f / (d13_1 + d13_2);
 				SimplexVertex v0_3 = this.V[0];
 				SimplexVertex v2_3 = this.V[2];
 				v0_3.A = d13_1 * inv_d13;
@@ -588,7 +588,7 @@ namespace FarseerPhysics.Collision
 			// e23
 			if (d23_1 > 0.0f && d23_2 > 0.0f && d123_1 <= 0.0f)
 			{
-				float inv_d23 = 1.0f / (d23_1 + d23_2);
+				double inv_d23 = 1.0f / (d23_1 + d23_2);
 				SimplexVertex v1_6 = this.V[1];
 				SimplexVertex v2_6 = this.V[2];
 				v1_6.A = d23_1 * inv_d23;
@@ -601,7 +601,7 @@ namespace FarseerPhysics.Collision
 			}
 
 			// Must be in triangle123
-			float inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
+			double inv_d123 = 1.0f / (d123_1 + d123_2 + d123_3);
 			SimplexVertex v0_7 = this.V[0];
 			SimplexVertex v1_7 = this.V[1];
 			SimplexVertex v2_7 = this.V[2];
@@ -638,9 +638,9 @@ namespace FarseerPhysics.Collision
 			FixedArray3<int> saveA = new FixedArray3<int>();
 			FixedArray3<int> saveB = new FixedArray3<int>();
 
-			Vector2 closestPoint = simplex.GetClosestPoint();
-			float distanceSqr1 = closestPoint.LengthSquared;
-			float distanceSqr2 = distanceSqr1;
+			Vector2D closestPoint = simplex.GetClosestPoint();
+			double distanceSqr1 = closestPoint.LengthSquared;
+			double distanceSqr2 = distanceSqr1;
 
 			// Main iteration loop.
 			int iter = 0;
@@ -679,7 +679,7 @@ namespace FarseerPhysics.Collision
 				}
 
 				// Compute closest point.
-				Vector2 p = simplex.GetClosestPoint();
+				Vector2D p = simplex.GetClosestPoint();
 				distanceSqr2 = p.LengthSquared;
 
 				// Ensure progress
@@ -690,7 +690,7 @@ namespace FarseerPhysics.Collision
 				distanceSqr1 = distanceSqr2;
 
 				// Get search direction.
-				Vector2 d = simplex.GetSearchDirection();
+				Vector2D d = simplex.GetSearchDirection();
 
 				// Ensure the search direction is numerically fit.
 				if (d.LengthSquared < Settings.Epsilon * Settings.Epsilon)
@@ -752,15 +752,15 @@ namespace FarseerPhysics.Collision
 			// Apply radii if requested.
 			if (input.UseRadii)
 			{
-				float rA = input.ProxyA.Radius;
-				float rB = input.ProxyB.Radius;
+				double rA = input.ProxyA.Radius;
+				double rB = input.ProxyB.Radius;
 
 				if (output.Distance > rA + rB && output.Distance > Settings.Epsilon)
 				{
 					// Shapes are still no overlapped.
 					// Move the witness points to the outer surface.
 					output.Distance -= rA + rB;
-					Vector2 normal = output.PointB - output.PointA;
+					Vector2D normal = output.PointB - output.PointA;
 					normal.Normalize();
 					output.PointA += rA * normal;
 					output.PointB -= rB * normal;
@@ -769,7 +769,7 @@ namespace FarseerPhysics.Collision
 				{
 					// Shapes are overlapped when radii are considered.
 					// Move the witness points to the middle.
-					Vector2 p = 0.5f * (output.PointA + output.PointB);
+					Vector2D p = 0.5f * (output.PointA + output.PointB);
 					output.PointA = p;
 					output.PointB = p;
 					output.Distance = 0.0f;

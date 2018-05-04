@@ -46,7 +46,7 @@ namespace FarseerPhysics.Common
 	}
 
 	[DebuggerDisplay("Count = {Count} Vertices = {ToString()}")]
-	public class Vertices : List<Vector2>
+	public class Vertices : List<Vector2D>
 	{
 		public Vertices()
 		{
@@ -57,7 +57,7 @@ namespace FarseerPhysics.Common
 			this.Capacity = capacity;
 		}
 
-		public Vertices(Vector2[] vector2)
+		public Vertices(Vector2D[] vector2)
 		{
 			for (int i = 0; i < vector2.Length; i++)
 			{
@@ -65,7 +65,7 @@ namespace FarseerPhysics.Common
 			}
 		}
 
-		public Vertices(IList<Vector2> vertices)
+		public Vertices(IList<Vector2D> vertices)
 		{
 			for (int i = 0; i < vertices.Count; i++)
 			{
@@ -87,7 +87,7 @@ namespace FarseerPhysics.Common
 			return index + 1;
 		}
 
-		public Vector2 NextVertex(int index)
+		public Vector2D NextVertex(int index)
 		{
 			return this[NextIndex(index)];
 		}
@@ -106,7 +106,7 @@ namespace FarseerPhysics.Common
 			return index - 1;
 		}
 
-		public Vector2 PreviousVertex(int index)
+		public Vector2D PreviousVertex(int index)
 		{
 			return this[PreviousIndex(index)];
 		}
@@ -115,10 +115,10 @@ namespace FarseerPhysics.Common
 		/// Gets the signed area.
 		/// </summary>
 		/// <returns></returns>
-		public float GetSignedArea()
+		public double GetSignedArea()
 		{
 			int i;
-			float area = 0;
+			double area = 0;
 
 			for (i = 0; i < this.Count; i++)
 			{
@@ -134,10 +134,10 @@ namespace FarseerPhysics.Common
 		/// Gets the area.
 		/// </summary>
 		/// <returns></returns>
-		public float GetArea()
+		public double GetArea()
 		{
 			int i;
-			float area = 0;
+			double area = 0;
 
 			for (i = 0; i < this.Count; i++)
 			{
@@ -153,28 +153,28 @@ namespace FarseerPhysics.Common
 		/// Gets the centroid.
 		/// </summary>
 		/// <returns></returns>
-		public Vector2 GetCentroid()
+		public Vector2D GetCentroid()
 		{
 			// Same algorithm is used by Box2D
 
-			Vector2 c = Vector2.Zero;
-			float area = 0.0f;
+			Vector2D c = Vector2D.Zero;
+			double area = 0.0f;
 
-			const float inv3 = 1.0f / 3.0f;
-			Vector2 pRef = Vector2.Zero;
+			const double inv3 = 1.0f / 3.0f;
+			Vector2D pRef = Vector2D.Zero;
 			for (int i = 0; i < this.Count; ++i)
 			{
 				// Triangle vertices.
-				Vector2 p1 = pRef;
-				Vector2 p2 = this[i];
-				Vector2 p3 = i + 1 < this.Count ? this[i + 1] : this[0];
+				Vector2D p1 = pRef;
+				Vector2D p2 = this[i];
+				Vector2D p3 = i + 1 < this.Count ? this[i + 1] : this[0];
 
-				Vector2 e1 = p2 - p1;
-				Vector2 e2 = p3 - p1;
+				Vector2D e1 = p2 - p1;
+				Vector2D e2 = p3 - p1;
 
-				float D = MathUtils.Cross(e1, e2);
+				double D = MathUtils.Cross(e1, e2);
 
-				float triangleArea = 0.5f * D;
+				double triangleArea = 0.5f * D;
 				area += triangleArea;
 
 				// Area weighted centroid
@@ -190,9 +190,9 @@ namespace FarseerPhysics.Common
 		/// Gets the radius based on area.
 		/// </summary>
 		/// <returns></returns>
-		public float GetRadius()
+		public double GetRadius()
 		{
-			float area = GetSignedArea();
+			double area = GetSignedArea();
 
 			double radiusSqrd = (double)area / MathHelper.Pi;
 			if (radiusSqrd < 0)
@@ -200,7 +200,7 @@ namespace FarseerPhysics.Common
 				radiusSqrd *= -1;
 			}
 
-			return (float)Math.Sqrt(radiusSqrd);
+			return (double)Math.Sqrt(radiusSqrd);
 		}
 
 		/// <summary>
@@ -210,8 +210,8 @@ namespace FarseerPhysics.Common
 		public AABB GetCollisionBox()
 		{
 			AABB aabb;
-			Vector2 lowerBound = new Vector2(float.MaxValue, float.MaxValue);
-			Vector2 upperBound = new Vector2(float.MinValue, float.MinValue);
+			Vector2D lowerBound = new Vector2D(double.MaxValue, double.MaxValue);
+			Vector2D upperBound = new Vector2D(double.MinValue, double.MinValue);
 
 			for (int i = 0; i < this.Count; ++i)
 			{
@@ -240,7 +240,7 @@ namespace FarseerPhysics.Common
 			return aabb;
 		}
 
-		public void Translate(Vector2 vector)
+		public void Translate(Vector2D vector)
 		{
 			Translate(ref vector);
 		}
@@ -249,7 +249,7 @@ namespace FarseerPhysics.Common
 		/// Translates the vertices with the specified vector.
 		/// </summary>
 		/// <param name="vector">The vector.</param>
-		public void Translate(ref Vector2 vector)
+		public void Translate(ref Vector2D vector)
 		{
 			for (int i = 0; i < this.Count; i++)
 				this[i] = this[i] + vector;
@@ -259,7 +259,7 @@ namespace FarseerPhysics.Common
 		/// Scales the vertices with the specified vector.
 		/// </summary>
 		/// <param name="value">The Value.</param>
-		public void Scale(ref Vector2 value)
+		public void Scale(ref Vector2D value)
 		{
 			for (int i = 0; i < this.Count; i++)
 				this[i] = this[i] * value;
@@ -269,13 +269,13 @@ namespace FarseerPhysics.Common
 		/// Rotate the vertices with the defined value in radians.
 		/// </summary>
 		/// <param name="value">The amount to rotate by in radians.</param>
-		public void Rotate(float value)
+		public void Rotate(double value)
 		{
-			Matrix4 rotationMatrix;
-			Matrix4.CreateRotationZ(value, out rotationMatrix);
+			Matrix4D rotationMatrix;
+			Matrix4D.CreateRotationZ(value, out rotationMatrix);
 
 			for (int i = 0; i < this.Count; i++)
-				this[i] = Vector2.Transform(this[i], rotationMatrix);
+				this[i] = Vector2D.Transform(this[i], rotationMatrix);
 		}
 
 		/// <summary>
@@ -293,7 +293,7 @@ namespace FarseerPhysics.Common
 			{
 				int i1 = i;
 				int i2 = i + 1 < this.Count ? i + 1 : 0;
-				Vector2 edge = this[i2] - this[i1];
+				Vector2D edge = this[i2] - this[i1];
 
 				for (int j = 0; j < this.Count; ++j)
 				{
@@ -303,9 +303,9 @@ namespace FarseerPhysics.Common
 						continue;
 					}
 
-					Vector2 r = this[j] - this[i1];
+					Vector2D r = this[j] - this[i1];
 
-					float s = edge.X * r.Y - edge.Y * r.X;
+					double s = edge.X * r.Y - edge.Y * r.X;
 
 					if (s <= 0.0f)
 						return false;
@@ -343,15 +343,15 @@ namespace FarseerPhysics.Common
 			for (int i = 0; i < this.Count; ++i)
 			{
 				int iplus = (i + 1 > this.Count - 1) ? 0 : i + 1;
-				Vector2 a1 = new Vector2(this[i].X, this[i].Y);
-				Vector2 a2 = new Vector2(this[iplus].X, this[iplus].Y);
+				Vector2D a1 = new Vector2D(this[i].X, this[i].Y);
+				Vector2D a2 = new Vector2D(this[iplus].X, this[iplus].Y);
 				for (int j = i + 1; j < this.Count; ++j)
 				{
 					int jplus = (j + 1 > this.Count - 1) ? 0 : j + 1;
-					Vector2 b1 = new Vector2(this[j].X, this[j].Y);
-					Vector2 b2 = new Vector2(this[jplus].X, this[jplus].Y);
+					Vector2D b1 = new Vector2D(this[j].X, this[j].Y);
+					Vector2D b2 = new Vector2D(this[jplus].X, this[jplus].Y);
 
-					Vector2 temp;
+					Vector2D temp;
 
 					if (LineTools.LineIntersect2(a1, a2, b1, b2, out temp))
 					{
@@ -389,7 +389,7 @@ namespace FarseerPhysics.Common
 			for (int i = 0; i < this.Count; ++i)
 			{
 				int next = i + 1 < this.Count ? i + 1 : 0;
-				Vector2 edge = this[next] - this[i];
+				Vector2D edge = this[next] - this[i];
 				if (edge.LengthSquared <= Settings.Epsilon * Settings.Epsilon)
 				{
 					return PolygonError.SideTooSmall;
@@ -430,7 +430,7 @@ namespace FarseerPhysics.Common
 			//Add base nodes (raw outline)
 			for (int i = 0; i < verts.Count; ++i)
 			{
-				Vector2 pos = new Vector2(verts[i].X, verts[i].Y);
+				Vector2D pos = new Vector2D(verts[i].X, verts[i].Y);
 				nodes[i].Position = pos;
 				++nNodes;
 				int iplus = (i == verts.Count - 1) ? 0 : i + 1;
@@ -458,7 +458,7 @@ namespace FarseerPhysics.Common
 									nodes[k].Connected[l] == nodes[i]) continue;
 
 								//Check intersection
-								Vector2 intersectPt;
+								Vector2D intersectPt;
 
 								bool crosses = LineTools.LineIntersect(nodes[i].Position, nodes[i].Connected[j].Position,
 																	   nodes[k].Position, nodes[k].Connected[l].Position,
@@ -505,7 +505,7 @@ namespace FarseerPhysics.Common
 					for (int j = i + 1; j < nNodes; ++j)
 					{
 						if (nodes[j].NConnected == 0) continue;
-						Vector2 diff = nodes[i].Position - nodes[j].Position;
+						Vector2D diff = nodes[i].Position - nodes[j].Position;
 						if (diff.LengthSquared <= Settings.Epsilon * Settings.Epsilon)
 						{
 							if (nActive <= 3)
@@ -538,8 +538,8 @@ namespace FarseerPhysics.Common
 			//Now walk the edge of the list
 
 			//Find node with minimum y value (max x if equal)
-			float minY = float.MaxValue;
-			float maxX = -float.MaxValue;
+			double minY = double.MaxValue;
+			double maxX = -double.MaxValue;
 			int minYIndex = -1;
 			for (int i = 0; i < nNodes; ++i)
 			{
@@ -556,8 +556,8 @@ namespace FarseerPhysics.Common
 				}
 			}
 
-			Vector2 origDir = new Vector2(1.0f, 0.0f);
-			Vector2[] resultVecs = new Vector2[4 * nNodes];
+			Vector2D origDir = new Vector2D(1.0f, 0.0f);
+			Vector2D[] resultVecs = new Vector2D[4 * nNodes];
 			// nodes may be visited more than once, unfortunately - change to growable array!
 			int nResultVecs = 0;
 			PolyNode currentNode = nodes[minYIndex];
@@ -614,15 +614,15 @@ namespace FarseerPhysics.Common
              */
 			public PolyNode[] Connected = new PolyNode[MaxConnected];
 			public int NConnected;
-			public Vector2 Position;
+			public Vector2D Position;
 
-			public PolyNode(Vector2 pos)
+			public PolyNode(Vector2D pos)
 			{
 				this.Position = pos;
 				this.NConnected = 0;
 			}
 
-			private bool IsRighter(float sinA, float cosA, float sinB, float cosB)
+			private bool IsRighter(double sinA, double cosA, double sinB, double cosB)
 			{
 				if (sinA < 0)
 				{
@@ -682,9 +682,9 @@ namespace FarseerPhysics.Common
 					// The correct behavior here is to turn around.
 					return incoming;
 				}
-				Vector2 inDir = this.Position - incoming.Position;
+				Vector2D inDir = this.Position - incoming.Position;
 
-				float inLength = inDir.Length;
+				double inLength = inDir.Length;
 				inDir.Normalize();
 
 				Debug.Assert(inLength > Settings.Epsilon);
@@ -693,18 +693,18 @@ namespace FarseerPhysics.Common
 				for (int i = 0; i < this.NConnected; ++i)
 				{
 					if (this.Connected[i] == incoming) continue;
-					Vector2 testDir = this.Connected[i].Position - this.Position;
-					float testLengthSqr = testDir.LengthSquared;
+					Vector2D testDir = this.Connected[i].Position - this.Position;
+					double testLengthSqr = testDir.LengthSquared;
 					testDir.Normalize();
 					Debug.Assert(testLengthSqr >= Settings.Epsilon * Settings.Epsilon);
-					float myCos = Vector2.Dot(inDir, testDir);
-					float mySin = MathUtils.Cross(inDir, testDir);
+					double myCos = Vector2D.Dot(inDir, testDir);
+					double mySin = MathUtils.Cross(inDir, testDir);
 					if (result != null)
 					{
-						Vector2 resultDir = result.Position - this.Position;
+						Vector2D resultDir = result.Position - this.Position;
 						resultDir.Normalize();
-						float resCos = Vector2.Dot(inDir, resultDir);
-						float resSin = MathUtils.Cross(inDir, resultDir);
+						double resCos = Vector2D.Dot(inDir, resultDir);
+						double resSin = MathUtils.Cross(inDir, resultDir);
 						if (IsRighter(mySin, myCos, resSin, resCos))
 						{
 							result = this.Connected[i];
@@ -721,9 +721,9 @@ namespace FarseerPhysics.Common
 				return result;
 			}
 
-			public PolyNode GetRightestConnection(Vector2 incomingDir)
+			public PolyNode GetRightestConnection(Vector2D incomingDir)
 			{
-				Vector2 diff = this.Position - incomingDir;
+				Vector2D diff = this.Position - incomingDir;
 				PolyNode temp = new PolyNode(diff);
 				PolyNode res = GetRightestConnection(temp);
 				Debug.Assert(res != null);
@@ -751,16 +751,16 @@ namespace FarseerPhysics.Common
 		/// <param name="axis">The axis.</param>
 		/// <param name="min">The min.</param>
 		/// <param name="max">The max.</param>
-		public void ProjectToAxis(ref Vector2 axis, out float min, out float max)
+		public void ProjectToAxis(ref Vector2D axis, out double min, out double max)
 		{
 			// To project a point on an axis use the dot product
-			float dotProduct = Vector2.Dot(axis, this[0]);
+			double dotProduct = Vector2D.Dot(axis, this[0]);
 			min = dotProduct;
 			max = dotProduct;
 
 			for (int i = 0; i < this.Count; i++)
 			{
-				dotProduct = Vector2.Dot(this[i], axis);
+				dotProduct = Vector2D.Dot(this[i], axis);
 				if (dotProduct < min)
 				{
 					min = dotProduct;
@@ -783,7 +783,7 @@ namespace FarseerPhysics.Common
 		/// <returns>-1 if the winding number is zero and the point is outside
 		/// the polygon, 1 if the point is inside the polygon, and 0 if the point
 		/// is on the polygons edge.</returns>
-		public int PointInPolygon(ref Vector2 point)
+		public int PointInPolygon(ref Vector2D point)
 		{
 			// Winding number
 			int wn = 0;
@@ -792,13 +792,13 @@ namespace FarseerPhysics.Common
 			for (int i = 0; i < this.Count; i++)
 			{
 				// Get points
-				Vector2 p1 = this[i];
-				Vector2 p2 = this[NextIndex(i)];
+				Vector2D p1 = this[i];
+				Vector2D p2 = this[NextIndex(i)];
 
 				// Test if a point is directly on the edge
-				Vector2 edge = p2 - p1;
-				float area = MathUtils.Area(ref p1, ref p2, ref point);
-				if (area == 0f && Vector2.Dot(point - p1, edge) >= 0f && Vector2.Dot(point - p2, edge) <= 0f)
+				Vector2D edge = p2 - p1;
+				double area = MathUtils.Area(ref p1, ref p2, ref point);
+				if (area == 0f && Vector2D.Dot(point - p1, edge) >= 0f && Vector2D.Dot(point - p2, edge) <= 0f)
 				{
 					return 0;
 				}
@@ -826,7 +826,7 @@ namespace FarseerPhysics.Common
 		/// If this sum is 2pi then the point is an interior point, if 0 then the point is an exterior point. 
 		/// ref: http://ozviz.wasp.uwa.edu.au/~pbourke/geometry/insidepoly/  - Solution 2 
 		/// </summary>
-		public bool PointInPolygonAngle(ref Vector2 point)
+		public bool PointInPolygonAngle(ref Vector2D point)
 		{
 			double angle = 0;
 
@@ -834,8 +834,8 @@ namespace FarseerPhysics.Common
 			for (int i = 0; i < this.Count; i++)
 			{
 				// Get points
-				Vector2 p1 = this[i] - point;
-				Vector2 p2 = this[NextIndex(i)] - point;
+				Vector2D p1 = this[i] - point;
+				Vector2D p2 = this[NextIndex(i)] - point;
 
 				angle += MathUtils.VectorAngle(ref p1, ref p2);
 			}

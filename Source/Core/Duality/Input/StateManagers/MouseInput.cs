@@ -12,8 +12,8 @@ namespace Duality.Input
 		{
 			public bool IsAvailable = false;
 			public Point2 WindowPos = Point2.Zero;
-			public Vector2 ViewPos = Vector2.Zero;
-			public float Wheel = 0.0f;
+			public Vector2D ViewPos = Vector2D.Zero;
+			public double Wheel = 0.0f;
 			public bool[] ButtonPressed	= new bool[(int)MouseButton.Last + 1];
 
 			public State() {}
@@ -45,10 +45,10 @@ namespace Duality.Input
 				Rect viewportRect;
 				Vector2 gameViewSize;
 				DualityApp.CalculateGameViewport(DualityApp.WindowSize, out viewportRect, out gameViewSize);
-				Vector2 relativePos = new Vector2(
-					MathF.Clamp((this.WindowPos.X - viewportRect.X) / viewportRect.W, 0.0f, 1.0f),
-					MathF.Clamp((this.WindowPos.Y - viewportRect.Y) / viewportRect.H, 0.0f, 1.0f));
-				this.ViewPos = relativePos * gameViewSize;
+				Vector2D relativePos = new Vector2D(
+					MathD.Clamp((this.WindowPos.X - viewportRect.X) / viewportRect.W, 0.0f, 1.0f),
+					MathD.Clamp((this.WindowPos.Y - viewportRect.Y) / viewportRect.H, 0.0f, 1.0f));
+				this.ViewPos = relativePos * (Vector2D)gameViewSize;
 			}
 		}
 
@@ -100,33 +100,33 @@ namespace Duality.Input
 		/// <summary>
 		/// [GET] The current viewport-local cursor position.
 		/// </summary>
-		public Vector2 Pos
+		public Vector2D Pos
 		{
 			get { return this.currentState.ViewPos; }
 		}
 		/// <summary>
 		/// [GET] The viewport-local cursor position change since last frame.
 		/// </summary>
-		public Vector2 Vel
+		public Vector2D Vel
 		{
 			get
 			{
 				return (this.currentState.IsAvailable && this.lastState.IsAvailable) ? 
 					this.currentState.ViewPos - this.lastState.ViewPos : 
-					Vector2.Zero;
+					Vector2D.Zero;
 			}
 		}
 		/// <summary>
 		/// [GET] The current mouse wheel value
 		/// </summary>
-		public float Wheel
+		public double Wheel
 		{
 			get { return this.currentState.Wheel; }
 		}
 		/// <summary>
 		/// [GET] Returns the change of the mouse wheel value since last frame.
 		/// </summary>
-		public float WheelSpeed
+		public double WheelSpeed
 		{
 			get { return (this.currentState.IsAvailable && this.lastState.IsAvailable) ? this.currentState.Wheel - this.lastState.Wheel : 0.0f; }
 		}

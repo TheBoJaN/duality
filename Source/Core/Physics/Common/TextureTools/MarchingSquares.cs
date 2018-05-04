@@ -48,7 +48,7 @@ namespace FarseerPhysics.Common
 		/// <param name="lerpCount"></param>
 		/// <param name="combine"></param>
 		/// <returns></returns>
-		public static List<Vertices> DetectSquares(AABB domain, float cellWidth, float cellHeight, sbyte[,] f,
+		public static List<Vertices> DetectSquares(AABB domain, double cellWidth, double cellHeight, sbyte[,] f,
 												   int lerpCount, bool combine)
 		{
 			CxFastList<GeomPoly> ret = new CxFastList<GeomPoly>();
@@ -87,15 +87,15 @@ namespace FarseerPhysics.Common
 			//generate sub-polys and combine to scan lines
 			for (int y = 0; y < yn; y++)
 			{
-				float y0 = y * cellHeight + domain.LowerBound.Y;
-				float y1;
+				double y0 = y * cellHeight + domain.LowerBound.Y;
+				double y1;
 				if (y == yn - 1) y1 = domain.UpperBound.Y;
 				else y1 = y0 + cellHeight;
 				GeomPoly pre = null;
 				for (int x = 0; x < xn; x++)
 				{
-					float x0 = x * cellWidth + domain.LowerBound.X;
-					float x1;
+					double x0 = x * cellWidth + domain.LowerBound.X;
+					double x1;
 					if (x == xn - 1) x1 = domain.UpperBound.X;
 					else x1 = x0 + cellWidth;
 
@@ -167,11 +167,11 @@ namespace FarseerPhysics.Common
 						continue;
 					}
 
-					float ax = x * cellWidth + domain.LowerBound.X;
-					float ay = y * cellHeight + domain.LowerBound.Y;
+					double ax = x * cellWidth + domain.LowerBound.X;
+					double ay = y * cellHeight + domain.LowerBound.Y;
 
-					CxFastList<Vector2> bp = p.GeomP.Points;
-					CxFastList<Vector2> ap = u.GeomP.Points;
+					CxFastList<Vector2D> bp = p.GeomP.Points;
+					CxFastList<Vector2D> ap = u.GeomP.Points;
 
 					//skip if it's already been combined with above polygon
 					if (u.GeomP == p.GeomP)
@@ -181,12 +181,12 @@ namespace FarseerPhysics.Common
 					}
 
 					//combine above (but disallow the hole thingies
-					CxFastListNode<Vector2> bi = bp.Begin();
+					CxFastListNode<Vector2D> bi = bp.Begin();
 					while (Square(bi.Elem().Y - ay) > Settings.Epsilon || bi.Elem().X < ax) bi = bi.Next();
 
 					//NOTE: Unused
-					//Vector2 b0 = bi.elem();
-					Vector2 b1 = bi.Next().Elem();
+					//Vector2D b0 = bi.elem();
+					Vector2D b1 = bi.Next().Elem();
 					if (Square(b1.Y - ay) > Settings.Epsilon)
 					{
 						x++;
@@ -194,7 +194,7 @@ namespace FarseerPhysics.Common
 					}
 
 					bool brk = true;
-					CxFastListNode<Vector2> ai = ap.Begin();
+					CxFastListNode<Vector2D> ai = ap.Begin();
 					while (ai != ap.End())
 					{
 						if (VecDsq(ai.Elem(), b1) < Settings.Epsilon)
@@ -210,7 +210,7 @@ namespace FarseerPhysics.Common
 						continue;
 					}
 
-					CxFastListNode<Vector2> bj = bi.Next().Next();
+					CxFastListNode<Vector2D> bj = bi.Next().Next();
 					if (bj == bp.End()) bj = bp.Begin();
 					while (bj != bi)
 					{
@@ -219,7 +219,7 @@ namespace FarseerPhysics.Common
 						if (bj == bp.End()) bj = bp.Begin();
 						u.GeomP.Length++;
 					}
-					//u.p.simplify(float.Epsilon,float.Epsilon);
+					//u.p.simplify(double.Epsilon,double.Epsilon);
 					//
 					ax = x + 1;
 					while (ax < xn)
@@ -276,10 +276,10 @@ namespace FarseerPhysics.Common
 											  0x6D, 0xB5, 0x55
 										  };
 
-		private static float Lerp(float x0, float x1, float v0, float v1)
+		private static double Lerp(double x0, double x1, double v0, double v1)
 		{
-			float dv = v0 - v1;
-			float t;
+			double dv = v0 - v1;
+			double t;
 			if (dv * dv < Settings.Epsilon)
 				t = 0.5f;
 			else t = v0 / dv;
@@ -290,9 +290,9 @@ namespace FarseerPhysics.Common
 
 		/** Recursive linear interpolation for use in marching squares **/
 
-		private static float Xlerp(float x0, float x1, float y, float v0, float v1, sbyte[,] f, int c)
+		private static double Xlerp(double x0, double x1, double y, double v0, double v1, sbyte[,] f, int c)
 		{
-			float xm = Lerp(x0, x1, v0, v1);
+			double xm = Lerp(x0, x1, v0, v1);
 			if (c == 0)
 				return xm;
 
@@ -306,9 +306,9 @@ namespace FarseerPhysics.Common
 
 		/** Recursive linear interpolation for use in marching squares **/
 
-		private static float Ylerp(float y0, float y1, float x, float v0, float v1, sbyte[,] f, int c)
+		private static double Ylerp(double y0, double y1, double x, double v0, double v1, sbyte[,] f, int c)
 		{
-			float ym = Lerp(y0, y1, v0, v1);
+			double ym = Lerp(y0, y1, v0, v1);
 			if (c == 0)
 				return ym;
 
@@ -322,18 +322,18 @@ namespace FarseerPhysics.Common
 
 		/** Square value for use in marching squares **/
 
-		private static float Square(float x)
+		private static double Square(double x)
 		{
 			return x * x;
 		}
 
-		private static float VecDsq(Vector2 a, Vector2 b)
+		private static double VecDsq(Vector2D a, Vector2D b)
 		{
-			Vector2 d = a - b;
+			Vector2D d = a - b;
 			return d.X * d.X + d.Y * d.Y;
 		}
 
-		private static float VecCross(Vector2 a, Vector2 b)
+		private static double VecCross(Vector2D a, Vector2D b)
 		{
 			return a.X * b.Y - a.Y * b.X;
 		}
@@ -348,8 +348,8 @@ namespace FarseerPhysics.Common
             coordinates of 'ax' 'ay' in the marching squares mesh.
         */
 
-		private static int MarchSquare(sbyte[,] f, sbyte[,] fs, ref GeomPoly poly, int ax, int ay, float x0, float y0,
-									   float x1, float y1, int bin)
+		private static int MarchSquare(sbyte[,] f, sbyte[,] fs, ref GeomPoly poly, int ax, int ay, double x0, double y0,
+									   double x1, double y1, int bin)
 		{
 			//key lookup
 			int key = 0;
@@ -365,33 +365,33 @@ namespace FarseerPhysics.Common
 			int val = _lookMarch[key];
 			if (val != 0)
 			{
-				CxFastListNode<Vector2> pi = null;
+				CxFastListNode<Vector2D> pi = null;
 				for (int i = 0; i < 8; i++)
 				{
-					Vector2 p;
+					Vector2D p;
 					if ((val & (1 << i)) != 0)
 					{
 						if (i == 7 && (val & 1) == 0)
-							poly.Points.Add(p = new Vector2(x0, Ylerp(y0, y1, x0, v0, v3, f, bin)));
+							poly.Points.Add(p = new Vector2D(x0, Ylerp(y0, y1, x0, v0, v3, f, bin)));
 						else
 						{
-							if (i == 0) p = new Vector2(x0, y0);
-							else if (i == 2) p = new Vector2(x1, y0);
-							else if (i == 4) p = new Vector2(x1, y1);
-							else if (i == 6) p = new Vector2(x0, y1);
+							if (i == 0) p = new Vector2D(x0, y0);
+							else if (i == 2) p = new Vector2D(x1, y0);
+							else if (i == 4) p = new Vector2D(x1, y1);
+							else if (i == 6) p = new Vector2D(x0, y1);
 
-							else if (i == 1) p = new Vector2(Xlerp(x0, x1, y0, v0, v1, f, bin), y0);
-							else if (i == 5) p = new Vector2(Xlerp(x0, x1, y1, v3, v2, f, bin), y1);
+							else if (i == 1) p = new Vector2D(Xlerp(x0, x1, y0, v0, v1, f, bin), y0);
+							else if (i == 5) p = new Vector2D(Xlerp(x0, x1, y1, v3, v2, f, bin), y1);
 
-							else if (i == 3) p = new Vector2(x1, Ylerp(y0, y1, x1, v1, v2, f, bin));
-							else p = new Vector2(x0, Ylerp(y0, y1, x0, v0, v3, f, bin));
+							else if (i == 3) p = new Vector2D(x1, Ylerp(y0, y1, x1, v1, v2, f, bin));
+							else p = new Vector2D(x0, Ylerp(y0, y1, x0, v0, v3, f, bin));
 
 							pi = poly.Points.Insert(pi, p);
 						}
 						poly.Length++;
 					}
 				}
-				//poly.simplify(float.Epsilon,float.Epsilon);
+				//poly.simplify(double.Epsilon,double.Epsilon);
 			}
 			return key;
 		}
@@ -402,29 +402,29 @@ namespace FarseerPhysics.Common
 
 		private static void combLeft(ref GeomPoly polya, ref GeomPoly polyb)
 		{
-			CxFastList<Vector2> ap = polya.Points;
-			CxFastList<Vector2> bp = polyb.Points;
-			CxFastListNode<Vector2> ai = ap.Begin();
-			CxFastListNode<Vector2> bi = bp.Begin();
+			CxFastList<Vector2D> ap = polya.Points;
+			CxFastList<Vector2D> bp = polyb.Points;
+			CxFastListNode<Vector2D> ai = ap.Begin();
+			CxFastListNode<Vector2D> bi = bp.Begin();
 
-			Vector2 b = bi.Elem();
-			CxFastListNode<Vector2> prea = null;
+			Vector2D b = bi.Elem();
+			CxFastListNode<Vector2D> prea = null;
 			while (ai != ap.End())
 			{
-				Vector2 a = ai.Elem();
+				Vector2D a = ai.Elem();
 				if (VecDsq(a, b) < Settings.Epsilon)
 				{
 					//ignore shared vertex if parallel
 					if (prea != null)
 					{
-						Vector2 a0 = prea.Elem();
+						Vector2D a0 = prea.Elem();
 						b = bi.Next().Elem();
 
-						Vector2 u = a - a0;
+						Vector2D u = a - a0;
 						//vec_new(u); vec_sub(a.p.p, a0.p.p, u);
-						Vector2 v = b - a;
+						Vector2D v = b - a;
 						//vec_new(v); vec_sub(b.p.p, a.p.p, v);
-						float dot = VecCross(u, v);
+						double dot = VecCross(u, v);
 						if (dot * dot < Settings.Epsilon)
 						{
 							ap.Erase(prea, ai);
@@ -435,10 +435,10 @@ namespace FarseerPhysics.Common
 
 					//insert polyb into polya
 					bool fst = true;
-					CxFastListNode<Vector2> preb = null;
+					CxFastListNode<Vector2D> preb = null;
 					while (!bp.Empty())
 					{
-						Vector2 bb = bp.Front();
+						Vector2D bb = bp.Front();
 						bp.Pop();
 						if (!fst && !bp.Empty())
 						{
@@ -451,16 +451,16 @@ namespace FarseerPhysics.Common
 
 					//ignore shared vertex if parallel
 					ai = ai.Next();
-					Vector2 a1 = ai.Elem();
+					Vector2D a1 = ai.Elem();
 					ai = ai.Next();
 					if (ai == ap.End()) ai = ap.Begin();
-					Vector2 a2 = ai.Elem();
-					Vector2 a00 = preb.Elem();
-					Vector2 uu = a1 - a00;
+					Vector2D a2 = ai.Elem();
+					Vector2D a00 = preb.Elem();
+					Vector2D uu = a1 - a00;
 					//vec_new(u); vec_sub(a1.p, a0.p, u);
-					Vector2 vv = a2 - a1;
+					Vector2D vv = a2 - a1;
 					//vec_new(v); vec_sub(a2.p, a1.p, v);
-					float dot1 = VecCross(uu, vv);
+					double dot1 = VecCross(uu, vv);
 					if (dot1 * dot1 < Settings.Epsilon)
 					{
 						ap.Erase(preb, preb.Next());
@@ -766,11 +766,11 @@ namespace FarseerPhysics.Common
 		internal class GeomPoly
 		{
 			public int Length;
-			public CxFastList<Vector2> Points;
+			public CxFastList<Vector2D> Points;
 
 			public GeomPoly()
 			{
-				this.Points = new CxFastList<Vector2>();
+				this.Points = new CxFastList<Vector2D>();
 				this.Length = 0;
 			}
 		}

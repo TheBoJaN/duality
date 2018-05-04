@@ -24,10 +24,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private ShapeInfo     activeShape          = null;
 		private int           activeVertex         = -1;
 		private int           activeEdge           = -1;
-		private Vector2       activeEdgeWorldPos   = Vector2.Zero;
+		private Vector2D       activeEdgeWorldPos   = Vector2D.Zero;
 
 		private ShapeInfo     backedUpShape        = null;
-		private Vector2[]     backedUpVertices     = null;
+		private Vector2D[]     backedUpVertices     = null;
 
 
 		public override string Name
@@ -80,12 +80,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			else
 			{
 				VertexBasedShapeInfo vertexShape = this.activeShape as VertexBasedShapeInfo;
-				Vector2[] activeShapeVertices = vertexShape.Vertices;
+				Vector2D[] activeShapeVertices = vertexShape.Vertices;
 
 				// Create a backup of the polygons vertices before our edit operation,
 				// so we can go back via Undo later.
 				this.backedUpShape = this.activeShape;
-				this.backedUpVertices = (Vector2[])activeShapeVertices.Clone();
+				this.backedUpVertices = (Vector2D[])activeShapeVertices.Clone();
 			
 				// Create a new vertex when hovering the polygon edge where none exists yet
 				if (mouseButton == MouseButtons.Left)
@@ -93,7 +93,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					if (this.activeEdge != -1)
 					{
 						int newIndex = this.activeEdge + 1;
-						List<Vector2> newVertices = activeShapeVertices.ToList();
+						List<Vector2D> newVertices = activeShapeVertices.ToList();
 						newVertices.Insert(newIndex, this.Environment.ActiveBodyPos);
 
 						vertexShape.Vertices = newVertices.ToArray();
@@ -105,7 +105,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				{
 					if (this.activeVertex != -1 && activeShapeVertices.Length > 3)
 					{
-						List<Vector2> newVertices = activeShapeVertices.ToList();
+						List<Vector2D> newVertices = activeShapeVertices.ToList();
 						newVertices.RemoveAt(this.activeVertex);
 
 						vertexShape.Vertices = newVertices.ToArray();
@@ -116,8 +116,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		}
 		public override void UpdateAction()
 		{
-			Vector2 worldPos = this.Environment.ActiveWorldPos.Xy;
-			Vector2 localPos = this.Environment.ActiveBodyPos;
+			Vector2D worldPos = this.Environment.ActiveWorldPos.Xy;
+			Vector2D localPos = this.Environment.ActiveBodyPos;
 
 			// For circles, emit regular EditProperty UndoRedo actions that adjust
 			// Position and Radius properties.
@@ -127,8 +127,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				bool isEditingRadius = this.activeEdge != -1;
 				if (isEditingRadius)
 				{
-					float oldLocalRadius = circle.Radius;
-					float newLocalRadius = (localPos - circle.Position).Length;
+					double oldLocalRadius = circle.Radius;
+					double newLocalRadius = (localPos - circle.Position).Length;
 					if (oldLocalRadius != newLocalRadius)
 					{
 						this.activeEdgeWorldPos = worldPos;
@@ -141,8 +141,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				}
 				else
 				{
-					Vector2 oldLocalPos = circle.Position;
-					Vector2 newLocalPos = localPos;
+					Vector2D oldLocalPos = circle.Position;
+					Vector2D newLocalPos = localPos;
 					if (oldLocalPos != newLocalPos)
 					{
 						this.activeEdgeWorldPos = worldPos;
@@ -160,8 +160,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			else if (this.activeVertex != -1)
 			{
 				VertexBasedShapeInfo vertexShape = this.activeShape as VertexBasedShapeInfo;
-				Vector2[] activeShapeVertices = vertexShape.Vertices;
-				Vector2 oldLocalPos = activeShapeVertices[this.activeVertex];
+				Vector2D[] activeShapeVertices = vertexShape.Vertices;
+				Vector2D oldLocalPos = activeShapeVertices[this.activeVertex];
 				if (oldLocalPos != localPos)
 				{
 					this.activeEdgeWorldPos = worldPos;
@@ -210,8 +210,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			DesignTimeObjectData designTimeData = DesignTimeObjectData.Get(body.GameObj);
 			if (designTimeData.IsHidden) return;
 
-			float knobSize = 7.0f;
-			float worldKnobSize = knobSize / MathF.Max(0.0001f, canvas.DrawDevice.GetScaleAtZ(0.0f));
+			double knobSize = 7.0f;
+			double worldKnobSize = knobSize / MathD.Max(0.0001f, canvas.DrawDevice.GetScaleAtZ(0.0f));
 
 			// Determine the color in which we'll draw the interaction markers
 			ColorRgba markerColor = this.Environment.FgColor;
@@ -220,21 +220,21 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				// Prepare the transform matrix for this object, so 
 				// we can move the RigidBody vertices into world space quickly
 				Transform transform = body.GameObj.Transform;
-				Vector2 bodyPos = transform.Pos.Xy;
-				Vector2 bodyDotX;
-				Vector2 bodyDotY;
-				MathF.GetTransformDotVec(transform.Angle, transform.Scale, out bodyDotX, out bodyDotY);
+				Vector2D bodyPos = transform.Pos.Xy;
+				Vector2D bodyDotX;
+				Vector2D bodyDotY;
+				MathD.GetTransformDotVec(transform.Angle, transform.Scale, out bodyDotX, out bodyDotY);
 
 			// Draw an interaction indicator for every vertex of the active bodies shapes
-				Vector3 mousePosWorld = this.Environment.ActiveWorldPos;
+				Vector3D mousePosWorld = this.Environment.ActiveWorldPos;
 				foreach (ShapeInfo shape in body.Shapes)
 				{
 					if (shape is CircleShapeInfo)
 					{
 						CircleShapeInfo circle = shape as CircleShapeInfo;
 
-						Vector2 circleWorldPos = circle.Position;
-						MathF.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
+						Vector2D circleWorldPos = circle.Position;
+						MathD.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
 						circleWorldPos = bodyPos + circleWorldPos;
 
 						// Draw the circles center as a vertex
@@ -252,16 +252,16 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 					else if (shape is VertexBasedShapeInfo)
 					{
 						VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-						Vector2[] vertices = vertexShape.Vertices;
+						Vector2D[] vertices = vertexShape.Vertices;
 						if (vertices == null) continue;
 
-						Vector2[] worldVertices = new Vector2[vertices.Length];
+						Vector2D[] worldVertices = new Vector2D[vertices.Length];
 
 						// Transform the shapes vertices into world space
 						for (int index = 0; index < vertices.Length; index++)
 						{
-							Vector2 vertex = vertices[index];
-							MathF.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
+							Vector2D vertex = vertices[index];
+							MathD.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
 							worldVertices[index] = bodyPos + vertex;
 						}
 
@@ -315,7 +315,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.activeShape = null;
 			this.activeVertex = -1;
 			this.activeEdge = -1;
-			this.activeEdgeWorldPos = Vector2.Zero;
+			this.activeEdgeWorldPos = Vector2D.Zero;
 			
 			RigidBody body = this.Environment.ActiveBody;
 			if (body == null) return;
@@ -326,30 +326,30 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Prepare the transform matrix for this object, so 
 			// we can move the RigidBody vertices into world space quickly
 			Transform transform = body.GameObj.Transform;
-			float bodyScale = transform.Scale;
-			Vector2 bodyPos = transform.Pos.Xy;
-			Vector2 bodyDotX;
-			Vector2 bodyDotY;
-			MathF.GetTransformDotVec(transform.Angle, bodyScale, out bodyDotX, out bodyDotY);
+			double bodyScale = transform.Scale;
+			Vector2D bodyPos = transform.Pos.Xy;
+			Vector2D bodyDotX;
+			Vector2D bodyDotY;
+			MathD.GetTransformDotVec(transform.Angle, bodyScale, out bodyDotX, out bodyDotY);
 
-			Vector3 mousePosWorld = this.Environment.HoveredWorldPos;
+			Vector3D mousePosWorld = this.Environment.HoveredWorldPos;
 			foreach (ShapeInfo shape in body.Shapes)
 			{
 				// Determine whether the cursor is hovering something it can interact with
 				bool anythingHovered = false;
-				float hotRadius = 8.0f;
-				float worldHotRadius = hotRadius / MathF.Max(0.0001f, this.Environment.GetScaleAtZ(0.0f));
+				double hotRadius = 8.0f;
+				double worldHotRadius = hotRadius / MathD.Max(0.0001f, this.Environment.GetScaleAtZ(0.0f));
 				if (shape is CircleShapeInfo)
 				{
 					CircleShapeInfo circle = shape as CircleShapeInfo;
 
 					// Determine world space position and radius of the circle shape
-					float circleWorldRadius = circle.Radius * bodyScale;
-					Vector2 circleWorldPos = circle.Position;
-					MathF.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
+					double circleWorldRadius = circle.Radius * bodyScale;
+					Vector2D circleWorldPos = circle.Position;
+					MathD.TransformDotVec(ref circleWorldPos, ref bodyDotX, ref bodyDotY);
 					circleWorldPos = bodyPos + circleWorldPos;
 
-					float hoverDist = (circleWorldPos - mousePosWorld.Xy).Length;
+					double hoverDist = (circleWorldPos - mousePosWorld.Xy).Length;
 
 					// Hovering the center
 					if (hoverDist <= worldHotRadius)
@@ -360,7 +360,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 						anythingHovered = true;
 					}
 					// Hovering the edge
-					else if (MathF.Abs(hoverDist - circleWorldRadius) <= worldHotRadius)
+					else if (MathD.Abs(hoverDist - circleWorldRadius) <= worldHotRadius)
 					{
 						this.activeVertex = -1;
 						this.activeEdge = 0;
@@ -373,16 +373,16 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				else if (shape is VertexBasedShapeInfo)
 				{
 					VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
-					Vector2[] vertices = vertexShape.Vertices;
+					Vector2D[] vertices = vertexShape.Vertices;
 					if (vertices == null) continue;
 
-					Vector2[] worldVertices = new Vector2[vertices.Length];
+					Vector2D[] worldVertices = new Vector2D[vertices.Length];
 
 					// Transform the shapes vertices into world space
 					for (int index = 0; index < vertices.Length; index++)
 					{
-						Vector2 vertex = vertices[index];
-						MathF.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
+						Vector2D vertex = vertices[index];
+						MathD.TransformDotVec(ref vertex, ref bodyDotX, ref bodyDotY);
 						worldVertices[index] = bodyPos + vertex;
 					}
 					anythingHovered = 
@@ -398,14 +398,14 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 		}
 
-		private bool GetHoveredVertex(Vector2[] vertices, Vector2 targetPos, float radius, out int hoverIndex, out Vector2 hoverPos)
+		private bool GetHoveredVertex(Vector2D[] vertices, Vector2D targetPos, double radius, out int hoverIndex, out Vector2D hoverPos)
 		{
 			hoverIndex = -1;
 			hoverPos = targetPos;
 
 			for (int index = 0; index < vertices.Length; index++)
 			{
-				Vector2 vertex = vertices[index];
+				Vector2D vertex = vertices[index];
 
 				if ((vertex - targetPos).Length <= radius)
 				{
@@ -417,7 +417,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			return false;
 		}
-		private bool GetHoveredEdge(Vector2[] vertices, Vector2 targetPos, float radius, out int edgeStartIndex, out Vector2 hoverPos)
+		private bool GetHoveredEdge(Vector2D[] vertices, Vector2D targetPos, double radius, out int edgeStartIndex, out Vector2D hoverPos)
 		{
 			hoverPos = targetPos;
 			edgeStartIndex = -1;
@@ -425,10 +425,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			for (int index = 0; index < vertices.Length; index++)
 			{
 				int nextIndex = (index + 1) % vertices.Length;
-				Vector2 vertex = vertices[index];
-				Vector2 nextVertex = vertices[nextIndex];
+				Vector2D vertex = vertices[index];
+				Vector2D nextVertex = vertices[nextIndex];
 				
-				Vector2 pointOnEdge = MathF.PointLineNearestPoint(
+				Vector2D pointOnEdge = MathD.PointLineNearestPoint(
 					targetPos.X, 
 					targetPos.Y, 
 					vertex.X, 

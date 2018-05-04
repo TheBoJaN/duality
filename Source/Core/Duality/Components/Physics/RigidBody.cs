@@ -49,26 +49,26 @@ namespace Duality.Components.Physics
 
 
 		private BodyType bodyType        = BodyType.Dynamic;
-		private float    linearDamp      = 0.3f;
-		private float    angularDamp     = 0.3f;
+		private double    linearDamp      = 0.3f;
+		private double    angularDamp     = 0.3f;
 		private bool     fixedAngle      = false;
 		private bool     ignoreGravity   = false;
 		private bool     allowParent     = false;
 		private bool     useCCD          = false;
-		private Vector2  linearVel       = Vector2.Zero;
-		private float    angularVel      = 0.0f;
-		private float    revolutions     = 0.0f;
-		private float    explicitMass    = 0.0f;
-		private float    explicitInertia = 0.0f;
+		private Vector2D  linearVel       = Vector2D.Zero;
+		private double    angularVel      = 0.0f;
+		private double    revolutions     = 0.0f;
+		private double    explicitMass    = 0.0f;
+		private double    explicitInertia = 0.0f;
 		private CollisionCategory colCat    = CollisionCategory.Cat1;
 		private CollisionCategory colWith   = CollisionCategory.All;
 		private CollisionFilter   colFilter = null;
 		private List<ShapeInfo>   shapes    = null;
 		private List<JointInfo>   joints    = null;
 
-		[DontSerialize] private Vector2   lastPos               = Vector2.Zero;
-		[DontSerialize] private float     lastAngle             = 0.0f;
-		[DontSerialize] private float     lastScale             = 1.0f;
+		[DontSerialize] private Vector2D   lastPos               = Vector2D.Zero;
+		[DontSerialize] private double     lastAngle             = 0.0f;
+		[DontSerialize] private double     lastScale             = 1.0f;
 		[DontSerialize] private InitState bodyInitState         = InitState.Disposed;
 		[DontSerialize] private bool      schedUpdateBody       = false;
 		[DontSerialize] private bool      enableBodyAfterUpdate = false;
@@ -103,7 +103,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The damping that is applied to the bodies velocity.
 		/// </summary>
 		[EditorHintRange(0.0f, 10000.0f, 0.0f, 10.0f)]
-		public float LinearDamping
+		public double LinearDamping
 		{
 			get { return this.linearDamp; }
 			set 
@@ -116,7 +116,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The damping that is applied to the bodies angular velocity.
 		/// </summary>
 		[EditorHintRange(0.0f, 10000.0f, 0.0f, 10.0f)]
-		public float AngularDamping
+		public double AngularDamping
 		{
 			get { return this.angularDamp; }
 			set 
@@ -179,7 +179,7 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The Colliders current linear velocity.
 		/// </summary>
-		public Vector2 LinearVelocity
+		public Vector2D LinearVelocity
 		{
 			get { return this.linearVel; }
 			set
@@ -191,9 +191,9 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The Colliders current angular velocity.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1 * 0.1f)]
+		[EditorHintIncrement(MathD.RadAngle1 * 0.1f)]
 		[EditorHintDecimalPlaces(3)]
-		public float AngularVelocity
+		public double AngularVelocity
 		{
 			get { return this.angularVel; }
 			set
@@ -207,7 +207,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
 		[EditorHintRange(0.0f, 10000.0f, 0.0f, 1.0f)]
-		public float Friction
+		public double Friction
 		{
 			get { return this.shapes == null || this.shapes.Count == 0 ? 0.0f : this.shapes.Average(s => s.Friction); }
 			set
@@ -224,7 +224,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
 		[EditorHintRange(0.0f, 1.0f)]
-		public float Restitution
+		public double Restitution
 		{
 			get { return this.shapes == null || this.shapes.Count == 0 ? 0.0f : this.shapes.Average(s => s.Restitution); }
 			set
@@ -243,7 +243,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(5.0f)]
 		[EditorHintDecimalPlaces(1)]
-		public float Mass
+		public double Mass
 		{
 			get 
 			{
@@ -264,7 +264,7 @@ namespace Duality.Components.Physics
 		/// automated calculation, set to zero.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float Inertia
+		public double Inertia
 		{
 			get 
 			{
@@ -318,7 +318,7 @@ namespace Duality.Components.Physics
 		/// [GET] The bodies total number of revolutions.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float Revolutions
+		public double Revolutions
 		{
 			get { return this.revolutions; }
 		}
@@ -326,27 +326,23 @@ namespace Duality.Components.Physics
 		/// [GET] The bodies center of mass in world coordinates.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public Vector2 WorldMassCenter
+		public Vector2D WorldMassCenter
 		{
 			get
 			{
-				return this.body != null ? 
-					PhysicsUnit.LengthToDuality * this.body.WorldCenter : 
-					this.GameObj.Transform.Pos.Xy;
+				return this.body != null ? PhysicsUnit.LengthToDuality * this.body.WorldCenter : (Vector2D)this.GameObj.Transform.Pos.Xy;
 			}
 		}
 		/// <summary>
 		/// [GET] The bodies center of mass in local coordinates.
 		/// </summary>
-		public Vector2 LocalMassCenter
+		public Vector2D LocalMassCenter
 		{
 			get
 			{
 				// Need to apply scale to make it actual Transform-local coordinates
 				// instead of RigidBody-local coordinates.
-				return (this.body != null ? 
-					PhysicsUnit.LengthToDuality * this.body.LocalCenter : 
-					Vector2.Zero) / this.gameobj.Transform.Scale;
+				return (this.body != null ? PhysicsUnit.LengthToDuality * this.body.LocalCenter : Vector2D.Zero) / (double)this.gameobj.Transform.Scale;
 			}
 		}
 		/// <summary>
@@ -371,17 +367,17 @@ namespace Duality.Components.Physics
 		/// [GET] The physical bodys bounding radius.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float BoundRadius
+		public double BoundRadius
 		{
 			get
 			{
 				if (this.shapes == null || this.shapes.Count == 0) return 0.0f;
 
-				Rect boundRect = this.shapes[0].AABB;
+				RectD boundRect = this.shapes[0].AABB;
 				foreach (ShapeInfo info in this.shapes.Skip(1))
 					boundRect = boundRect.ExpandedToContain(info.AABB);
 
-				float scale = this.GameObj.Transform.Scale;
+				double scale = (double)this.GameObj.Transform.Scale;
 				return boundRect.Transformed(scale, scale).BoundingRadius;
 			}
 		}
@@ -536,9 +532,9 @@ namespace Duality.Components.Physics
 		/// Applies a Transform-local angular impulse to the object. You don't usually need to apply <see cref="Time.TimeMult"/> here because it is inteded to be a one-time force impact.
 		/// </summary>
 		/// <param name="angularImpulse"></param>
-		public void ApplyLocalImpulse(float angularImpulse)
+		public void ApplyLocalImpulse(double angularImpulse)
 		{
-			MathF.CheckValidValue(angularImpulse);
+			MathD.CheckValidValue(angularImpulse);
 			if (this.body == null) return;
 
 			this.body.ApplyAngularImpulse(PhysicsUnit.AngularImpulseToPhysical * angularImpulse);
@@ -548,9 +544,9 @@ namespace Duality.Components.Physics
 		/// Applies a Transform-local impulse to the objects mass center. You don't usually need to apply <see cref="Time.TimeMult"/> here because it is inteded to be a one-time force impact.
 		/// </summary>
 		/// <param name="impulse"></param>
-		public void ApplyLocalImpulse(Vector2 impulse)
+		public void ApplyLocalImpulse(Vector2D impulse)
 		{
-			MathF.CheckValidValue(impulse);
+			MathD.CheckValidValue(impulse);
 			if (this.body == null) return;
 
 			impulse = this.gameobj.Transform.GetWorldVector(impulse);
@@ -563,10 +559,10 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="impulse"></param>
 		/// <param name="applyAt"></param>
-		public void ApplyLocalImpulse(Vector2 impulse, Vector2 applyAt)
+		public void ApplyLocalImpulse(Vector2D impulse, Vector2D applyAt)
 		{
-			MathF.CheckValidValue(impulse);
-			MathF.CheckValidValue(applyAt);
+			MathD.CheckValidValue(impulse);
+			MathD.CheckValidValue(applyAt);
 			if (this.body == null) return;
 
 			impulse = this.gameobj.Transform.GetWorldVector(impulse);
@@ -582,9 +578,9 @@ namespace Duality.Components.Physics
 		/// Applies a world impulse to the objects mass center. You don't usually need to apply <see cref="Time.TimeMult"/> here because it is inteded to be a one-time force impact.
 		/// </summary>
 		/// <param name="impulse"></param>
-		public void ApplyWorldImpulse(Vector2 impulse)
+		public void ApplyWorldImpulse(Vector2D impulse)
 		{
-			MathF.CheckValidValue(impulse);
+			MathD.CheckValidValue(impulse);
 			if (this.body == null) return;
 
 			this.body.ApplyLinearImpulse(PhysicsUnit.ImpulseToPhysical * impulse);
@@ -595,10 +591,10 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="impulse"></param>
 		/// <param name="applyAt"></param>
-		public void ApplyWorldImpulse(Vector2 impulse, Vector2 applyAt)
+		public void ApplyWorldImpulse(Vector2D impulse, Vector2D applyAt)
 		{
-			MathF.CheckValidValue(impulse);
-			MathF.CheckValidValue(applyAt);
+			MathD.CheckValidValue(impulse);
+			MathD.CheckValidValue(applyAt);
 			if (this.body == null) return;
 
 			this.body.ApplyLinearImpulse(
@@ -612,9 +608,9 @@ namespace Duality.Components.Physics
 		/// Applies a Transform-local angular force to the object. You don't need to apply <see cref="Time.TimeMult"/> here, the physics simulation takes care of this.
 		/// </summary>
 		/// <param name="angularForce"></param>
-		public void ApplyLocalForce(float angularForce)
+		public void ApplyLocalForce(double angularForce)
 		{
-			MathF.CheckValidValue(angularForce);
+			MathD.CheckValidValue(angularForce);
 			if (this.body == null) return;
 
 			if (Scene.PhysicsFixedTime) angularForce *= Time.TimeMult;
@@ -624,9 +620,9 @@ namespace Duality.Components.Physics
 		/// Applies a Transform-local force to the objects mass center. You don't need to apply <see cref="Time.TimeMult"/> here, the physics simulation takes care of this.
 		/// </summary>
 		/// <param name="force"></param>
-		public void ApplyLocalForce(Vector2 force)
+		public void ApplyLocalForce(Vector2D force)
 		{
-			MathF.CheckValidValue(force);
+			MathD.CheckValidValue(force);
 			if (this.body == null) return;
 
 			force = this.gameobj.Transform.GetWorldVector(force);
@@ -638,10 +634,10 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="force"></param>
 		/// <param name="applyAt"></param>
-		public void ApplyLocalForce(Vector2 force, Vector2 applyAt)
+		public void ApplyLocalForce(Vector2D force, Vector2D applyAt)
 		{
-			MathF.CheckValidValue(force);
-			MathF.CheckValidValue(applyAt);
+			MathD.CheckValidValue(force);
+			MathD.CheckValidValue(applyAt);
 			if (this.body == null) return;
 
 			force = this.gameobj.Transform.GetWorldVector(force);
@@ -655,9 +651,9 @@ namespace Duality.Components.Physics
 		/// Applies a world force to the objects mass center. You don't need to apply <see cref="Time.TimeMult"/> here, the physics simulation takes care of this.
 		/// </summary>
 		/// <param name="force"></param>
-		public void ApplyWorldForce(Vector2 force)
+		public void ApplyWorldForce(Vector2D force)
 		{
-			MathF.CheckValidValue(force);
+			MathD.CheckValidValue(force);
 			if (this.body == null) return;
 
 			if (Scene.PhysicsFixedTime) force *= Time.TimeMult;
@@ -668,10 +664,10 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="force"></param>
 		/// <param name="applyAt"></param>
-		public void ApplyWorldForce(Vector2 force, Vector2 applyAt)
+		public void ApplyWorldForce(Vector2D force, Vector2D applyAt)
 		{
-			MathF.CheckValidValue(force);
-			MathF.CheckValidValue(applyAt);
+			MathD.CheckValidValue(force);
+			MathD.CheckValidValue(applyAt);
 			if (this.body == null) return;
 
 			if (Scene.PhysicsFixedTime) force *= Time.TimeMult;
@@ -695,11 +691,11 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="worldCoord"></param>
 		/// <returns></returns>
-		public ShapeInfo PickShape(Vector2 worldCoord)
+		public ShapeInfo PickShape(Vector2D worldCoord)
 		{
 			if (this.body == null) return null;
 
-			Vector2 fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
+			Vector2D fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
 
 			for (int i = 0; i < this.body.FixtureList.Count; i++)
 			{
@@ -718,11 +714,11 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new shape was found.</returns>
-		public bool PickShapes(Vector2 worldCoord, List<ShapeInfo> pickedShapes)
+		public bool PickShapes(Vector2D worldCoord, List<ShapeInfo> pickedShapes)
 		{
 			if (this.body == null) return false;
 
-			Vector2 fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
+			Vector2D fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
 
 			int oldCount = pickedShapes.Count;
 			for (int i = 0; i < this.body.FixtureList.Count; i++)
@@ -747,16 +743,16 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new shape was found.</returns>
-		public bool PickShapes(Vector2 worldCoord, Vector2 size, List<ShapeInfo> pickedShapes)
+		public bool PickShapes(Vector2D worldCoord, Vector2D size, List<ShapeInfo> pickedShapes)
 		{
 			if (this.body == null) return false;
 
-			PolygonShape boxShape = new PolygonShape(new Vertices(new List<Vector2>
+			PolygonShape boxShape = new PolygonShape(new Vertices(new List<Vector2D>
 			{
 				PhysicsUnit.LengthToPhysical * worldCoord,
-				PhysicsUnit.LengthToPhysical * new Vector2(worldCoord.X + size.X, worldCoord.Y),
+				PhysicsUnit.LengthToPhysical * new Vector2D(worldCoord.X + size.X, worldCoord.Y),
 				PhysicsUnit.LengthToPhysical * (worldCoord + size),
-				PhysicsUnit.LengthToPhysical * new Vector2(worldCoord.X, worldCoord.Y + size.Y) 
+				PhysicsUnit.LengthToPhysical * new Vector2D(worldCoord.X, worldCoord.Y + size.Y) 
 			}), 1);
 
 			FarseerPhysics.Common.Transform boxTransform = new FarseerPhysics.Common.Transform();
@@ -787,7 +783,7 @@ namespace Duality.Components.Physics
 					case ShapeType.Chain:
 						// This one is still buggy. Will be fixed in a later PR. For now just leave this disabled.
 						//ChainShape chainShape = (ChainShape)f.Shape;
-						//EdgeShape edgeShape = new EdgeShape(Vector2.Zero, Vector2.Zero);
+						//EdgeShape edgeShape = new EdgeShape(Vector2D.Zero, Vector2D.Zero);
 						//for (int j = 0; j < chainShape.Vertices.Count - 1; j++)
 						//{
 						//	chainShape.GetChildEdge(ref edgeShape, i);
@@ -858,7 +854,7 @@ namespace Duality.Components.Physics
 			if (this.body == null) return;
 			this.isUpdatingBody = true;
 
-			this.lastScale = this.gameobj.Transform.Scale;
+			this.lastScale = (double)this.gameobj.Transform.Scale;
 			if (this.shapes != null)
 			{
 				foreach (ShapeInfo info in this.shapes)
@@ -884,7 +880,7 @@ namespace Duality.Components.Physics
 		{
 			Transform transform = this.GameObj.Transform;
 
-			Vector2 pos = transform.Pos.Xy;
+			Vector2D pos = transform.Pos.Xy;
 			if (this.lastPos != pos)
 			{
 				this.lastPos = pos;
@@ -892,7 +888,7 @@ namespace Duality.Components.Physics
 				this.body.Awake = true;
 			}
 
-			float angle = transform.Angle;
+			double angle = (double)transform.Angle;
 			if (this.lastAngle != angle)
 			{
 				this.lastAngle = angle;
@@ -900,7 +896,7 @@ namespace Duality.Components.Physics
 				this.body.Awake = true;
 			}
 
-			float scale = transform.Scale;
+			double scale = (double)transform.Scale;
 			if (this.lastScale != scale)
 			{
 				bool updateScale = false;
@@ -910,10 +906,10 @@ namespace Duality.Components.Physics
 				}
 				else
 				{
-					const float pixelLimit = 2;
-					float boundRadius = this.BoundRadius;
-					float upper = (boundRadius + pixelLimit) / boundRadius;
-					float lower = (boundRadius - pixelLimit) / boundRadius;
+					const double pixelLimit = 2;
+					double boundRadius = this.BoundRadius;
+					double upper = (boundRadius + pixelLimit) / boundRadius;
+					double lower = (boundRadius - pixelLimit) / boundRadius;
 					if (scale / this.lastScale >= upper || scale / this.lastScale <= lower)
 					{
 						updateScale = true;
@@ -939,23 +935,23 @@ namespace Duality.Components.Physics
 			Transform transform = this.gameobj.Transform;
 
 			// The current PhysicsAlpha interpolation probably isn't the best one. Maybe replace later.
-			Vector2 bodyVel = this.body.LinearVelocity;
-			Vector2 bodyPos = this.body.Position - bodyVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
-			float bodyAngleVel = this.body.AngularVelocity;
-			float bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
+			Vector2D bodyVel = this.body.LinearVelocity;
+			Vector2D bodyPos = this.body.Position - bodyVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
+			double bodyAngleVel = this.body.AngularVelocity;
+			double bodyAngle = this.body.Rotation - bodyAngleVel * (1.0f - Scene.PhysicsAlpha) * Time.SecondsPerFrame;
 
 			// Unless allowed explicitly, ignore the transform hierarchy, so nested RigidBodies don't clash
 			if (!this.allowParent)
 				transform.IgnoreParent = true;
 
-			transform.MoveTo(new Vector3(
+			transform.MoveTo(new Vector3D(
 				PhysicsUnit.LengthToDuality * bodyPos.X,
 				PhysicsUnit.LengthToDuality * bodyPos.Y,
-				transform.Pos.Z));
+				(double)transform.Pos.Z));
 			transform.TurnTo(PhysicsUnit.AngleToDuality * bodyAngle);
 
 			this.lastPos = transform.Pos.Xy;
-			this.lastAngle = transform.Angle;
+			this.lastAngle = (double)transform.Angle;
 		}
 
 		private void CleanupBody()
@@ -1028,12 +1024,12 @@ namespace Duality.Components.Physics
 
 			if (transform != null)
 			{
-				this.body.SetTransform(PhysicsUnit.LengthToPhysical * transform.Pos.Xy, PhysicsUnit.AngleToPhysical * transform.Angle);
+				this.body.SetTransform(PhysicsUnit.LengthToPhysical * (Vector2D)transform.Pos.Xy, PhysicsUnit.AngleToPhysical * (double)transform.Angle);
 				this.body.LinearVelocity = PhysicsUnit.VelocityToPhysical * this.linearVel;
 				this.body.AngularVelocity = PhysicsUnit.AngularVelocityToPhysical * this.angularVel;
 				this.lastPos = transform.Pos.Xy;
-				this.lastAngle = transform.Angle;
-				this.lastScale = transform.Scale;
+				this.lastAngle = (double)transform.Angle;
+				this.lastScale = (double)transform.Scale;
 			}
 
 			this.body.Collision += this.body_OnCollision;
@@ -1367,14 +1363,14 @@ namespace Duality.Components.Physics
 		/// The callback that is invoked for each hit on the raycast. Note that the order in which each hit occurs isn't deterministic
 		/// and may appear random. Return -1 to ignore the curret shape, 0 to terminate the raycast, data.Fraction to clip the ray for current hit, or 1 to continue.
 		/// </param>
-		public static void RayCast(Vector2 start, Vector2 end, RayCastCallback callback)
+		public static void RayCast(Vector2D start, Vector2D end, RayCastCallback callback)
 		{
 			if (callback == null) callback = Raycast_DefaultCallback;
 
-			Vector2 fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
-			Vector2 fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
+			Vector2D fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
+			Vector2D fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
 
-			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2 pos, Vector2 normal, float fraction)
+			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2D pos, Vector2D normal, double fraction)
 			{
 				return callback(new RayCastData(
 					fixture.UserData as ShapeInfo, 
@@ -1397,15 +1393,15 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new hit was registered.</returns>
-		public static bool RayCast(Vector2 start, Vector2 end, RayCastCallback callback, RawList<RayCastData> hits)
+		public static bool RayCast(Vector2D start, Vector2D end, RayCastCallback callback, RawList<RayCastData> hits)
 		{
 			if (callback == null) callback = Raycast_DefaultCallback;
 
-			Vector2 fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
-			Vector2 fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
+			Vector2D fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
+			Vector2D fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
 
 			int oldResultCount = hits.Count;
-			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2 pos, Vector2 normal, float fraction)
+			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2D pos, Vector2D normal, double fraction)
 			{
 				int index = hits.Count++;
 				RayCastData[] data = hits.Data;
@@ -1416,7 +1412,7 @@ namespace Duality.Components.Physics
 					normal, 
 					fraction);
 
-				float result = callback(data[index]);
+				double result = callback(data[index]);
 				if (result < 0.0f)
 					hits.Count--;
 
@@ -1440,17 +1436,17 @@ namespace Duality.Components.Physics
 		/// </param>
 		/// <param name="firstHit">Returns the first hit that occurs, i.e. the one with the highest proximity to the starting point.</param>
 		/// <returns>Returns whether anything has been hit.</returns>
-		public static bool RayCast(Vector2 start, Vector2 end, RayCastCallback callback, out RayCastData firstHit)
+		public static bool RayCast(Vector2D start, Vector2D end, RayCastCallback callback, out RayCastData firstHit)
 		{
 			if (callback == null) callback = Raycast_DefaultCallback;
 
-			Vector2 fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
-			Vector2 fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
+			Vector2D fsWorldCoordA = PhysicsUnit.LengthToPhysical * start;
+			Vector2D fsWorldCoordB = PhysicsUnit.LengthToPhysical * end;
 
-			float firstHitFraction = float.MaxValue;
+			double firstHitFraction = double.MaxValue;
 			RayCastData firstHitLocal = default(RayCastData);
 
-			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2 pos, Vector2 normal, float fraction)
+			Scene.PhysicsWorld.RayCast(delegate(Fixture fixture, Vector2D pos, Vector2D normal, double fraction)
 			{
 				RayCastData data = new RayCastData(
 					fixture.UserData as ShapeInfo, 
@@ -1458,7 +1454,7 @@ namespace Duality.Components.Physics
 					normal, 
 					fraction);
 
-				float result = callback(data);
+				double result = callback(data);
 				if (result >= 0.0f && data.Fraction < firstHitFraction)
 				{
 					firstHitLocal = data;
@@ -1469,9 +1465,9 @@ namespace Duality.Components.Physics
 			}, fsWorldCoordA, fsWorldCoordB);
 
 			firstHit = firstHitLocal;
-			return firstHitFraction != float.MaxValue;
+			return firstHitFraction != double.MaxValue;
 		}
-		private static float Raycast_DefaultCallback(RayCastData data)
+		private static double Raycast_DefaultCallback(RayCastData data)
 		{
 			return 1.0f;
 		}
@@ -1482,9 +1478,9 @@ namespace Duality.Components.Physics
 		/// </summary>
 		/// <param name="worldCoord"></param>
 		/// <returns></returns>
-		public static ShapeInfo PickShapeGlobal(Vector2 worldCoord)
+		public static ShapeInfo PickShapeGlobal(Vector2D worldCoord)
 		{
-			Vector2 fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
+			Vector2D fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
 			Fixture f = Scene.PhysicsWorld.TestPoint(fsWorldCoord);
 
 			return f != null && f.UserData is ShapeInfo ? (f.UserData as ShapeInfo) : null;
@@ -1499,9 +1495,9 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new shape was found.</returns>
-		public static bool PickShapesGlobal(Vector2 worldCoord, List<ShapeInfo> pickedShapes)
+		public static bool PickShapesGlobal(Vector2D worldCoord, List<ShapeInfo> pickedShapes)
 		{
-			Vector2 fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
+			Vector2D fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
 			List<Fixture> fixtureList = Scene.PhysicsWorld.TestPointAll(fsWorldCoord);
 
 			int oldResultCount = pickedShapes.Count;
@@ -1528,18 +1524,18 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new shape was found.</returns>
-		public static bool PickShapesGlobal(Vector2 worldCoord, Vector2 size, List<ShapeInfo> pickedShapes)
+		public static bool PickShapesGlobal(Vector2D worldCoord, Vector2D size, List<ShapeInfo> pickedShapes)
 		{
 			List<RigidBody> potentialBodies = new List<RigidBody>();
 			QueryRectGlobal(worldCoord, size, potentialBodies);
 			if (potentialBodies.Count == 0) return false;
 
-			PolygonShape boxShape = new PolygonShape(new Vertices(new List<Vector2>
+			PolygonShape boxShape = new PolygonShape(new Vertices(new List<Vector2D>
 			{
 				PhysicsUnit.LengthToPhysical * worldCoord,
-				PhysicsUnit.LengthToPhysical * new Vector2(worldCoord.X + size.X, worldCoord.Y),
+				PhysicsUnit.LengthToPhysical * new Vector2D(worldCoord.X + size.X, worldCoord.Y),
 				PhysicsUnit.LengthToPhysical * (worldCoord + size),
-				PhysicsUnit.LengthToPhysical * new Vector2(worldCoord.X, worldCoord.Y + size.Y)
+				PhysicsUnit.LengthToPhysical * new Vector2D(worldCoord.X, worldCoord.Y + size.Y)
 			}), 1);
 
 			FarseerPhysics.Common.Transform boxTransform = new FarseerPhysics.Common.Transform();
@@ -1564,9 +1560,9 @@ namespace Duality.Components.Physics
 		/// The list will not be cleared before adding items.
 		/// </param>
 		/// <returns>Returns whether any new body was found.</returns>
-		public static bool QueryRectGlobal(Vector2 worldCoord, Vector2 size, List<RigidBody> queriedBodies)
+		public static bool QueryRectGlobal(Vector2D worldCoord, Vector2D size, List<RigidBody> queriedBodies)
 		{
-			Vector2 fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
+			Vector2D fsWorldCoord = PhysicsUnit.LengthToPhysical * worldCoord;
 			FarseerPhysics.Collision.AABB fsWorldAABB = new FarseerPhysics.Collision.AABB(fsWorldCoord, PhysicsUnit.LengthToPhysical * (worldCoord + size));
 
 			int oldResultCount = queriedBodies.Count;
@@ -1612,12 +1608,12 @@ namespace Duality.Components.Physics
 		{
 			if (this.body == null) return;
 
-			MathF.CheckValidValue(this.body.Position.X);
-			MathF.CheckValidValue(this.body.Position.Y);
-			MathF.CheckValidValue(this.body.Rotation);
-			MathF.CheckValidValue(this.body.LinearVelocity.X);
-			MathF.CheckValidValue(this.body.LinearVelocity.Y);
-			MathF.CheckValidValue(this.body.AngularVelocity);
+			MathD.CheckValidValue(this.body.Position.X);
+			MathD.CheckValidValue(this.body.Position.Y);
+			MathD.CheckValidValue(this.body.Rotation);
+			MathD.CheckValidValue(this.body.LinearVelocity.X);
+			MathD.CheckValidValue(this.body.LinearVelocity.Y);
+			MathD.CheckValidValue(this.body.AngularVelocity);
 		}
 	}
 }

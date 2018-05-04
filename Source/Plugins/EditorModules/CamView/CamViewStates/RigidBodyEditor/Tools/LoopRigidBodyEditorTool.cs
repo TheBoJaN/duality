@@ -41,7 +41,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			get { return base.IsAvailable && this.Environment.ActiveBody.BodyType == BodyType.Static; }
 		}
 
-		protected override VertexBasedShapeInfo CreateShapeInfo(Vector2[] vertices)
+		protected override VertexBasedShapeInfo CreateShapeInfo(Vector2D[] vertices)
 		{
 			return new LoopShapeInfo(vertices);
 		}

@@ -20,11 +20,11 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <param name="splitSize">The size of the split. Think of this as the laser-width</param>
 		/// <param name="first">The first collection of vertexes</param>
 		/// <param name="second">The second collection of vertexes</param>
-		public static void SplitShape(Fixture fixture, Vector2 entryPoint, Vector2 exitPoint, float splitSize,
+		public static void SplitShape(Fixture fixture, Vector2D entryPoint, Vector2D exitPoint, double splitSize,
 									  out Vertices first, out Vertices second)
 		{
-			Vector2 localEntryPoint = fixture.Body.GetLocalPoint(ref entryPoint);
-			Vector2 localExitPoint = fixture.Body.GetLocalPoint(ref exitPoint);
+			Vector2D localEntryPoint = fixture.Body.GetLocalPoint(ref entryPoint);
+			Vector2D localExitPoint = fixture.Body.GetLocalPoint(ref exitPoint);
 
 			PolygonShape shape = fixture.Shape as PolygonShape;
 
@@ -49,7 +49,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			{
 				int n;
 				//Find out if this vertex is on the old or new shape.
-				if (Vector2.Dot(MathUtils.Cross(localExitPoint - localEntryPoint, 1), vertices[i] - localEntryPoint) > Settings.Epsilon)
+				if (Vector2D.Dot(MathUtils.Cross(localExitPoint - localEntryPoint, 1), vertices[i] - localEntryPoint) > Settings.Epsilon)
 					n = 0;
 				else
 					n = 1;
@@ -93,7 +93,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 
 			for (int n = 0; n < 2; n++)
 			{
-				Vector2 offset;
+				Vector2D offset;
 				if (cutAdded[n] > 0)
 				{
 					offset = (newPolygon[n][cutAdded[n] - 1] - newPolygon[n][cutAdded[n]]);
@@ -131,11 +131,11 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <param name="start">The startpoint.</param>
 		/// <param name="end">The endpoint.</param>
 		/// <param name="thickness">The thickness of the cut</param>
-		public static void Cut(World world, Vector2 start, Vector2 end, float thickness)
+		public static void Cut(World world, Vector2D start, Vector2D end, double thickness)
 		{
 			List<Fixture> fixtures = new List<Fixture>();
-			List<Vector2> entryPoints = new List<Vector2>();
-			List<Vector2> exitPoints = new List<Vector2>();
+			List<Vector2D> entryPoints = new List<Vector2D>();
+			List<Vector2D> exitPoints = new List<Vector2D>();
 
 			//We don't support cutting when the start or end is inside a shape.
 			if (world.TestPoint(start) != null || world.TestPoint(end) != null)
@@ -210,7 +210,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			{
 				int i1 = i;
 				int i2 = i + 1 < vertices.Count ? i + 1 : 0;
-				Vector2 edge = vertices[i2] - vertices[i1];
+				Vector2D edge = vertices[i2] - vertices[i1];
 				if (edge.LengthSquared < Settings.Epsilon * Settings.Epsilon)
 					return false;
 			}
@@ -219,7 +219,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			{
 				int i1 = i;
 				int i2 = i + 1 < vertices.Count ? i + 1 : 0;
-				Vector2 edge = vertices[i2] - vertices[i1];
+				Vector2D edge = vertices[i2] - vertices[i1];
 
 				for (int j = 0; j < vertices.Count; ++j)
 				{
@@ -229,11 +229,11 @@ namespace FarseerPhysics.Common.PolygonManipulation
 						continue;
 					}
 
-					Vector2 r = vertices[j] - vertices[i1];
+					Vector2D r = vertices[j] - vertices[i1];
 
 					// Your polygon is non-convex (it has an indentation) or
 					// has colinear edges.
-					float s = edge.X * r.Y - edge.Y * r.X;
+					double s = edge.X * r.Y - edge.Y * r.X;
 
 					if (s < 0.0f)
 						return false;

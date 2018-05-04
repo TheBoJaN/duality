@@ -12,16 +12,16 @@ namespace Duality
 	/// </summary>
 	public sealed class VisualLogCircleEntry : VisualLogEntry
 	{
-		private	Vector3 pos				= Vector3.Zero;
+		private	Vector3D pos				= Vector3D.Zero;
 		private	bool	invariantScale	= false;
-		private	float	radius			= 100.0f;
-		private	float	minAngle		= 0.0f;
-		private	float	maxAngle		= MathF.RadAngle360;
+		private	double	radius			= 100.0f;
+		private	double	minAngle		= 0.0f;
+		private	double	maxAngle		= MathD.RadAngle360;
 		
 		/// <summary>
 		/// [GET / SET] The circular areas center location.
 		/// </summary>
-		public Vector3 Pos
+		public Vector3D Pos
 		{
 			get { return this.pos; }
 			set { this.pos = value; }
@@ -29,7 +29,7 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The circles radius.
 		/// </summary>
-		public float Radius
+		public double Radius
 		{
 			get { return this.radius; }
 			set { this.radius = value; }
@@ -37,7 +37,7 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The minimum angle of the displayed circle area segment.
 		/// </summary>
-		public float MinAngle
+		public double MinAngle
 		{
 			get { return this.minAngle; }
 			set { this.minAngle = value; }
@@ -45,7 +45,7 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The maximum angle of the displayed circle area segment.
 		/// </summary>
-		public float MaxAngle
+		public double MaxAngle
 		{
 			get { return this.maxAngle; }
 			set { this.maxAngle = value; }
@@ -59,22 +59,22 @@ namespace Duality
 			set { this.invariantScale = value; }
 		}
 
-		public override void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale)
+		public override void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale)
 		{
-			float borderRadius = DefaultOutlineWidth;
-			float circleRadius = this.radius * baseScale;
+			double borderRadius = DefaultOutlineWidth;
+			double circleRadius = this.radius * baseScale;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.pos.Z + basePos.Z);
+				double scale = target.DrawDevice.GetScaleAtZ((float)(this.pos.Z + basePos.Z));
 				borderRadius /= scale;
 				if (this.invariantScale) circleRadius /= scale;
 			}
 
 			// Determine circle position
-			Vector3 circlePos = this.pos;
-			MathF.TransformCoord(ref circlePos.X, ref circlePos.Y, baseRotation, baseScale);
+			Vector3D circlePos = this.pos;
+			MathD.TransformCoord(ref circlePos.X, ref circlePos.Y, baseRotation, baseScale);
 			circlePos += basePos;
 
 			// Draw circle
@@ -98,10 +98,10 @@ namespace Duality
 				this.minAngle + baseRotation, 
 				this.maxAngle + baseRotation, 
 				borderRadius);
-			if (MathF.CircularDist(this.minAngle, this.maxAngle) > MathF.RadAngle1 * 0.001f)
+			if (MathD.CircularDist(this.minAngle, this.maxAngle) > MathD.RadAngle1 * 0.001f)
 			{
-				Vector2 minAngleVec = Vector2.FromAngleLength(this.minAngle + baseRotation, circleRadius);
-				Vector2 maxAngleVec = Vector2.FromAngleLength(this.maxAngle + baseRotation, circleRadius);
+				Vector2D minAngleVec = Vector2D.FromAngleLength(this.minAngle + baseRotation, circleRadius);
+				Vector2D maxAngleVec = Vector2D.FromAngleLength(this.maxAngle + baseRotation, circleRadius);
 				target.FillThickLine(
 					circlePos.X, 
 					circlePos.Y, 

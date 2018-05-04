@@ -14,23 +14,23 @@ namespace Duality.Components.Physics
 	/// </summary>
 	public sealed class PrismaticJointInfo : JointInfo
 	{
-		private	Vector2		localAnchorA	= Vector2.Zero;
-		private	Vector2		localAnchorB	= Vector2.Zero;
-		private	Vector2		moveAxis		= Vector2.UnitX;
+		private	Vector2D		localAnchorA	= Vector2D.Zero;
+		private	Vector2D		localAnchorB	= Vector2D.Zero;
+		private	Vector2D		moveAxis		= Vector2D.UnitX;
 		private	bool		limitEnabled	= false;
-		private	float		lowerLimit		= 0.0f;
-		private	float		upperLimit		= 0.0f;
+		private	double		lowerLimit		= 0.0f;
+		private	double		upperLimit		= 0.0f;
 		private	bool		motorEnabled	= false;
-		private float		maxMotorForce	= 0.0f;
-		private float		motorSpeed		= 0.0f;
-		private	float		refAngle		= 0.0f;
+		private double		maxMotorForce	= 0.0f;
+		private double		motorSpeed		= 0.0f;
+		private	double		refAngle		= 0.0f;
 
 
 		/// <summary>
 		/// [GET / SET] The local anchor point on the first RigidBody.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 LocalAnchorA
+		public Vector2D LocalAnchorA
 		{
 			get { return this.localAnchorA; }
 			set { this.localAnchorA = value; this.UpdateJoint(); }
@@ -39,7 +39,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The local anchor point on the second RigidBody.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public Vector2 LocalAnchorB
+		public Vector2D LocalAnchorB
 		{
 			get { return this.localAnchorB; }
 			set { this.localAnchorB = value; this.UpdateJoint(); }
@@ -47,10 +47,10 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET / SET] The axis on which the body may move.
 		/// </summary>
-		public Vector2 MovementAxis
+		public Vector2D MovementAxis
 		{
 			get { return this.moveAxis; }
-			set { this.moveAxis = (value == Vector2.Zero) ? Vector2.UnitX : value; this.UpdateJoint(); }
+			set { this.moveAxis = (value == Vector2D.Zero) ? Vector2D.UnitX : value; this.UpdateJoint(); }
 		}
 		/// <summary>
 		/// [GET / SET] Is the joint limited in its movement?
@@ -64,19 +64,19 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The lower joint limit.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public float LowerLimit
+		public double LowerLimit
 		{
 			get { return this.lowerLimit; }
-			set { this.lowerLimit = MathF.Min(value, this.upperLimit); this.UpdateJoint(); }
+			set { this.lowerLimit = MathD.Min(value, this.upperLimit); this.UpdateJoint(); }
 		}
 		/// <summary>
 		/// [GET / SET] The upper joint limit.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public float UpperLimit
+		public double UpperLimit
 		{
 			get { return this.upperLimit; }
-			set { this.upperLimit = MathF.Max(value, this.lowerLimit); this.UpdateJoint(); }
+			set { this.upperLimit = MathD.Max(value, this.lowerLimit); this.UpdateJoint(); }
 		}
 		/// <summary>
 		/// [GET / SET] Is the joint motor enabled?
@@ -92,7 +92,7 @@ namespace Duality.Components.Physics
 		[EditorHintIncrement(1.0f)]
 		[EditorHintDecimalPlaces(1)]
 		[EditorHintRange(0, 10000, 0, 500)]
-		public float MaxMotorForce
+		public double MaxMotorForce
 		{
 			get { return this.maxMotorForce; }
 			set { this.maxMotorForce = value; this.UpdateJoint(); }
@@ -101,7 +101,7 @@ namespace Duality.Components.Physics
 		/// [GET / SET] The desired motor speed.
 		/// </summary>
 		[EditorHintIncrement(1)]
-		public float MotorSpeed
+		public double MotorSpeed
 		{
 			get { return this.motorSpeed; }
 			set { this.motorSpeed = value; this.UpdateJoint(); }
@@ -110,7 +110,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint speed.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointSpeed
+		public double JointSpeed
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.VelocityToDuality * (this.joint as PrismaticJoint).JointSpeed); }
 		}
@@ -118,7 +118,7 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint translation.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float JointTranslation
+		public double JointTranslation
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.LengthToDuality * (this.joint as PrismaticJoint).JointTranslation); }
 		}
@@ -126,24 +126,24 @@ namespace Duality.Components.Physics
 		/// [GET] The current joint motor force.
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public float MotorForce
+		public double MotorForce
 		{
 			get { return this.joint == null ? 0.0f : (PhysicsUnit.ForceToDuality * (this.joint as PrismaticJoint).MotorForce * Time.SecondsPerFrame); }
 		}
 		/// <summary>
 		/// [GET / SET] The reference angle that is used to constrain the bodies angle.
 		/// </summary>
-		[EditorHintIncrement(MathF.RadAngle1)]
-		public float ReferenceAngle
+		[EditorHintIncrement(MathD.RadAngle1)]
+		public double ReferenceAngle
 		{
 			get { return this.refAngle; }
-			set { this.refAngle = MathF.NormalizeAngle(value); this.UpdateJoint(); }
+			set { this.refAngle = MathD.NormalizeAngle(value); this.UpdateJoint(); }
 		}
 
 
 		protected override Joint CreateJoint(World world, Body bodyA, Body bodyB)
 		{
-			return bodyA != null && bodyB != null ? JointFactory.CreatePrismaticJoint(world, bodyA, bodyB, Vector2.Zero, Vector2.UnitX) : null;
+			return bodyA != null && bodyB != null ? JointFactory.CreatePrismaticJoint(world, bodyA, bodyB, Vector2D.Zero, Vector2D.UnitX) : null;
 		}
 		internal override void UpdateJoint()
 		{

@@ -154,7 +154,33 @@ namespace Duality.Drawing
 			this.B = this.R;
 			this.A = ClampToByte(a * 255.0f);
 		}
-		
+		/// <summary>
+		/// Creates a new color.
+		/// </summary>
+		/// <param name="r">The red component as float [0.0f - 1.0f].</param>
+		/// <param name="g">The green component as float [0.0f - 1.0f].</param>
+		/// <param name="b">The blue component as float [0.0f - 1.0f].</param>
+		/// <param name="a">The alpha component as float [0.0f - 1.0f].</param>
+		public ColorRgba(double r, double g, double b, double a = 1.0f)
+		{
+			this.R = ClampToByte(r * 255.0f);
+			this.G = ClampToByte(g * 255.0f);
+			this.B = ClampToByte(b * 255.0f);
+			this.A = ClampToByte(a * 255.0f);
+		}
+		/// <summary>
+		/// Creates a new color based on value (brightness) and alpha.
+		/// </summary>
+		/// <param name="value">The value / brightness of the color as float [0.0f - 1.0f].</param>
+		/// <param name="a">The colors alpha value as float [0.0f - 1.0f].</param>
+		public ColorRgba(double value, double a = 1.0f)
+		{
+			this.R = ClampToByte(value * 255.0f);
+			this.G = this.R;
+			this.B = this.R;
+			this.A = ClampToByte(a * 255.0f);
+		}
+
 		/// <summary>
 		/// Returns a new version of the color with an adjusted red component.
 		/// </summary>
@@ -224,6 +250,43 @@ namespace Duality.Drawing
 		/// <param name="a">The new alpha component as float [0.0f - 1.0f].</param>
 		/// <returns>A new color with the specified adjustments.</returns>
 		public ColorRgba WithAlpha(float a)
+		{
+			return new ColorRgba(this.R, this.G, this.B, ClampToByte(a * 255.0f));
+		}
+		
+		/// <summary>
+		/// Returns a new version of the color with an adjusted red component.
+		/// </summary>
+		/// <param name="r">The new red component as float [0.0f - 1.0f].</param>
+		/// <returns>A new color with the specified adjustments.</returns>
+		public ColorRgba WithRed(double r)
+		{
+			return new ColorRgba(ClampToByte(r * 255.0f), this.G, this.B, this.A);
+		}
+		/// <summary>
+		/// Returns a new version of the color with an adjusted green component.
+		/// </summary>
+		/// <param name="g">The new green component as float [0.0f - 1.0f].</param>
+		/// <returns>A new color with the specified adjustments.</returns>
+		public ColorRgba WithGreen(double g)
+		{
+			return new ColorRgba(this.R, ClampToByte(g * 255.0f), this.B, this.A);
+		}
+		/// <summary>
+		/// Returns a new version of the color with an adjusted blue component.
+		/// </summary>
+		/// <param name="b">The new blue component as float [0.0f - 1.0f].</param>
+		/// <returns>A new color with the specified adjustments.</returns>
+		public ColorRgba WithBlue(double b)
+		{
+			return new ColorRgba(this.R, this.G, ClampToByte(b * 255.0f), this.A);
+		}
+		/// <summary>
+		/// Returns a new version of the color with an adjusted alpha component.
+		/// </summary>
+		/// <param name="a">The new alpha component as float [0.0f - 1.0f].</param>
+		/// <returns>A new color with the specified adjustments.</returns>
+		public ColorRgba WithAlpha(double a)
 		{
 			return new ColorRgba(this.R, this.G, this.B, ClampToByte(a * 255.0f));
 		}
@@ -366,6 +429,23 @@ namespace Duality.Drawing
 				ClampToByte((float)Math.Round(first.G * invFactor + second.G * factor)),
 				ClampToByte((float)Math.Round(first.B * invFactor + second.B * factor)),
 				ClampToByte((float)Math.Round(first.A * invFactor + second.A * factor)));
+		}
+
+		/// <summary>
+		/// Mixes two colors by performing a linear interpolation between both.
+		/// </summary>
+		/// <param name="first">The first color.</param>
+		/// <param name="second">The second color.</param>
+		/// <param name="factor">The linear interpolation value. Zero equals the first color, one equals the second color.</param>
+		/// <returns>The interpolated / mixed color.</returns>
+		public static ColorRgba Lerp(ColorRgba first, ColorRgba second, double factor)
+		{
+			double invFactor = 1.0f - factor;
+			return new ColorRgba(
+				ClampToByte(Math.Round(first.R * invFactor + second.R * factor)),
+				ClampToByte(Math.Round(first.G * invFactor + second.G * factor)),
+				ClampToByte(Math.Round(first.B * invFactor + second.B * factor)),
+				ClampToByte(Math.Round(first.A * invFactor + second.A * factor)));
 		}
 
 		/// <summary>
@@ -523,7 +603,12 @@ namespace Duality.Drawing
 		{
 			return (byte)Math.Min(Math.Max(value, 0), 255);
 		}
+
 		internal static byte ClampToByte(float value)
+		{
+			return (byte)Math.Min(Math.Max((int)value, 0), 255);
+		}
+		internal static byte ClampToByte(double value)
 		{
 			return (byte)Math.Min(Math.Max((int)value, 0), 255);
 		}

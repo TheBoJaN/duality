@@ -45,7 +45,7 @@ namespace FarseerPhysics.Common.Decomposition
 		/// </summary>
 		/// <param name="vertices">The vertices.</param>
 		/// <param name="tolerance">The tolerance.</param>
-		public static List<Vertices> ConvexPartition(Vertices vertices, float tolerance = 0.001f)
+		public static List<Vertices> ConvexPartition(Vertices vertices, double tolerance = 0.001f)
 		{
 			Debug.Assert(vertices.Count > 3);
 			Debug.Assert(!vertices.IsCounterClockWise());
@@ -71,7 +71,7 @@ namespace FarseerPhysics.Common.Decomposition
 		/// <remarks>
 		/// Only works on simple polygons.
 		/// </remarks>
-		private static List<Vertices> TriangulatePolygon(Vertices vertices, float tolerance)
+		private static List<Vertices> TriangulatePolygon(Vertices vertices, double tolerance)
 		{
 			//FPE note: Check is needed as invalid triangles can be returned in recursive calls.
 			if (vertices.Count < 3)
@@ -104,8 +104,8 @@ namespace FarseerPhysics.Common.Decomposition
 
 			Vertices[] buffer = new Vertices[vertices.Count - 2];
 			int bufferSize = 0;
-			float[] xrem = new float[vertices.Count];
-			float[] yrem = new float[vertices.Count];
+			double[] xrem = new double[vertices.Count];
+			double[] yrem = new double[vertices.Count];
 			for (int i = 0; i < vertices.Count; ++i)
 			{
 				xrem[i] = vertices[i].X;
@@ -118,34 +118,34 @@ namespace FarseerPhysics.Common.Decomposition
 			{
 				// Find an ear
 				int earIndex = -1;
-				float earMaxMinCross = -10.0f;
+				double earMaxMinCross = -10.0f;
 				for (int i = 0; i < vNum; ++i)
 				{
 					if (IsEar(i, xrem, yrem, vNum))
 					{
 						int lower = Remainder(i - 1, vNum);
 						int upper = Remainder(i + 1, vNum);
-						Vector2 d1 = new Vector2(xrem[upper] - xrem[i], yrem[upper] - yrem[i]);
-						Vector2 d2 = new Vector2(xrem[i] - xrem[lower], yrem[i] - yrem[lower]);
-						Vector2 d3 = new Vector2(xrem[lower] - xrem[upper], yrem[lower] - yrem[upper]);
+						Vector2D d1 = new Vector2D(xrem[upper] - xrem[i], yrem[upper] - yrem[i]);
+						Vector2D d2 = new Vector2D(xrem[i] - xrem[lower], yrem[i] - yrem[lower]);
+						Vector2D d3 = new Vector2D(xrem[lower] - xrem[upper], yrem[lower] - yrem[upper]);
 
 						d1.Normalize();
 						d2.Normalize();
 						d3.Normalize();
-						float cross12;
+						double cross12;
 						MathUtils.Cross(ref d1, ref d2, out cross12);
 						cross12 = Math.Abs(cross12);
 
-						float cross23;
+						double cross23;
 						MathUtils.Cross(ref d2, ref d3, out cross23);
 						cross23 = Math.Abs(cross23);
 
-						float cross31;
+						double cross31;
 						MathUtils.Cross(ref d3, ref d1, out cross31);
 						cross31 = Math.Abs(cross31);
 
 						//Find the maximum minimum angle
-						float minCross = Math.Min(cross12, Math.Min(cross23, cross31));
+						double minCross = Math.Min(cross12, Math.Min(cross23, cross31));
 						if (minCross > earMaxMinCross)
 						{
 							earIndex = i;
@@ -172,8 +172,8 @@ namespace FarseerPhysics.Common.Decomposition
 				// - remove the ear tip from the list
 
 				--vNum;
-				float[] newx = new float[vNum];
-				float[] newy = new float[vNum];
+				double[] newx = new double[vNum];
+				double[] newy = new double[vNum];
 				int currDest = 0;
 				for (int i = 0; i < vNum; ++i)
 				{
@@ -223,7 +223,7 @@ namespace FarseerPhysics.Common.Decomposition
 		/// <param name="poutA">The pout A.</param>
 		/// <param name="poutB">The pout B.</param>
 		/// <param name="tolerance"></param>
-		private static bool ResolvePinchPoint(Vertices pin, out Vertices poutA, out Vertices poutB, float tolerance)
+		private static bool ResolvePinchPoint(Vertices pin, out Vertices poutA, out Vertices poutB, double tolerance)
 		{
 			poutA = new Vertices();
 			poutB = new Vertices();
@@ -299,9 +299,9 @@ namespace FarseerPhysics.Common.Decomposition
 		/// <returns>
 		/// 	<c>true</c> if the specified i is ear; otherwise, <c>false</c>.
 		/// </returns>
-		private static bool IsEar(int i, float[] xv, float[] yv, int xvLength)
+		private static bool IsEar(int i, double[] xv, double[] yv, int xvLength)
 		{
-			float dx0, dy0, dx1, dy1;
+			double dx0, dy0, dx1, dy1;
 			if (i >= xvLength || i < 0 || xvLength < 3)
 			{
 				return false;
@@ -332,7 +332,7 @@ namespace FarseerPhysics.Common.Decomposition
 				dy1 = yv[i + 1] - yv[i];
 			}
 
-			float cross = dx0 * dy1 - dx1 * dy0;
+			double cross = dx0 * dy1 - dx1 * dy0;
 
 			if (cross > 0)
 				return false;
@@ -352,49 +352,49 @@ namespace FarseerPhysics.Common.Decomposition
 		private class Triangle : Vertices
 		{
 			//Constructor automatically fixes orientation to ccw
-			public Triangle(float x1, float y1, float x2, float y2, float x3, float y3)
+			public Triangle(double x1, double y1, double x2, double y2, double x3, double y3)
 			{
-				float cross = (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
+				double cross = (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1);
 				if (cross > 0)
 				{
-					Add(new Vector2(x1, y1));
-					Add(new Vector2(x2, y2));
-					Add(new Vector2(x3, y3));
+					Add(new Vector2D(x1, y1));
+					Add(new Vector2D(x2, y2));
+					Add(new Vector2D(x3, y3));
 				}
 				else
 				{
-					Add(new Vector2(x1, y1));
-					Add(new Vector2(x3, y3));
-					Add(new Vector2(x2, y2));
+					Add(new Vector2D(x1, y1));
+					Add(new Vector2D(x3, y3));
+					Add(new Vector2D(x2, y2));
 				}
 			}
 
-			public bool IsInside(float x, float y)
+			public bool IsInside(double x, double y)
 			{
-				Vector2 a = this[0];
-				Vector2 b = this[1];
-				Vector2 c = this[2];
+				Vector2D a = this[0];
+				Vector2D b = this[1];
+				Vector2D c = this[2];
 
 				if (x < a.X && x < b.X && x < c.X) return false;
 				if (x > a.X && x > b.X && x > c.X) return false;
 				if (y < a.Y && y < b.Y && y < c.Y) return false;
 				if (y > a.Y && y > b.Y && y > c.Y) return false;
 
-				float vx2 = x - a.X;
-				float vy2 = y - a.Y;
-				float vx1 = b.X - a.X;
-				float vy1 = b.Y - a.Y;
-				float vx0 = c.X - a.X;
-				float vy0 = c.Y - a.Y;
+				double vx2 = x - a.X;
+				double vy2 = y - a.Y;
+				double vx1 = b.X - a.X;
+				double vy1 = b.Y - a.Y;
+				double vx0 = c.X - a.X;
+				double vy0 = c.Y - a.Y;
 
-				float dot00 = vx0 * vx0 + vy0 * vy0;
-				float dot01 = vx0 * vx1 + vy0 * vy1;
-				float dot02 = vx0 * vx2 + vy0 * vy2;
-				float dot11 = vx1 * vx1 + vy1 * vy1;
-				float dot12 = vx1 * vx2 + vy1 * vy2;
-				float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-				float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-				float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+				double dot00 = vx0 * vx0 + vy0 * vy0;
+				double dot01 = vx0 * vx1 + vy0 * vy1;
+				double dot02 = vx0 * vx2 + vy0 * vy2;
+				double dot11 = vx1 * vx1 + vy1 * vy1;
+				double dot12 = vx1 * vx2 + vy1 * vy2;
+				double invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+				double u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+				double v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
 				return ((u > 0) && (v > 0) && (u + v < 1));
 			}

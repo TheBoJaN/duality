@@ -110,27 +110,27 @@ namespace Duality.Editor.Plugins.CamView
 			this.RenderPickingMap();
 			return this.CameraComponent.PickRenderersIn(x / 2, y / 2, (w + 1) / 2, (h + 1) / 2);
 		}
-		public bool IsSphereInView(Vector3 worldPos, float radius = 1.0f)
+		public bool IsSphereInView(Vector3D worldPos, double radius = 1.0f)
 		{
 			return this.CameraComponent.IsSphereInView(worldPos, radius);
 		}
-		public float GetScaleAtZ(float z)
+		public double GetScaleAtZ(double z)
 		{
 			return this.CameraComponent.GetScaleAtZ(z);
 		}
-		public Vector3 GetWorldPos(Vector3 screenPos)
+		public Vector3D GetWorldPos(Vector3D screenPos)
 		{
 			return this.CameraComponent.GetWorldPos(screenPos);
 		}
-		public Vector3 GetWorldPos(Vector2 screenPos)
+		public Vector3D GetWorldPos(Vector2D screenPos)
 		{
 			return this.CameraComponent.GetWorldPos(screenPos);
 		}
-		public Vector2 GetScreenPos(Vector3 worldPos)
+		public Vector2D GetScreenPos(Vector3D worldPos)
 		{
 			return this.CameraComponent.GetScreenPos(worldPos);
 		}
-		public Vector2 GetScreenPos(Vector2 worldPos)
+		public Vector2D GetScreenPos(Vector2D worldPos)
 		{
 			return this.CameraComponent.GetScreenPos(worldPos);
 		}

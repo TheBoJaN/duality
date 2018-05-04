@@ -30,7 +30,7 @@ namespace SmoothAnimation
 			Vector3 posTemp = this.GameObj.Transform.Pos;
 
 			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.GameObj.Transform.Scale, out xDot, out yDot);
+			MathF.GetTransformDotVec((float)this.GameObj.Transform.Angle, (float)this.GameObj.Transform.Scale, out xDot, out yDot);
 
 			Vector2 edge1 = this.rect.TopLeft;
 			Vector2 edge2 = this.rect.BottomLeft;

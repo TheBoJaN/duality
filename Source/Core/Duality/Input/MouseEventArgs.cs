@@ -7,14 +7,14 @@ namespace Duality.Input
 {
 	public class MouseEventArgs : UserInputEventArgs
 	{
-		private Vector2 pos;
+		private Vector2D pos;
 		
-		public Vector2 Pos
+		public Vector2D Pos
 		{
 			get { return this.pos; }
 		}
 
-		public MouseEventArgs(MouseInput inputChannel, Vector2 pos) : base(inputChannel)
+		public MouseEventArgs(MouseInput inputChannel, Vector2D pos) : base(inputChannel)
 		{
 			this.pos = pos;
 		}
@@ -22,14 +22,14 @@ namespace Duality.Input
 
 	public class MouseMoveEventArgs : MouseEventArgs
 	{
-		private Vector2 vel;
+		private Vector2D vel;
 		
-		public Vector2 Vel
+		public Vector2D Vel
 		{
 			get { return this.vel; }
 		}
 
-		public MouseMoveEventArgs(MouseInput inputChannel, Vector2 pos, Vector2 vel) : base(inputChannel, pos)
+		public MouseMoveEventArgs(MouseInput inputChannel, Vector2D pos, Vector2D vel) : base(inputChannel, pos)
 		{
 			this.vel = vel;
 		}
@@ -49,7 +49,7 @@ namespace Duality.Input
 			get { return this.pressed; }
 		}
 
-		public MouseButtonEventArgs(MouseInput inputChannel, Vector2 pos, MouseButton button, bool pressed) : base(inputChannel, pos)
+		public MouseButtonEventArgs(MouseInput inputChannel, Vector2D pos, MouseButton button, bool pressed) : base(inputChannel, pos)
 		{
 			this.button = button;
 			this.pressed = pressed;
@@ -58,19 +58,19 @@ namespace Duality.Input
 
 	public class MouseWheelEventArgs : MouseEventArgs
 	{
-		private float wheelValue;
-		private float wheelSpeed;
+		private double wheelValue;
+		private double wheelSpeed;
 
-		public float WheelValue
+		public double WheelValue
 		{
 			get { return this.wheelValue; }
 		}
-		public float WheelSpeed
+		public double WheelSpeed
 		{
 			get { return this.wheelSpeed; }
 		}
 
-		public MouseWheelEventArgs(MouseInput inputChannel, Vector2 pos, float value, float delta) : base(inputChannel, pos)
+		public MouseWheelEventArgs(MouseInput inputChannel, Vector2D pos, double value, double delta) : base(inputChannel, pos)
 		{
 			this.wheelValue = value;
 			this.wheelSpeed = delta;

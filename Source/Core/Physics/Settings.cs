@@ -29,9 +29,9 @@ namespace FarseerPhysics
 {
 	public static class Settings
 	{
-		public const float MaxFloat = 3.402823466e+38f;
-		public const float Epsilon = 1.192092896e-07f;
-		public const float Pi = 3.14159265359f;
+		public const double MaxFloat = 3.402823466e+38f;
+		public const double Epsilon = 1.192092896e-07f;
+		public const double Pi = 3.14159265359f;
 
 		/// <summary>
 		/// Enabling diagnistics causes the engine to gather timing information.
@@ -102,33 +102,33 @@ namespace FarseerPhysics
 		/// to move by a small amount without triggering a tree adjustment.
 		/// This is in meters.
 		/// </summary>
-		public const float AABBExtension = 0.1f;
+		public const double AABBExtension = 0.1f;
 
 		/// <summary>
 		/// This is used to fatten AABBs in the dynamic tree. This is used to predict
 		/// the future position based on the current displacement.
 		/// This is a dimensionless multiplier.
 		/// </summary>
-		public const float AABBMultiplier = 2.0f;
+		public const double AABBMultiplier = 2.0f;
 
 		/// <summary>
 		/// A small length used as a collision and constraint tolerance. Usually it is
 		/// chosen to be numerically significant, but visually insignificant.
 		/// </summary>
-		public const float LinearSlop = 0.005f; // was 0.005f
+		public const double LinearSlop = 0.005f; // was 0.005f
 
 		/// <summary>
 		/// A small angle used as a collision and constraint tolerance. Usually it is
 		/// chosen to be numerically significant, but visually insignificant.
 		/// </summary>
-		public const float AngularSlop = (2.0f / 180.0f * Pi);
+		public const double AngularSlop = (2.0f / 180.0f * Pi);
 
 		/// <summary>
 		/// The radius of the polygon/edge shape skin. This should not be modified. Making
 		/// this smaller means polygons will have an insufficient buffer for continuous collision.
 		/// Making it larger may create artifacts for vertex collision.
 		/// </summary>
-		public const float PolygonRadius = (0.5f * LinearSlop); // was (2.0f * LinearSlop);
+		public const double PolygonRadius = (0.5f * LinearSlop); // was (2.0f * LinearSlop);
 
 		// Dynamics
 
@@ -141,59 +141,59 @@ namespace FarseerPhysics
 		/// A velocity threshold for elastic collisions. Any collision with a relative linear
 		/// velocity below this threshold will be treated as inelastic.
 		/// </summary>
-		public static float VelocityThreshold = 1.0f;
+		public static double VelocityThreshold = 1.0f;
 
 		/// <summary>
 		/// The maximum linear position correction used when solving constraints. This helps to
 		/// prevent overshoot.
 		/// </summary>
-		public const float MaxLinearCorrection = 0.2f;
+		public const double MaxLinearCorrection = 0.2f;
 
 		/// <summary>
 		/// The maximum angular position correction used when solving constraints. This helps to
 		/// prevent overshoot.
 		/// </summary>
-		public const float MaxAngularCorrection = (8.0f / 180.0f * Pi);
+		public const double MaxAngularCorrection = (8.0f / 180.0f * Pi);
 
 		/// <summary>
 		/// This scale factor controls how fast overlap is resolved. Ideally this would be 1 so
 		/// that overlap is removed in one time step. However using values close to 1 often lead
 		/// to overshoot.
 		/// </summary>
-		public const float ContactBaumgarte = 0.2f;
+		public const double ContactBaumgarte = 0.2f;
 
 		// Sleep
 
 		/// <summary>
 		/// The time that a body must be still before it will go to sleep.
 		/// </summary>
-		public const float TimeToSleep = 0.5f;
+		public const double TimeToSleep = 0.5f;
 
 		/// <summary>
 		/// A body cannot sleep if its linear velocity is above this tolerance.
 		/// </summary>
-		public const float LinearSleepTolerance = 0.01f;
+		public const double LinearSleepTolerance = 0.01f;
 
 		/// <summary>
 		/// A body cannot sleep if its angular velocity is above this tolerance.
 		/// </summary>
-		public const float AngularSleepTolerance = (2.0f / 180.0f * Pi);
+		public const double AngularSleepTolerance = (2.0f / 180.0f * Pi);
 
 		/// <summary>
 		/// The maximum linear velocity of a body. This limit is very large and is used
 		/// to prevent numerical problems. You shouldn't need to adjust this.
 		/// </summary>
-		public const float MaxTranslation = 2.0f;
+		public const double MaxTranslation = 2.0f;
 
-		public const float MaxTranslationSquared = (MaxTranslation * MaxTranslation);
+		public const double MaxTranslationSquared = (MaxTranslation * MaxTranslation);
 
 		/// <summary>
 		/// The maximum angular velocity of a body. This limit is very large and is used
 		/// to prevent numerical problems. You shouldn't need to adjust this.
 		/// </summary>
-		public const float MaxRotation = (0.5f * Pi);
+		public const double MaxRotation = (0.5f * Pi);
 
-		public const float MaxRotationSquared = (MaxRotation * MaxRotation);
+		public const double MaxRotationSquared = (MaxRotation * MaxRotation);
 
 		/// <summary>
 		/// Friction mixing law. Feel free to customize this.
@@ -201,9 +201,9 @@ namespace FarseerPhysics
 		/// <param name="friction1">The friction1.</param>
 		/// <param name="friction2">The friction2.</param>
 		/// <returns></returns>
-		public static float MixFriction(float friction1, float friction2)
+		public static double MixFriction(double friction1, double friction2)
 		{
-			return (float)Math.Sqrt(friction1 * friction2);
+			return (double)Math.Sqrt(friction1 * friction2);
 		}
 
 		/// <summary>
@@ -212,7 +212,7 @@ namespace FarseerPhysics
 		/// <param name="restitution1">The restitution1.</param>
 		/// <param name="restitution2">The restitution2.</param>
 		/// <returns></returns>
-		public static float MixRestitution(float restitution1, float restitution2)
+		public static double MixRestitution(double restitution1, double restitution2)
 		{
 			return restitution1 > restitution2 ? restitution1 : restitution2;
 		}

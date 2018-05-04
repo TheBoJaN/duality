@@ -53,7 +53,7 @@
 		/// <param name="align"></param>
 		/// <param name="vec"></param>
 		/// <param name="size"></param>
-		public static void ApplyTo(this Alignment align, ref Vector2 vec, ref Vector2 size)
+		public static void ApplyTo(this Alignment align, ref Vector2D vec, ref Vector2D size)
 		{
 			switch (align)
 			{
@@ -96,7 +96,7 @@
 		/// <param name="align"></param>
 		/// <param name="vec"></param>
 		/// <param name="size"></param>
-		public static void ApplyTo(this Alignment align, ref Vector2 vec, Vector2 size)
+		public static void ApplyTo(this Alignment align, ref Vector2D vec, Vector2D size)
 		{
 			ApplyTo(align, ref vec, ref size);
 		}
@@ -107,7 +107,7 @@
 		/// <param name="vec"></param>
 		/// <param name="size"></param>
 		/// <returns></returns>
-		public static Vector2 ApplyTo(this Alignment align, Vector2 vec, Vector2 size)
+		public static Vector2D ApplyTo(this Alignment align, Vector2D vec, Vector2D size)
 		{
 			ApplyTo(align, ref vec, ref size);
 			return vec;
@@ -120,10 +120,10 @@
 		/// <param name="y"></param>
 		/// <param name="width"></param>
 		/// <param name="height"></param>
-		public static void ApplyTo(this Alignment align, ref float x, ref float y, float width, float height)
+		public static void ApplyTo(this Alignment align, ref double x, ref double y, double width, double height)
 		{
-			Vector2 vec;
-			Vector2 size;
+			Vector2D vec;
+			Vector2D size;
 			vec.X = x;
 			vec.Y = y;
 			size.X = width;
@@ -141,10 +141,10 @@
 		/// <param name="width"></param>
 		/// <param name="height"></param>
 		/// <returns></returns>
-		public static Vector2 ApplyTo(this Alignment align, float x, float y, float width, float height)
+		public static Vector2D ApplyTo(this Alignment align, double x, double y, double width, double height)
 		{
-			Vector2 vec;
-			Vector2 size;
+			Vector2D vec;
+			Vector2D size;
 			vec.X = x;
 			vec.Y = y;
 			size.X = width;

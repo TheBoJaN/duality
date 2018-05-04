@@ -29,27 +29,27 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		/// [GET] The cursor-hovered local position relative to the current <see cref="ActiveBody"/>.
 		/// Unlike <see cref="HoveredBodyPos"/>, this property will take into account snap-to-grid and axis lock constraints.
 		/// </summary>
-		Vector2 ActiveBodyPos { get; }
+		Vector2D ActiveBodyPos { get; }
 		/// <summary>
 		/// [GET] The cursor-hovered world position on the Z-plane of the current <see cref="ActiveBody"/>.
 		/// Unlike <see cref="HoveredWorldPos"/>, this property will take into account snap-to-grid and axis lock constraints.
 		/// </summary>
-		Vector3 ActiveWorldPos { get; }
+		Vector3D ActiveWorldPos { get; }
 		/// <summary>
 		/// [GET] The cursor-hovered local position relative to the current <see cref="ActiveBody"/>.
 		/// Unlike <see cref="ActiveBodyPos"/>, this property will ignore snap-to-grid and axis lock constraints.
 		/// </summary>
-		Vector2 HoveredBodyPos { get; }
+		Vector2D HoveredBodyPos { get; }
 		/// <summary>
 		/// [GET] The cursor-hovered world position on the Z-plane of the current <see cref="ActiveBody"/>.
 		/// Unlike <see cref="ActiveBodyPos"/>, this property will ignore snap-to-grid and axis lock constraints.
 		/// </summary>
-		Vector3 HoveredWorldPos { get; }
+		Vector3D HoveredWorldPos { get; }
 		/// <summary>
 		/// [GET] The world position to which cursor movement will be locked when using the
 		/// axis lock editor feature.
 		/// </summary>
-		Vector3 LockedWorldPos { get; set; }
+		Vector3D LockedWorldPos { get; set; }
 		/// <summary>
 		/// [GET] Returns whether the key that was used to start this action is still pressed.
 		/// </summary>
@@ -89,25 +89,25 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		/// <param name="worldPos"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
-		bool IsSphereInView(Vector3 worldPos, float radius = 1.0f);
+		bool IsSphereInView(Vector3D worldPos, double radius = 1.0f);
 		/// <summary>
 		/// Determins the view scale at a given world space Z position.
 		/// </summary>
 		/// <param name="z"></param>
 		/// <returns></returns>
-		float GetScaleAtZ(float z);
+		double GetScaleAtZ(double z);
 		/// <summary>
 		/// Determins the world space position of a given point in screen space.
 		/// The Z coordinate of that point will be evaluated as the assumed Z position.
 		/// </summary>
 		/// <param name="screenPos"></param>
 		/// <returns></returns>
-		Vector3 GetWorldPos(Vector3 screenPos);
+		Vector3D GetWorldPos(Vector3D screenPos);
 		/// <summary>
 		/// Determines the screen space position of a given point in world space.
 		/// </summary>
 		/// <param name="worldPos"></param>
 		/// <returns></returns>
-		Vector2 GetScreenPos(Vector3 worldPos);
+		Vector2D GetScreenPos(Vector3D worldPos);
 	}
 }

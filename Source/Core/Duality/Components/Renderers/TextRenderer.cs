@@ -22,20 +22,20 @@ namespace Duality.Components.Renderers
 		protected BatchInfo            customMat  = null;
 		protected ColorRgba            colorTint  = ColorRgba.White;
 		protected ContentRef<Material> iconMat    = null;
-		protected float                offset     = 0.0f;
+		protected double                offset     = 0.0f;
 		[DontSerialize] protected VertexC1P3T2[][] vertFont = null;
 		[DontSerialize] protected VertexC1P3T2[]   vertIcon = null;
 
 
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public override float BoundRadius
+		public override double BoundRadius
 		{
 			get 
 			{
-				Rect textRect = Rect.Align(this.blockAlign, 0.0f, 0.0f, 
-					MathF.Max(this.text.Size.X, this.text.MaxWidth), 
-					MathF.Max(this.text.Size.Y, this.text.MaxHeight));
-				return textRect.Transformed(this.gameobj.Transform.Scale, this.gameobj.Transform.Scale).BoundingRadius;
+				RectD textRect = RectD.Align(this.blockAlign, 0.0f, 0.0f, 
+					MathD.Max(this.text.Size.X, this.text.MaxWidth), 
+					MathD.Max(this.text.Size.Y, this.text.MaxHeight));
+				return textRect.Transformed((double)this.gameobj.Transform.Scale, (double)this.gameobj.Transform.Scale).BoundingRadius;
 			}
 		}
 		/// <summary>
@@ -93,7 +93,7 @@ namespace Duality.Components.Renderers
 		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public double DepthOffset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
@@ -107,33 +107,33 @@ namespace Duality.Components.Renderers
 
 		public override void Draw(IDrawDevice device)
 		{
-			Vector3 posTemp = this.gameobj.Transform.Pos;
+			Vector3D posTemp = this.gameobj.Transform.Pos;
 
-			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.gameobj.Transform.Scale, out xDot, out yDot);
+			Vector2D xDot, yDot;
+			MathD.GetTransformDotVec((double)this.GameObj.Transform.Angle, (double)this.gameobj.Transform.Scale, out xDot, out yDot);
 
 			// Apply block alignment
-			Vector2 textOffset = Vector2.Zero;
-			Vector2 textSize = this.text.Size;
+			Vector2D textOffset = Vector2D.Zero;
+			Vector2D textSize = this.text.Size;
 			if (this.text.MaxWidth > 0) textSize.X = this.text.MaxWidth;
 			this.blockAlign.ApplyTo(ref textOffset, textSize);
-			MathF.TransformDotVec(ref textOffset, ref xDot, ref yDot);
+			MathD.TransformDotVec(ref textOffset, ref xDot, ref yDot);
 			posTemp.X += textOffset.X;
 			posTemp.Y += textOffset.Y;
 			if (this.text.Fonts != null && this.text.Fonts.Any(r => r.IsAvailable && r.Res.IsPixelGridAligned))
 			{
-				posTemp.X = MathF.Round(posTemp.X);
-				posTemp.Y = MathF.Round(posTemp.Y);
-				if (MathF.RoundToInt(device.TargetSize.X) != (MathF.RoundToInt(device.TargetSize.X) / 2) * 2)
+				posTemp.X = MathD.Round(posTemp.X);
+				posTemp.Y = MathD.Round(posTemp.Y);
+				if (MathD.RoundToInt(device.TargetSize.X) != (MathD.RoundToInt(device.TargetSize.X) / 2) * 2)
 					posTemp.X += 0.5f;
-				if (MathF.RoundToInt(device.TargetSize.Y) != (MathF.RoundToInt(device.TargetSize.Y) / 2) * 2)
+				if (MathD.RoundToInt(device.TargetSize.Y) != (MathD.RoundToInt(device.TargetSize.Y) / 2) * 2)
 					posTemp.Y += 0.5f;
 			}
 
 			int[] vertLen = this.text.EmitVertices(
 				ref this.vertFont, 
 				ref this.vertIcon, 
-				posTemp.X, 
+				(float)posTemp.X, 
 				posTemp.Y, 
 				posTemp.Z, 
 				this.colorTint, 
@@ -145,12 +145,12 @@ namespace Duality.Components.Renderers
 			{
 				for (int j = 0; j < vertLen[i + 1]; j++)
 				{
-					this.vertFont[i][j].DepthOffset = this.offset;
+					this.vertFont[i][j].DepthOffset = (float)this.offset;
 				}
 			}
 			for (int i = 0; i < vertLen[0]; i++)
 			{
-				this.vertIcon[i].DepthOffset = this.offset;
+				this.vertIcon[i].DepthOffset = (float)this.offset;
 			}
 
 			if (this.text.Fonts != null)

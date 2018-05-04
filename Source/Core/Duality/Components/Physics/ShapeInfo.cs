@@ -18,9 +18,9 @@ namespace Duality.Components.Physics
 	{
 		[CloneBehavior(CloneBehavior.WeakReference)]
 		private RigidBody parent      = null;
-		protected float   density     = 1.0f;
-		protected float   friction    = 0.3f;
-		protected float   restitution = 0.3f;
+		protected double   density     = 1.0f;
+		protected double   friction    = 0.3f;
+		protected double   restitution = 0.3f;
 		protected bool    sensor      = false;
 		protected int     userTag     = 0;
 			
@@ -38,7 +38,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
 		[EditorHintRange(0.0f, 100.0f)]
-		public float Density
+		public double Density
 		{
 			get { return this.density; }
 			set 
@@ -72,7 +72,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
 		[EditorHintRange(0.0f, 10000.0f)]
-		public float Friction
+		public double Friction
 		{
 			get { return this.friction; }
 			set { this.friction = value; this.UpdateInternalShape(false); }
@@ -82,7 +82,7 @@ namespace Duality.Components.Physics
 		/// </summary>
 		[EditorHintIncrement(0.05f)]
 		[EditorHintRange(0.0f, 1.0f)]
-		public float Restitution
+		public double Restitution
 		{
 			get { return this.restitution; }
 			set { this.restitution = value; this.UpdateInternalShape(false); }
@@ -99,7 +99,7 @@ namespace Duality.Components.Physics
 		/// [GET] Returns the Shapes axis-aligned bounding box
 		/// </summary>
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public abstract Rect AABB { get; }
+		public abstract RectD AABB { get; }
 		/// <summary>
 		/// [GET] Whether the internal physics shape was successfully created and is now active.
 		/// </summary>
@@ -107,12 +107,12 @@ namespace Duality.Components.Physics
 		/// <summary>
 		/// [GET] The scale factor of the parent object to be applied to all created shapes.
 		/// </summary>
-		protected float ParentScale
+		protected double ParentScale
 		{
 			get
 			{
 				Transform transform = (this.parent != null && this.parent.gameobj != null) ? this.parent.gameobj.Transform : null;
-				return transform != null ? transform.Scale : 1.0f;
+				return transform != null ? (double)transform.Scale : 1.0f;
 			}
 		}
 

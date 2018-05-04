@@ -40,7 +40,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		{
 			base.BeforeAutoCreateEditors();
 			
-			this.editorPos = this.ParentGrid.CreateEditor((typeof(Vector3)), this);
+			this.editorPos = this.ParentGrid.CreateEditor((typeof(Vector3D)), this);
 			if (this.editorPos != null)
 			{
 				this.editorPos.BeginUpdate();
@@ -52,7 +52,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				this.AddPropertyEditor(this.editorPos);
 				this.editorPos.EndUpdate();
 			}
-			this.editorScale = this.ParentGrid.CreateEditor(typeof(float), this);
+			this.editorScale = this.ParentGrid.CreateEditor(typeof(double), this);
 			if (this.editorScale != null)
 			{
 				this.editorScale.BeginUpdate();
@@ -63,7 +63,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				this.AddPropertyEditor(this.editorScale);
 				this.editorScale.EndUpdate();
 			}
-			this.editorAngle = this.ParentGrid.CreateEditor(typeof(float), this);
+			this.editorAngle = this.ParentGrid.CreateEditor(typeof(double), this);
 			if (this.editorAngle != null)
 			{
 				this.editorAngle.BeginUpdate();
@@ -73,7 +73,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 				this.ParentGrid.ConfigureEditor(this.editorAngle, new EditorHintAttribute[] { 
 					new EditorHintDecimalPlacesAttribute(1), 
 					new EditorHintIncrementAttribute(1),
-					new EditorHintRangeAttribute(float.MinValue, float.MaxValue, 0.0f, 359.999f) });
+					new EditorHintRangeAttribute(double.MinValue, double.MaxValue, 0.0f, 359.999f) });
 				this.AddPropertyEditor(this.editorAngle);
 				this.editorAngle.EndUpdate();
 			}
@@ -113,7 +113,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		{
 			if (this.showWorldSpace)
 			{
-				List<Vector3> valuesList = values.Cast<Vector3>().ToList();
+				List<Vector3D> valuesList = values.Cast<Vector3D>().ToList();
 				List<object> valuesListLocal = new List<object>(valuesList.Count);
 				List<Transform> targetList = this.GetValue().OfType<Transform>().ToList();
 				List<Transform> targetListLocal = new List<Transform>(targetList.Count);
@@ -133,7 +133,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 
 						if (parent == null || !targetList.Contains(parent))
 						{
-							Vector3 curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
+							Vector3D curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
 
 							targetListLocal.Add(t);
 							valuesListLocal.Add(parent != null ? parent.GetLocalPoint(curValue) : curValue);
@@ -169,7 +169,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		{
 			if (this.showWorldSpace)
 			{
-				List<float> valuesList = values.Cast<float>().ToList();
+				List<double> valuesList = values.Cast<double>().ToList();
 				List<object> valuesListLocal = new List<object>(valuesList.Count);
 				List<Transform> targetList = this.GetValue().OfType<Transform>().ToList();
 				List<Transform> targetListLocal = new List<Transform>(targetList.Count);
@@ -189,7 +189,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 
 						if (parent == null || !targetList.Contains(parent))
 						{
-							float curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
+							double curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
 
 							targetListLocal.Add(t);
 							valuesListLocal.Add(parent != null ? curValue / parent.Scale : curValue);
@@ -217,16 +217,16 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 		protected IEnumerable<object> AngleGetter()
 		{
 			if (this.showWorldSpace)
-				return this.GetValue().OfType<Transform>().Select(o => (object)MathF.RadToDeg(o.Angle));
+				return this.GetValue().OfType<Transform>().Select(o => (object)MathD.RadToDeg(o.Angle));
 			else
-				return this.GetValue().OfType<Transform>().Select(o => (object)MathF.RadToDeg(o.LocalAngle));
+				return this.GetValue().OfType<Transform>().Select(o => (object)MathD.RadToDeg(o.LocalAngle));
 		}
 		protected void AngleSetter(IEnumerable<object> values)
 		{
-			values = values.Select(v => (object)MathF.DegToRad((float)v));
+			values = values.Select(v => (object)MathD.DegToRad((double)v));
 			if (this.showWorldSpace)
 			{
-				List<float> valuesList = values.Cast<float>().ToList();
+				List<double> valuesList = values.Cast<double>().ToList();
 				List<object> valuesListLocal = new List<object>(valuesList.Count);
 				List<Transform> targetList = this.GetValue().OfType<Transform>().ToList();
 				List<Transform> targetListLocal = new List<Transform>(targetList.Count);
@@ -246,7 +246,7 @@ namespace Duality.Editor.Plugins.Base.PropertyEditors
 
 						if (parent == null || !targetList.Contains(parent))
 						{
-							float curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
+							double curValue = valuesList[Math.Min(i, valuesList.Count - 1)];
 
 							targetListLocal.Add(t);
 							valuesListLocal.Add(parent != null ? curValue - parent.Angle : curValue);

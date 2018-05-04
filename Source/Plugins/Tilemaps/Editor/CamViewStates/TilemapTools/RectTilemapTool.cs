@@ -60,15 +60,15 @@ namespace Duality.Editor.Plugins.Tilemaps.CamViewStates
 
 			// Manually define outlines in the trivial rect case
 			Tileset tileset = env.ActiveTilemap != null ? env.ActiveTilemap.Tileset.Res : null;
-			Vector2 tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
+			Vector2D tileSize = tileset != null ? tileset.TileSize : Tileset.DefaultTileSize;
 			env.ActiveAreaOutlines.Clear();
-			env.ActiveAreaOutlines.Add(new Vector2[]
+			env.ActiveAreaOutlines.Add(new Vector2D[]
 			{
-				new Vector2(0, 0),
-				new Vector2(tileSize.X * size.X, 0),
-				new Vector2(tileSize.X * size.X, tileSize.Y * size.Y),
-				new Vector2(0, tileSize.Y * size.Y),
-				new Vector2(0, 0) // Close the loop
+				new Vector2D(0, 0),
+				new Vector2D(tileSize.X * size.X, 0),
+				new Vector2D(tileSize.X * size.X, tileSize.Y * size.Y),
+				new Vector2D(0, tileSize.Y * size.Y),
+				new Vector2D(0, 0) // Close the loop
 			});
 
 			env.SubmitActiveAreaChanges(true);

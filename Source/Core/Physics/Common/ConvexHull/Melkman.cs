@@ -25,13 +25,13 @@ namespace FarseerPhysics.Common.ConvexHull
 
 			//We'll never need a queue larger than the current number of Vertices +1
 			//Create double-ended queue
-			Vector2[] deque = new Vector2[vertices.Count + 1];
+			Vector2D[] deque = new Vector2D[vertices.Count + 1];
 			int qf = 3, qb = 0; //Queue front index, queue back index
 			int qfm1, qbm1; //qfm1 = second element, qbm1 = second last element
 
 			//Start by placing first 3 vertices in convex CCW order
 			int startIndex = 3;
-			float k = MathUtils.Area(vertices[0], vertices[1], vertices[2]);
+			double k = MathUtils.Area(vertices[0], vertices[1], vertices[2]);
 			if (k == 0)
 			{
 				//Vertices are collinear.
@@ -43,7 +43,7 @@ namespace FarseerPhysics.Common.ConvexHull
 				//Go until the end of the collinear sequence of vertices
 				for (startIndex = 3; startIndex < vertices.Count; startIndex++)
 				{
-					Vector2 tmp = vertices[startIndex];
+					Vector2D tmp = vertices[startIndex];
 					if (MathUtils.Area(ref deque[0], ref deque[1], ref tmp) == 0) //This point is also collinear
 						deque[1] = vertices[startIndex];
 					else break;
@@ -72,7 +72,7 @@ namespace FarseerPhysics.Common.ConvexHull
 			//Add vertices one at a time and adjust convex hull as needed
 			for (int i = startIndex; i < vertices.Count; i++)
 			{
-				Vector2 nextPt = vertices[i];
+				Vector2D nextPt = vertices[i];
 
 				//Ignore if it is already within the convex hull we have constructed
 				if (MathUtils.Area(ref deque[qfm1], ref deque[qf], ref nextPt) > 0 &&

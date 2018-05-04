@@ -16,9 +16,9 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 {
 	public class RotateCamViewObjAction : CamViewObjAction
 	{
-		private Vector3[]	backupPos	= null;
-		private float[]		backupAngle	= null;
-		private	float		turnBy		= 0.0f;
+		private Vector3D[]	backupPos	= null;
+		private double[]		backupAngle	= null;
+		private	double		turnBy		= 0.0f;
 
 		public override string Name
 		{
@@ -31,7 +31,7 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 			get { return base.IsVoid || this.turnBy == 0.0f; }
 		}
 
-		public RotateCamViewObjAction(IEnumerable<ObjectEditorSelObj> obj, PostPerformAction postPerform, float turnBy) : base(obj, postPerform)
+		public RotateCamViewObjAction(IEnumerable<ObjectEditorSelObj> obj, PostPerformAction postPerform, double turnBy) : base(obj, postPerform)
 		{
 			this.turnBy = turnBy;
 		}
@@ -56,8 +56,8 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 		{
 			if (this.backupPos == null)
 			{
-				this.backupPos = new Vector3[this.targetObj.Length];
-				this.backupAngle = new float[this.targetObj.Length];
+				this.backupPos = new Vector3D[this.targetObj.Length];
+				this.backupAngle = new double[this.targetObj.Length];
 				for (int i = 0; i < this.targetObj.Length; i++)
 				{
 					this.backupPos[i] = this.targetObj[i].Pos;
@@ -65,7 +65,7 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 				}
 			}
 			
-			Vector3 center = Vector3.Zero;
+			Vector3D center = Vector3D.Zero;
 			foreach (ObjectEditorSelObj s in this.targetObj)
 			{
 				center += s.Pos;
@@ -74,9 +74,9 @@ namespace Duality.Editor.Plugins.CamView.UndoRedoActions
 
 			foreach (ObjectEditorSelObj s in this.targetObj)
 			{
-				Vector3 posRelCenter = s.Pos - center;
-				Vector3 posRelCenterTarget = posRelCenter;
-				MathF.TransformCoord(ref posRelCenterTarget.X, ref posRelCenterTarget.Y, this.turnBy);
+				Vector3D posRelCenter = s.Pos - center;
+				Vector3D posRelCenterTarget = posRelCenter;
+				MathD.TransformCoord(ref posRelCenterTarget.X, ref posRelCenterTarget.Y, this.turnBy);
 				s.Pos = center + posRelCenterTarget;
 				s.Angle += this.turnBy;
 			}

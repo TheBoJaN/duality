@@ -69,16 +69,16 @@ namespace Duality.Components.Renderers
 		protected ColorRgba            colorTint   = ColorRgba.White;
 		protected UVMode               rectMode    = UVMode.Stretch;
 		protected bool                 pixelGrid   = false;
-		protected float                offset      = 0.0f;
+		protected double                offset      = 0.0f;
 		protected FlipMode             flipMode    = FlipMode.None;
 		protected int                  spriteIndex = -1;
 		[DontSerialize] protected VertexC1P3T2[] vertices = null;
 
 
 		[EditorHintFlags(MemberFlags.Invisible)]
-		public override float BoundRadius
+		public override double BoundRadius
 		{
-			get { return this.rect.BoundingRadius * this.gameobj.Transform.Scale; }
+			get { return this.rect.BoundingRadius * (double)this.gameobj.Transform.Scale; }
 		}
 		/// <summary>
 		/// [GET / SET] The rectangular area the sprite occupies. Relative to the <see cref="GameObject"/>.
@@ -135,7 +135,7 @@ namespace Duality.Components.Renderers
 		/// [GET / SET] A depth / Z offset that affects the order in which objects are drawn. If you want to assure an object is drawn after another one,
 		/// just assign a higher Offset value to the background object.
 		/// </summary>
-		public float DepthOffset
+		public double DepthOffset
 		{
 			get { return this.offset; }
 			set { this.offset = value; }
@@ -178,15 +178,15 @@ namespace Duality.Components.Renderers
 		}
 		protected void PrepareVertices(ref VertexC1P3T2[] vertices, IDrawDevice device, ColorRgba mainClr, Rect uvRect)
 		{
-			Vector3 posTemp = this.gameobj.Transform.Pos;
+			Vector3D posTemp = this.gameobj.Transform.Pos;
 
-			Vector2 xDot, yDot;
-			MathF.GetTransformDotVec(this.GameObj.Transform.Angle, this.gameobj.Transform.Scale, out xDot, out yDot);
+			Vector2D xDot, yDot;
+			MathD.GetTransformDotVec((double)this.GameObj.Transform.Angle, (double)this.gameobj.Transform.Scale, out xDot, out yDot);
 
-			Vector2 edge1 = this.rect.TopLeft;
-			Vector2 edge2 = this.rect.BottomLeft;
-			Vector2 edge3 = this.rect.BottomRight;
-			Vector2 edge4 = this.rect.TopRight;
+			Vector2D edge1 = this.rect.TopLeft;
+			Vector2D edge2 = this.rect.BottomLeft;
+			Vector2D edge3 = this.rect.BottomRight;
+			Vector2D edge4 = this.rect.TopRight;
 
 			if ((this.flipMode & FlipMode.Horizontal) != FlipMode.None)
 			{ 
@@ -203,58 +203,58 @@ namespace Duality.Components.Renderers
 				edge4.Y = -edge4.Y;
 			}
 
-			MathF.TransformDotVec(ref edge1, ref xDot, ref yDot);
-			MathF.TransformDotVec(ref edge2, ref xDot, ref yDot);
-			MathF.TransformDotVec(ref edge3, ref xDot, ref yDot);
-			MathF.TransformDotVec(ref edge4, ref xDot, ref yDot);
+			MathD.TransformDotVec(ref edge1, ref xDot, ref yDot);
+			MathD.TransformDotVec(ref edge2, ref xDot, ref yDot);
+			MathD.TransformDotVec(ref edge3, ref xDot, ref yDot);
+			MathD.TransformDotVec(ref edge4, ref xDot, ref yDot);
             
-			float left   = uvRect.X;
-			float right  = uvRect.RightX;
-			float top    = uvRect.Y;
-			float bottom = uvRect.BottomY;
+			double left   = uvRect.X;
+			double right  = uvRect.RightX;
+			double top    = uvRect.Y;
+			double bottom = uvRect.BottomY;
 
 			if (vertices == null || vertices.Length != 4) vertices = new VertexC1P3T2[4];
 
-			vertices[0].Pos.X = posTemp.X + edge1.X;
-			vertices[0].Pos.Y = posTemp.Y + edge1.Y;
-			vertices[0].Pos.Z = posTemp.Z;
-			vertices[0].DepthOffset = this.offset;
-			vertices[0].TexCoord.X = left;
-			vertices[0].TexCoord.Y = top;
+			vertices[0].Pos.X = (float)(posTemp.X + edge1.X);
+			vertices[0].Pos.Y = (float)(posTemp.Y + edge1.Y);
+			vertices[0].Pos.Z = (float)posTemp.Z;
+			vertices[0].DepthOffset = (float)this.offset;
+			vertices[0].TexCoord.X = (float)left;
+			vertices[0].TexCoord.Y = (float)top;
 			vertices[0].Color = mainClr;
 
-			vertices[1].Pos.X = posTemp.X + edge2.X;
-			vertices[1].Pos.Y = posTemp.Y + edge2.Y;
-			vertices[1].Pos.Z = posTemp.Z;
-			vertices[1].DepthOffset = this.offset;
-			vertices[1].TexCoord.X = left;
-			vertices[1].TexCoord.Y = bottom;
+			vertices[1].Pos.X = (float)(posTemp.X + edge2.X);
+			vertices[1].Pos.Y = (float)(posTemp.Y + edge2.Y);
+			vertices[1].Pos.Z = (float)posTemp.Z;
+			vertices[1].DepthOffset = (float)this.offset;
+			vertices[1].TexCoord.X = (float)left;
+			vertices[1].TexCoord.Y = (float)bottom;
 			vertices[1].Color = mainClr;
 
-			vertices[2].Pos.X = posTemp.X + edge3.X;
-			vertices[2].Pos.Y = posTemp.Y + edge3.Y;
-			vertices[2].Pos.Z = posTemp.Z;
-			vertices[2].DepthOffset = this.offset;
-			vertices[2].TexCoord.X = right;
-			vertices[2].TexCoord.Y = bottom;
+			vertices[2].Pos.X = (float)(posTemp.X + edge3.X);
+			vertices[2].Pos.Y = (float)(posTemp.Y + edge3.Y);
+			vertices[2].Pos.Z = (float)posTemp.Z;
+			vertices[2].DepthOffset = (float)this.offset;
+			vertices[2].TexCoord.X = (float)right;
+			vertices[2].TexCoord.Y = (float)bottom;
 			vertices[2].Color = mainClr;
 				
-			vertices[3].Pos.X = posTemp.X + edge4.X;
-			vertices[3].Pos.Y = posTemp.Y + edge4.Y;
-			vertices[3].Pos.Z = posTemp.Z;
-			vertices[3].DepthOffset = this.offset;
-			vertices[3].TexCoord.X = right;
-			vertices[3].TexCoord.Y = top;
+			vertices[3].Pos.X = (float)(posTemp.X + edge4.X);
+			vertices[3].Pos.Y = (float)(posTemp.Y + edge4.Y);
+			vertices[3].Pos.Z = (float)posTemp.Z;
+			vertices[3].DepthOffset = (float)this.offset;
+			vertices[3].TexCoord.X = (float)right;
+			vertices[3].TexCoord.Y = (float)top;
 			vertices[3].Color = mainClr;
 
 			if (this.pixelGrid)
 			{
-				vertices[0].Pos.X = MathF.Round(vertices[0].Pos.X);
-				vertices[1].Pos.X = MathF.Round(vertices[1].Pos.X);
-				vertices[2].Pos.X = MathF.Round(vertices[2].Pos.X);
-				vertices[3].Pos.X = MathF.Round(vertices[3].Pos.X);
+				vertices[0].Pos.X = (float)MathD.Round(vertices[0].Pos.X);
+				vertices[1].Pos.X = (float)MathD.Round(vertices[1].Pos.X);
+				vertices[2].Pos.X = (float)MathD.Round(vertices[2].Pos.X);
+				vertices[3].Pos.X = (float)MathD.Round(vertices[3].Pos.X);
 
-				if (MathF.RoundToInt(device.TargetSize.X) != (MathF.RoundToInt(device.TargetSize.X) / 2) * 2)
+				if (MathD.RoundToInt(device.TargetSize.X) != (MathD.RoundToInt(device.TargetSize.X) / 2) * 2)
 				{
 					vertices[0].Pos.X += 0.5f;
 					vertices[1].Pos.X += 0.5f;
@@ -262,12 +262,12 @@ namespace Duality.Components.Renderers
 					vertices[3].Pos.X += 0.5f;
 				}
 
-				vertices[0].Pos.Y = MathF.Round(vertices[0].Pos.Y);
-				vertices[1].Pos.Y = MathF.Round(vertices[1].Pos.Y);
-				vertices[2].Pos.Y = MathF.Round(vertices[2].Pos.Y);
-				vertices[3].Pos.Y = MathF.Round(vertices[3].Pos.Y);
+				vertices[0].Pos.Y = (float)MathD.Round(vertices[0].Pos.Y);
+				vertices[1].Pos.Y = (float)MathD.Round(vertices[1].Pos.Y);
+				vertices[2].Pos.Y = (float)MathD.Round(vertices[2].Pos.Y);
+				vertices[3].Pos.Y = (float)MathD.Round(vertices[3].Pos.Y);
 
-				if (MathF.RoundToInt(device.TargetSize.Y) != (MathF.RoundToInt(device.TargetSize.Y) / 2) * 2)
+				if (MathD.RoundToInt(device.TargetSize.Y) != (MathD.RoundToInt(device.TargetSize.Y) / 2) * 2)
 				{
 					vertices[0].Pos.Y += 0.5f;
 					vertices[1].Pos.Y += 0.5f;
@@ -280,26 +280,26 @@ namespace Duality.Components.Renderers
 		{
 			// Determine the rect area of the texture to be displayed
 			if (mainTex == null)
-				uvRect = new Rect(1.0f, 1.0f);
+				uvRect = new RectD(1.0f, 1.0f);
 			else if (spriteIndex != -1)
 				mainTex.LookupAtlas(spriteIndex, out uvRect);
 			else
-				uvRect = new Rect(mainTex.UVRatio);
+				uvRect = new RectD(mainTex.UVRatio);
 
 			// Determine wrap-around and stretch behavior if the displayed rect size does
 			// not equal the rect size that would be required for a 1:1 display.
 			if (mainTex != null)
 			{
-				Vector2 fullSize = mainTex.ContentSize * (uvRect.Size / mainTex.UVRatio);
+				Vector2D fullSize = mainTex.ContentSize * (uvRect.Size / mainTex.UVRatio);
 				if ((this.rectMode & UVMode.WrapHorizontal) != 0)
-					uvRect.W *= this.rect.W / fullSize.X;
+					uvRect.W *= (float)(this.rect.W / fullSize.X);
 				if ((this.rectMode & UVMode.WrapVertical) != 0)
-					uvRect.H *= this.rect.H / fullSize.Y;
+					uvRect.H *= (float)(this.rect.H / fullSize.Y);
 			}
 		}
 
 		/// <inheritdoc/>
-		public virtual void ApplySpriteAnimation(int currentSpriteIndex, int nextSpriteIndex, float progressToNext)
+		public virtual void ApplySpriteAnimation(int currentSpriteIndex, int nextSpriteIndex, double progressToNext)
 		{
 			this.spriteIndex = currentSpriteIndex;
 		}

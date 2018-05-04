@@ -16,7 +16,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <param name="vertices">The polygon that needs simplification.</param>
 		/// <param name="collinearityTolerance">The collinearity tolerance.</param>
 		/// <returns>A simplified polygon.</returns>
-		public static Vertices CollinearSimplify(Vertices vertices, float collinearityTolerance)
+		public static Vertices CollinearSimplify(Vertices vertices, double collinearityTolerance)
 		{
 			//We can't simplify polygons under 3 vertices
 			if (vertices.Count < 3)
@@ -29,9 +29,9 @@ namespace FarseerPhysics.Common.PolygonManipulation
 				int prevId = vertices.PreviousIndex(i);
 				int nextId = vertices.NextIndex(i);
 
-				Vector2 prev = vertices[prevId];
-				Vector2 current = vertices[i];
-				Vector2 next = vertices[nextId];
+				Vector2D prev = vertices[prevId];
+				Vector2D current = vertices[i];
+				Vector2D next = vertices[nextId];
 
 				//If they collinear, continue
 				if (MathUtils.Collinear(ref prev, ref current, ref next, collinearityTolerance))
@@ -61,7 +61,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// If you pass in 0, it will remove all collinear points
 		/// </summary>
 		/// <returns>The simplified polygon</returns>
-		public static Vertices DouglasPeuckerSimplify(Vertices vertices, float distanceTolerance)
+		public static Vertices DouglasPeuckerSimplify(Vertices vertices, double distanceTolerance)
 		{
 			_distanceTolerance = distanceTolerance;
 
@@ -84,8 +84,8 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			if ((i + 1) == j)
 				return;
 
-			Vector2 A = vertices[i];
-			Vector2 B = vertices[j];
+			Vector2D A = vertices[i];
+			Vector2D B = vertices[j];
 			double maxDistance = -1.0;
 			int maxIndex = i;
 			for (int k = i + 1; k < j; k++)
@@ -108,14 +108,14 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			}
 		}
 
-		private static double DistancePointPoint(Vector2 p, Vector2 p2)
+		private static double DistancePointPoint(Vector2D p, Vector2D p2)
 		{
 			double dx = p.X - p2.X;
 			double dy = p.Y - p2.X;
 			return Math.Sqrt(dx * dx + dy * dy);
 		}
 
-		private static double DistancePointLine(Vector2 p, Vector2 A, Vector2 B)
+		private static double DistancePointLine(Vector2D p, Vector2D A, Vector2D B)
 		{
 			// if start == end, then use point-to-point distance
 			if (A.X == B.X && A.Y == B.Y)
@@ -158,7 +158,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		}
 
 		//From physics2d.net
-		public static Vertices ReduceByArea(Vertices vertices, float areaTolerance)
+		public static Vertices ReduceByArea(Vertices vertices, double areaTolerance)
 		{
 			if (vertices.Count <= 3)
 				return vertices;
@@ -169,8 +169,8 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			}
 
 			Vertices result = new Vertices();
-			Vector2 v1, v2, v3;
-			float old1, old2, new1;
+			Vector2D v1, v2, v3;
+			double old1, old2, new1;
 			v1 = vertices[vertices.Count - 2];
 			v2 = vertices[vertices.Count - 1];
 			areaTolerance *= 2;
@@ -207,7 +207,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// </summary>
 		/// <param name="vertices">The vertices.</param>
 		/// <param name="tolerance">The tolerance.</param>
-		public static void MergeParallelEdges(Vertices vertices, float tolerance)
+		public static void MergeParallelEdges(Vertices vertices, double tolerance)
 		{
 			if (vertices.Count <= 3)
 				return; //Can't do anything useful here to a triangle
@@ -222,12 +222,12 @@ namespace FarseerPhysics.Common.PolygonManipulation
 				int middle = i;
 				int upper = (i == vertices.Count - 1) ? (0) : (i + 1);
 
-				float dx0 = vertices[middle].X - vertices[lower].X;
-				float dy0 = vertices[middle].Y - vertices[lower].Y;
-				float dx1 = vertices[upper].Y - vertices[middle].X;
-				float dy1 = vertices[upper].Y - vertices[middle].Y;
-				float norm0 = (float)Math.Sqrt(dx0 * dx0 + dy0 * dy0);
-				float norm1 = (float)Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+				double dx0 = vertices[middle].X - vertices[lower].X;
+				double dy0 = vertices[middle].Y - vertices[lower].Y;
+				double dx1 = vertices[upper].Y - vertices[middle].X;
+				double dy1 = vertices[upper].Y - vertices[middle].Y;
+				double norm0 = (double)Math.Sqrt(dx0 * dx0 + dy0 * dy0);
+				double norm1 = (double)Math.Sqrt(dx1 * dx1 + dy1 * dy1);
 
 				if (!(norm0 > 0.0f && norm1 > 0.0f) && newNVertices > 3)
 				{
@@ -240,8 +240,8 @@ namespace FarseerPhysics.Common.PolygonManipulation
 				dy0 /= norm0;
 				dx1 /= norm1;
 				dy1 /= norm1;
-				float cross = dx0 * dy1 - dx1 * dy0;
-				float dot = dx0 * dx1 + dy0 * dy1;
+				double cross = dx0 * dy1 - dx1 * dy0;
+				double dot = dx0 * dx1 + dy0 * dy1;
 
 				if (Math.Abs(cross) < tolerance && dot > 0 && newNVertices > 3)
 				{
@@ -283,7 +283,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		public static Vertices MergeIdenticalPoints(Vertices vertices)
 		{
 			//We use a dictonary here because HashSet is not avaliable on all platforms.
-			HashSet<Vector2> results = new HashSet<Vector2>();
+			HashSet<Vector2D> results = new HashSet<Vector2D>();
 
 			for (int i = 0; i < vertices.Count; i++)
 			{
@@ -291,7 +291,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 			}
 
 			Vertices returnResults = new Vertices();
-			foreach (Vector2 v in results)
+			foreach (Vector2D v in results)
 			{
 				returnResults.Add(v);
 			}
@@ -305,7 +305,7 @@ namespace FarseerPhysics.Common.PolygonManipulation
 		/// <param name="vertices">The vertices.</param>
 		/// <param name="distance">The distance between points. Points closer than this will be 'joined'.</param>
 		/// <returns></returns>
-		public static Vertices ReduceByDistance(Vertices vertices, float distance)
+		public static Vertices ReduceByDistance(Vertices vertices, double distance)
 		{
 			//We can't simplify polygons under 3 vertices
 			if (vertices.Count < 3)
@@ -315,8 +315,8 @@ namespace FarseerPhysics.Common.PolygonManipulation
 
 			for (int i = 0; i < vertices.Count; i++)
 			{
-				Vector2 current = vertices[i];
-				Vector2 next = vertices.NextVertex(i);
+				Vector2D current = vertices[i];
+				Vector2D next = vertices.NextVertex(i);
 
 				//If they are closer than the distance, continue
 				if ((next - current).LengthSquared <= distance)

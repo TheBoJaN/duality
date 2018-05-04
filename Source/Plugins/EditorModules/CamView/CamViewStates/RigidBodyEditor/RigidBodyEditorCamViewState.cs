@@ -28,11 +28,11 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private List<RigidBodyEditorTool> tools           = new List<RigidBodyEditorTool>();
 		private RigidBody                 selectedBody    = null;
 		private RigidBodyEditorTool       selectedTool    = null;
-		private Vector3                   lockedWorldPos  = Vector3.Zero;
-		private Vector3                   hoveredWorldPos = Vector3.Zero;
-		private Vector2                   hoveredObjPos   = Vector2.Zero;
-		private Vector3                   activeWorldPos  = Vector3.Zero;
-		private Vector2                   activeObjPos    = Vector2.Zero;
+		private Vector3D                   lockedWorldPos  = Vector3D.Zero;
+		private Vector3D                   hoveredWorldPos = Vector3D.Zero;
+		private Vector2D                   hoveredObjPos   = Vector2D.Zero;
+		private Vector3D                   activeWorldPos  = Vector3D.Zero;
+		private Vector2D                   activeObjPos    = Vector2D.Zero;
 		private RigidBodyEditorTool       activeTool      = null;
 		private RigidBodyEditorTool       actionTool      = null;
 		private ToolStrip                 toolstrip       = null;
@@ -63,23 +63,23 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			get { return this.selectedBody; }
 		}
-		public Vector2 ActiveBodyPos
+		public Vector2D ActiveBodyPos
 		{
 			get { return this.activeObjPos; }
 		}
-		public Vector3 ActiveWorldPos
+		public Vector3D ActiveWorldPos
 		{
 			get { return this.activeWorldPos; }
 		}
-		public Vector2 HoveredBodyPos
+		public Vector2D HoveredBodyPos
 		{
 			get { return this.hoveredObjPos; }
 		}
-		public Vector3 HoveredWorldPos
+		public Vector3D HoveredWorldPos
 		{
 			get { return this.hoveredWorldPos; }
 		}
-		public Vector3 LockedWorldPos
+		public Vector3D LockedWorldPos
 		{
 			get { return this.lockedWorldPos; }
 			set { this.lockedWorldPos = value; }
@@ -216,12 +216,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				.ToArray();
 			visibleColliders.StableSort(delegate(RigidBody c1, RigidBody c2) 
 			{ 
-				return MathF.RoundToInt(1000.0f * (c1.GameObj.Transform.Pos.Z - c2.GameObj.Transform.Pos.Z));
+				return MathD.RoundToInt(1000.0f * (c1.GameObj.Transform.Pos.Z - c2.GameObj.Transform.Pos.Z));
 			});
 
 			foreach (RigidBody c in visibleColliders)
 			{
-				Vector3 worldCoord = this.GetWorldPos(new Vector3(x, y, c.GameObj.Transform.Pos.Z));
+				Vector3D worldCoord = this.GetWorldPos(new Vector3D(x, y, c.GameObj.Transform.Pos.Z));
 
 				// Do a physical picking operation
 				pickedShape = this.PickShape(c, worldCoord.Xy);
@@ -251,15 +251,15 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				.ToArray();
 			visibleColliders.StableSort(delegate(RigidBody c1, RigidBody c2) 
 			{ 
-				return MathF.RoundToInt(1000.0f * (c1.GameObj.Transform.Pos.Z - c2.GameObj.Transform.Pos.Z));
+				return MathD.RoundToInt(1000.0f * (c1.GameObj.Transform.Pos.Z - c2.GameObj.Transform.Pos.Z));
 			});
 
 			// Pick a collider
 			foreach (RigidBody c in visibleColliders)
 			{
-				Vector3 worldCoord = this.GetWorldPos(new Vector3(x, y, c.GameObj.Transform.Pos.Z));
-				float scale = this.GetScaleAtZ(c.GameObj.Transform.Pos.Z);
-				pickedShape = this.PickShapes(c, worldCoord.Xy, new Vector2(w / scale, h / scale)).FirstOrDefault();
+				Vector3D worldCoord = this.GetWorldPos(new Vector3D(x, y, c.GameObj.Transform.Pos.Z));
+				double scale = this.GetScaleAtZ(c.GameObj.Transform.Pos.Z);
+				pickedShape = this.PickShapes(c, worldCoord.Xy, new Vector2D(w / scale, h / scale)).FirstOrDefault();
 				if (pickedShape != null)
 				{
 					pickedCollider = c;
@@ -272,26 +272,26 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Pick shapes
 			if (pickedCollider != null)
 			{
-				Vector3 worldCoord = this.GetWorldPos(new Vector3(x, y, pickedCollider.GameObj.Transform.Pos.Z));
-				float scale = this.GetScaleAtZ(pickedCollider.GameObj.Transform.Pos.Z);
-				List<ShapeInfo> picked = this.PickShapes(pickedCollider, worldCoord.Xy, new Vector2(w / scale, h / scale));
+				Vector3D worldCoord = this.GetWorldPos(new Vector3D(x, y, pickedCollider.GameObj.Transform.Pos.Z));
+				double scale = this.GetScaleAtZ(pickedCollider.GameObj.Transform.Pos.Z);
+				List<ShapeInfo> picked = this.PickShapes(pickedCollider, worldCoord.Xy, new Vector2D(w / scale, h / scale));
 				if (picked.Count > 0) result.AddRange(picked.Select(s => RigidBodyEditorSelShape.Create(s) as ObjectEditorSelObj));
 			}
 
 			return result;
 		}
 
-		private ShapeInfo PickShape(RigidBody body, Vector2 worldCoord)
+		private ShapeInfo PickShape(RigidBody body, Vector2D worldCoord)
 		{
 			// Special case for non-solid / "outline only" shapes, because they are by definition unpickable
-			Rect worldRect = Rect.Align(Alignment.Center, worldCoord.X, worldCoord.Y, 10.0f, 10.0f);
+			RectD worldRect = RectD.Align(Alignment.Center, worldCoord.X, worldCoord.Y, 10.0f, 10.0f);
 			foreach (ShapeInfo shape in body.Shapes)
 			{
 				VertexBasedShapeInfo vertexShape = shape as VertexBasedShapeInfo;
 				if (vertexShape == null) continue;
 				if ((vertexShape.ShapeTraits & VertexShapeTrait.IsSolid) != VertexShapeTrait.None) continue;
 				
-				Vector2[] vertices = vertexShape.Vertices;
+				Vector2D[] vertices = vertexShape.Vertices;
 				if (vertices != null && IsOutlineBoxIntersection(body.GameObj.Transform, vertices, worldRect))
 					return shape;
 			}
@@ -299,9 +299,9 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			// Do a physical picking operation
 			return body.PickShape(worldCoord);
 		}
-		private List<ShapeInfo> PickShapes(RigidBody body, Vector2 worldCoord, Vector2 worldSize)
+		private List<ShapeInfo> PickShapes(RigidBody body, Vector2D worldCoord, Vector2D worldSize)
 		{
-			Rect worldRect = new Rect(worldCoord.X, worldCoord.Y, worldSize.X, worldSize.Y);
+			RectD worldRect = new RectD(worldCoord.X, worldCoord.Y, worldSize.X, worldSize.Y);
 
 			// Do a physical picking operation
 			List<ShapeInfo> result = new List<ShapeInfo>();
@@ -314,7 +314,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				if (vertexShape == null) continue;
 				if ((vertexShape.ShapeTraits & VertexShapeTrait.IsSolid) != VertexShapeTrait.None) continue;
 				
-				Vector2[] vertices = vertexShape.Vertices;
+				Vector2D[] vertices = vertexShape.Vertices;
 				if (vertices != null && IsOutlineBoxIntersection(body.GameObj.Transform, vertices, worldRect))
 				{
 					result.Add(shape);
@@ -324,32 +324,32 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 			return result;
 		}
-		private bool IsOutlineBoxIntersection(Transform transform, Vector2[] vertices, Rect box)
+		private bool IsOutlineBoxIntersection(Transform transform, Vector2D[] vertices, Rect box)
 		{
 			bool hit = false;
 			for (int i = 0; i < vertices.Length; i++)
 			{
-				Vector2 worldV1 = transform.GetWorldPoint(vertices[i]);
-				Vector2 worldV2 = transform.GetWorldPoint(vertices[(i + 1) % vertices.Length]);
-				hit = hit || MathF.LinesCross(
+				Vector2D worldV1 = transform.GetWorldPoint(vertices[i]);
+				Vector2D worldV2 = transform.GetWorldPoint(vertices[(i + 1) % vertices.Length]);
+				hit = hit || MathD.LinesCross(
 					box.TopLeft.X, 
 					box.TopLeft.Y, 
 					box.TopRight.X, 
 					box.TopRight.Y, 
 					worldV1.X, worldV1.Y, worldV2.X, worldV2.Y);
-				hit = hit || MathF.LinesCross(
+				hit = hit || MathD.LinesCross(
 					box.TopLeft.X, 
 					box.TopLeft.Y, 
 					box.BottomLeft.X, 
 					box.BottomLeft.Y, 
 					worldV1.X, worldV1.Y, worldV2.X, worldV2.Y);
-				hit = hit || MathF.LinesCross(
+				hit = hit || MathD.LinesCross(
 					box.BottomRight.X, 
 					box.BottomRight.Y, 
 					box.TopRight.X, 
 					box.TopRight.Y, 
 					worldV1.X, worldV1.Y, worldV2.X, worldV2.Y);
-				hit = hit || MathF.LinesCross(
+				hit = hit || MathD.LinesCross(
 					box.BottomRight.X, 
 					box.BottomRight.Y, 
 					box.BottomLeft.X, 
@@ -521,13 +521,13 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			Point mousePos = this.PointToClient(Cursor.Position);
 			if (selTransform != null)
 			{
-				this.hoveredWorldPos = this.GetWorldPos(new Vector3(mousePos.X, mousePos.Y, selTransform.Pos.Z));
+				this.hoveredWorldPos = this.GetWorldPos(new Vector3D(mousePos.X, mousePos.Y, selTransform.Pos.Z));
 				this.activeWorldPos = this.hoveredWorldPos;
 			}
 			else
 			{
-				this.hoveredWorldPos = Vector3.Zero;
-				this.activeWorldPos = Vector3.Zero;
+				this.hoveredWorldPos = Vector3D.Zero;
+				this.activeWorldPos = Vector3D.Zero;
 			}
 			
 			// Snap active position to user guides
@@ -545,8 +545,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			}
 			else
 			{
-				this.hoveredObjPos = Vector2.Zero;
-				this.activeObjPos = Vector2.Zero;
+				this.hoveredObjPos = Vector2D.Zero;
+				this.activeObjPos = Vector2D.Zero;
 			}
 
 			// If an action is currently being performed, that action will always be the active tool
@@ -712,7 +712,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			{
 				this.selectedBody.BeginUpdateBodyShape();
 				this.EditingUserGuide.SnapPosOrigin = this.selectedBody.GameObj.Transform.Pos;
-				this.EditingUserGuide.SnapScaleOrigin = Vector3.One * this.selectedBody.GameObj.Transform.Scale;
+				this.EditingUserGuide.SnapScaleOrigin = Vector3D.One * this.selectedBody.GameObj.Transform.Scale;
 			}
 		}
 		protected override void OnEndAction(ObjectEditorAction action)
@@ -725,8 +725,8 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			if (this.selectedBody != null && shapeAction)
 				this.selectedBody.EndUpdateBodyShape();
 
-			this.EditingUserGuide.SnapPosOrigin = Vector3.Zero;
-			this.EditingUserGuide.SnapScaleOrigin = Vector3.One;
+			this.EditingUserGuide.SnapPosOrigin = Vector3D.Zero;
+			this.EditingUserGuide.SnapScaleOrigin = Vector3D.One;
 		}
 		protected override void PostPerformAction(IEnumerable<ObjectEditorSelObj> selObjEnum, ObjectEditorAction action)
 		{
@@ -749,7 +749,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			else
 				return base.UpdateStatusText();
 		}
-		protected override string UpdateActionText(ref Vector2 actionTextPos)
+		protected override string UpdateActionText(ref Vector2D actionTextPos)
 		{
 			string toolText = this.activeTool.GetActionText();
 			if (!string.IsNullOrEmpty(toolText))

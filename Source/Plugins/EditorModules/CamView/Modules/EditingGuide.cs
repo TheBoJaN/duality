@@ -8,22 +8,22 @@ namespace Duality.Editor.Plugins.CamView
 {
 	public class EditingGuide
 	{
-		private	Vector3		gridSize		= Vector3.Zero;
-		private	Vector3		snapPosOrigin	= Vector3.Zero;
-		private	Vector3		snapScaleOrigin	= Vector3.One;
+		private	Vector3D		gridSize		= Vector3D.Zero;
+		private	Vector3D		snapPosOrigin	= Vector3D.Zero;
+		private	Vector3D		snapScaleOrigin	= Vector3D.One;
 
 
-		public Vector3 GridSize
+		public Vector3D GridSize
 		{
 			get { return this.gridSize; }
 			set { this.gridSize = value; }
 		}
-		public Vector3 SnapPosOrigin
+		public Vector3D SnapPosOrigin
 		{
 			get { return this.snapPosOrigin; }
 			set { this.snapPosOrigin = value; }
 		}
-		public Vector3 SnapScaleOrigin
+		public Vector3D SnapScaleOrigin
 		{
 			get { return this.snapScaleOrigin; }
 			set { this.snapScaleOrigin = value; }
@@ -35,16 +35,16 @@ namespace Duality.Editor.Plugins.CamView
 		/// </summary>
 		/// <param name="pos"></param>
 		/// <returns></returns>
-		public Vector3 SnapPosition(Vector3 pos)
+		public Vector3D SnapPosition(Vector3D pos)
 		{
-			Vector3 localPos = (pos - this.snapPosOrigin) / this.snapScaleOrigin;
-			Vector3 snapLocalPos = localPos;
+			Vector3D localPos = (pos - this.snapPosOrigin) / this.snapScaleOrigin;
+			Vector3D snapLocalPos = localPos;
 
-			if (this.gridSize.X > 0.001f) snapLocalPos.X = this.gridSize.X * MathF.RoundToInt(snapLocalPos.X / this.gridSize.X);
-			if (this.gridSize.Y > 0.001f) snapLocalPos.Y = this.gridSize.Y * MathF.RoundToInt(snapLocalPos.Y / this.gridSize.Y);
-			if (this.gridSize.Z > 0.001f) snapLocalPos.Z = this.gridSize.Z * MathF.RoundToInt(snapLocalPos.Z / this.gridSize.Z);
+			if (this.gridSize.X > 0.001f) snapLocalPos.X = this.gridSize.X * MathD.RoundToInt(snapLocalPos.X / this.gridSize.X);
+			if (this.gridSize.Y > 0.001f) snapLocalPos.Y = this.gridSize.Y * MathD.RoundToInt(snapLocalPos.Y / this.gridSize.Y);
+			if (this.gridSize.Z > 0.001f) snapLocalPos.Z = this.gridSize.Z * MathD.RoundToInt(snapLocalPos.Z / this.gridSize.Z);
 
-			Vector3 snapPos = this.snapPosOrigin + this.snapScaleOrigin * snapLocalPos;
+			Vector3D snapPos = this.snapPosOrigin + this.snapScaleOrigin * snapLocalPos;
 			return snapPos;
 		}
 		/// <summary>
@@ -52,9 +52,9 @@ namespace Duality.Editor.Plugins.CamView
 		/// </summary>
 		/// <param name="pos"></param>
 		/// <returns></returns>
-		public Vector2 SnapPosition(Vector2 pos)
+		public Vector2D SnapPosition(Vector2D pos)
 		{
-			return this.SnapPosition(new Vector3(pos)).Xy;
+			return this.SnapPosition(new Vector3D(pos)).Xy;
 		}
 
 		/// <summary>
@@ -62,10 +62,10 @@ namespace Duality.Editor.Plugins.CamView
 		/// </summary>
 		/// <param name="size"></param>
 		/// <returns></returns>
-		public Vector3 SnapSize(Vector3 size)
+		public Vector3D SnapSize(Vector3D size)
 		{
 			size /= this.snapScaleOrigin;
-			return this.snapScaleOrigin * new Vector3(
+			return this.snapScaleOrigin * new Vector3D(
 				this.gridSize.X > 0.001f ? this.gridSize.X * Math.Max(1, (int)(size.X / this.gridSize.X)) : size.X,
 				this.gridSize.Y > 0.001f ? this.gridSize.Y * Math.Max(1, (int)(size.Y / this.gridSize.Y)) : size.Y,
 				this.gridSize.Z > 0.001f ? this.gridSize.Z * Math.Max(1, (int)(size.Z / this.gridSize.Z)) : size.Z);
@@ -75,19 +75,19 @@ namespace Duality.Editor.Plugins.CamView
 		/// </summary>
 		/// <param name="size"></param>
 		/// <returns></returns>
-		public Vector2 SnapSize(Vector2 size)
+		public Vector2D SnapSize(Vector2D size)
 		{
-			return this.SnapSize(new Vector3(size)).Xy;
+			return this.SnapSize(new Vector3D(size)).Xy;
 		}
 		/// <summary>
 		/// Snaps the specified size value according to match this editing guide.
 		/// </summary>
 		/// <param name="size"></param>
 		/// <returns></returns>
-		public float SnapSize(float size)
+		public double SnapSize(double size)
 		{
-			float snapOrigin = 1.0f;
-			float snapStep = 0.001f;
+			double snapOrigin = 1.0f;
+			double snapStep = 0.001f;
 			if (this.gridSize.X > snapStep)
 			{
 				snapStep = this.gridSize.X;

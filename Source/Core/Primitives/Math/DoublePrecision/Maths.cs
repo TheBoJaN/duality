@@ -968,27 +968,42 @@ namespace Duality
             yDot = new Vector2D(sin, cos);
         }
 
-        /// <summary>
-        /// Performs a 2d transformation
-        /// </summary>
-        /// <param name="vec">The vector to transform.</param>
-        /// <param name="xDot">Dot product base for the transformed x value.</param>
-        /// <param name="yDot">Dot product base for the transformed y value.</param>
-        /// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
-        public static void TransformDotVec(ref Vector2D vec, ref Vector2D xDot, ref Vector2D yDot)
-        {
-            double oldX = vec.X;
-            vec.X = vec.X * xDot.X + vec.Y * xDot.Y;
-            vec.Y = oldX * yDot.X + vec.Y * yDot.Y;
-        }
-        /// <summary>
-        /// Performs a 2d transformation
-        /// </summary>
-        /// <param name="vec">The vector to transform.</param>
-        /// <param name="xDot">Dot product base for the transformed x value.</param>
-        /// <param name="yDot">Dot product base for the transformed y value.</param>
-        /// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
-        public static void TransformDotVec(ref Vector2D vec, Vector2D xDot, Vector2D yDot)
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector2D vec, ref Vector2D xDot, ref Vector2D yDot)
+		{
+			double oldX = vec.X;
+			vec.X = vec.X * xDot.X + vec.Y * xDot.Y;
+			vec.Y = oldX * yDot.X + vec.Y * yDot.Y;
+		}
+
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector2 vec, ref Vector2D xDot, ref Vector2D yDot)
+		{
+			double oldX = vec.X;
+			vec.X = (float)(vec.X * xDot.X + vec.Y * xDot.Y);
+			vec.Y = (float)(oldX * yDot.X + vec.Y * yDot.Y);
+		}
+
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector2D vec, Vector2D xDot, Vector2D yDot)
         {
             double oldX = vec.X;
             vec.X = vec.X * xDot.X + vec.Y * xDot.Y;
@@ -1007,28 +1022,42 @@ namespace Duality
             return new Vector2D(
                 vec.X * xDot.X + vec.Y * xDot.Y,
                 vec.X * yDot.X + vec.Y * yDot.Y);
-        }
-        /// <summary>
-        /// Performs a 2d transformation
-        /// </summary>
-        /// <param name="vec">The vector to transform.</param>
-        /// <param name="xDot">Dot product base for the transformed x value.</param>
-        /// <param name="yDot">Dot product base for the transformed y value.</param>
-        /// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
-        public static void TransformDotVec(ref Vector3D vec, ref Vector2D xDot, ref Vector2D yDot)
-        {
-            double oldX = vec.X;
-            vec.X = vec.X * xDot.X + vec.Y * xDot.Y;
-            vec.Y = oldX * yDot.X + vec.Y * yDot.Y;
-        }
-        /// <summary>
-        /// Performs a 2d transformation
-        /// </summary>
-        /// <param name="vec">The vector to transform.</param>
-        /// <param name="xDot">Dot product base for the transformed x value.</param>
-        /// <param name="yDot">Dot product base for the transformed y value.</param>
-        /// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
-        public static void TransformDotVec(ref Vector3D vec, Vector2D xDot, Vector2D yDot)
+		}
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector3D vec, ref Vector2D xDot, ref Vector2D yDot)
+		{
+			double oldX = vec.X;
+			vec.X = vec.X * xDot.X + vec.Y * xDot.Y;
+			vec.Y = oldX * yDot.X + vec.Y * yDot.Y;
+		}
+
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector3 vec, ref Vector2D xDot, ref Vector2D yDot)
+		{
+			double oldX = vec.X;
+			vec.X = (float)(vec.X * xDot.X + vec.Y * xDot.Y);
+			vec.Y = (float)(oldX * yDot.X + vec.Y * yDot.Y);
+		}
+		/// <summary>
+		/// Performs a 2d transformation
+		/// </summary>
+		/// <param name="vec">The vector to transform.</param>
+		/// <param name="xDot">Dot product base for the transformed x value.</param>
+		/// <param name="yDot">Dot product base for the transformed y value.</param>
+		/// <seealso cref="GetTransformDotVec(double, out Vector2D, out Vector2D)"/>
+		public static void TransformDotVec(ref Vector3D vec, Vector2D xDot, Vector2D yDot)
         {
             double oldX = vec.X;
             vec.X = vec.X * xDot.X + vec.Y * xDot.Y;

@@ -32,26 +32,26 @@ namespace FarseerPhysics.Dynamics.Joints
 {
 	public class LineJoint : Joint
 	{
-		private Vector2 _ax, _ay;
-		private float _bias;
+		private Vector2D _ax, _ay;
+		private double _bias;
 		private bool _enableMotor;
-		private float _gamma;
-		private float _impulse;
-		private Vector2 _localXAxis;
-		private Vector2 _localYAxisA;
-		private float _mass;
-		private float _maxMotorTorque;
-		private float _motorImpulse;
-		private float _motorMass;
-		private float _motorSpeed;
+		private double _gamma;
+		private double _impulse;
+		private Vector2D _localXAxis;
+		private Vector2D _localYAxisA;
+		private double _mass;
+		private double _maxMotorTorque;
+		private double _motorImpulse;
+		private double _motorMass;
+		private double _motorSpeed;
 
-		private float _sAx;
-		private float _sAy;
-		private float _sBx;
-		private float _sBy;
+		private double _sAx;
+		private double _sAy;
+		private double _sBx;
+		private double _sBy;
 
-		private float _springImpulse;
-		private float _springMass;
+		private double _springImpulse;
+		private double _springMass;
 
 		// Linear constraint (point-to-line)
 		// d = pB - pA = xB + rB - xA - rA
@@ -74,7 +74,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.JointType = JointType.Line;
 		}
 
-		public LineJoint(Body bA, Body bB, Vector2 anchor, Vector2 axis)
+		public LineJoint(Body bA, Body bB, Vector2D anchor, Vector2D axis)
 			: base(bA, bB)
 		{
 			this.JointType = JointType.Line;
@@ -84,44 +84,44 @@ namespace FarseerPhysics.Dynamics.Joints
 			this.LocalXAxis = bA.GetLocalVector(axis);
 		}
 
-		public Vector2 LocalAnchorA { get; set; }
+		public Vector2D LocalAnchorA { get; set; }
 
-		public Vector2 LocalAnchorB { get; set; }
+		public Vector2D LocalAnchorB { get; set; }
 
-		public override Vector2 WorldAnchorA
+		public override Vector2D WorldAnchorA
 		{
 			get { return this.BodyA.GetWorldPoint(this.LocalAnchorA); }
 		}
 
-		public override Vector2 WorldAnchorB
+		public override Vector2D WorldAnchorB
 		{
 			get { return this.BodyB.GetWorldPoint(this.LocalAnchorB); }
 			set { Debug.Assert(false, "You can't set the world anchor on this joint type."); }
 		}
 
-		public float JointTranslation
+		public double JointTranslation
 		{
 			get
 			{
 				Body bA = this.BodyA;
 				Body bB = this.BodyB;
 
-				Vector2 pA = bA.GetWorldPoint(this.LocalAnchorA);
-				Vector2 pB = bB.GetWorldPoint(this.LocalAnchorB);
-				Vector2 d = pB - pA;
-				Vector2 axis = bA.GetWorldVector(this.LocalXAxis);
+				Vector2D pA = bA.GetWorldPoint(this.LocalAnchorA);
+				Vector2D pB = bB.GetWorldPoint(this.LocalAnchorB);
+				Vector2D d = pB - pA;
+				Vector2D axis = bA.GetWorldVector(this.LocalXAxis);
 
-				float translation = Vector2.Dot(d, axis);
+				double translation = Vector2D.Dot(d, axis);
 				return translation;
 			}
 		}
 
-		public float JointSpeed
+		public double JointSpeed
 		{
 			get
 			{
-				float wA = this.BodyA.AngularVelocityInternal;
-				float wB = this.BodyB.AngularVelocityInternal;
+				double wA = this.BodyA.AngularVelocityInternal;
+				double wB = this.BodyB.AngularVelocityInternal;
 				return wB - wA;
 			}
 		}
@@ -137,7 +137,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 		}
 
-		public float MotorSpeed
+		public double MotorSpeed
 		{
 			set
 			{
@@ -148,7 +148,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			get { return this._motorSpeed; }
 		}
 
-		public float MaxMotorTorque
+		public double MaxMotorTorque
 		{
 			set
 			{
@@ -159,11 +159,11 @@ namespace FarseerPhysics.Dynamics.Joints
 			get { return this._maxMotorTorque; }
 		}
 
-		public float Frequency { get; set; }
+		public double Frequency { get; set; }
 
-		public float DampingRatio { get; set; }
+		public double DampingRatio { get; set; }
 
-		public Vector2 LocalXAxis
+		public Vector2D LocalXAxis
 		{
 			get { return this._localXAxis; }
 			set
@@ -173,12 +173,12 @@ namespace FarseerPhysics.Dynamics.Joints
 			}
 		}
 
-		public override Vector2 GetReactionForce(float invDt)
+		public override Vector2D GetReactionForce(double invDt)
 		{
 			return invDt * (this._impulse * this._ay + this._springImpulse * this._ax);
 		}
 
-		public override float GetReactionTorque(float invDt)
+		public override double GetReactionTorque(double invDt)
 		{
 			return invDt * this._motorImpulse;
 		}
@@ -197,9 +197,9 @@ namespace FarseerPhysics.Dynamics.Joints
 			bB.GetTransform(out xfB);
 
 			// Compute the effective masses.
-			Vector2 rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - this.LocalCenterA);
-			Vector2 rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - this.LocalCenterB);
-			Vector2 d = bB.Sweep.C + rB - bA.Sweep.C - rA;
+			Vector2D rA = MathUtils.Multiply(ref xfA.R, this.LocalAnchorA - this.LocalCenterA);
+			Vector2D rB = MathUtils.Multiply(ref xfB.R, this.LocalAnchorB - this.LocalCenterB);
+			Vector2D d = bB.Sweep.C + rB - bA.Sweep.C - rA;
 
 			this.InvMassA = bA.InvMass;
 			this.InvIA = bA.InvI;
@@ -228,22 +228,22 @@ namespace FarseerPhysics.Dynamics.Joints
 				this._sAx = MathUtils.Cross(d + rA, this._ax);
 				this._sBx = MathUtils.Cross(rB, this._ax);
 
-				float invMass = this.InvMassA + this.InvMassB + this.InvIA * this._sAx * this._sAx + this.InvIB * this._sBx * this._sBx;
+				double invMass = this.InvMassA + this.InvMassB + this.InvIA * this._sAx * this._sAx + this.InvIB * this._sBx * this._sBx;
 
 				if (invMass > 0.0f)
 				{
 					this._springMass = 1.0f / invMass;
 
-					float C = Vector2.Dot(d, this._ax);
+					double C = Vector2D.Dot(d, this._ax);
 
 					// Frequency
-					float omega = 2.0f * Settings.Pi * this.Frequency;
+					double omega = 2.0f * Settings.Pi * this.Frequency;
 
 					// Damping coefficient
-					float da = 2.0f * this._springMass * this.DampingRatio * omega;
+					double da = 2.0f * this._springMass * this.DampingRatio * omega;
 
 					// Spring stiffness
-					float k = this._springMass * omega * omega;
+					double k = this._springMass * omega * omega;
 
 					// magic formulas
 					this._gamma = step.dt * (da + step.dt * k);
@@ -290,9 +290,9 @@ namespace FarseerPhysics.Dynamics.Joints
 				this._springImpulse *= step.dtRatio;
 				this._motorImpulse *= step.dtRatio;
 
-				Vector2 P = this._impulse * this._ay + this._springImpulse * this._ax;
-				float LA = this._impulse * this._sAy + this._springImpulse * this._sAx + this._motorImpulse;
-				float LB = this._impulse * this._sBy + this._springImpulse * this._sBx + this._motorImpulse;
+				Vector2D P = this._impulse * this._ay + this._springImpulse * this._ax;
+				double LA = this._impulse * this._sAy + this._springImpulse * this._sAx + this._motorImpulse;
+				double LB = this._impulse * this._sBy + this._springImpulse * this._sBx + this._motorImpulse;
 
 				bA.LinearVelocityInternal -= this.InvMassA * P;
 				bA.AngularVelocityInternal -= this.InvIA * LA;
@@ -314,20 +314,20 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bA = this.BodyA;
 			Body bB = this.BodyB;
 
-			Vector2 vA = bA.LinearVelocity;
-			float wA = bA.AngularVelocityInternal;
-			Vector2 vB = bB.LinearVelocityInternal;
-			float wB = bB.AngularVelocityInternal;
+			Vector2D vA = bA.LinearVelocity;
+			double wA = bA.AngularVelocityInternal;
+			Vector2D vB = bB.LinearVelocityInternal;
+			double wB = bB.AngularVelocityInternal;
 
 			// Solve spring constraint
 			{
-				float Cdot = Vector2.Dot(this._ax, vB - vA) + this._sBx * wB - this._sAx * wA;
-				float impulse = -this._springMass * (Cdot + this._bias + this._gamma * this._springImpulse);
+				double Cdot = Vector2D.Dot(this._ax, vB - vA) + this._sBx * wB - this._sAx * wA;
+				double impulse = -this._springMass * (Cdot + this._bias + this._gamma * this._springImpulse);
 				this._springImpulse += impulse;
 
-				Vector2 P = impulse * this._ax;
-				float LA = impulse * this._sAx;
-				float LB = impulse * this._sBx;
+				Vector2D P = impulse * this._ax;
+				double LA = impulse * this._sAx;
+				double LB = impulse * this._sBx;
 
 				vA -= this.InvMassA * P;
 				wA -= this.InvIA * LA;
@@ -338,11 +338,11 @@ namespace FarseerPhysics.Dynamics.Joints
 
 			// Solve rotational motor constraint
 			{
-				float Cdot = wB - wA - this._motorSpeed;
-				float impulse = -this._motorMass * Cdot;
+				double Cdot = wB - wA - this._motorSpeed;
+				double impulse = -this._motorMass * Cdot;
 
-				float oldImpulse = this._motorImpulse;
-				float maxImpulse = step.dt * this._maxMotorTorque;
+				double oldImpulse = this._motorImpulse;
+				double maxImpulse = step.dt * this._maxMotorTorque;
 				this._motorImpulse = MathUtils.Clamp(this._motorImpulse + impulse, -maxImpulse, maxImpulse);
 				impulse = this._motorImpulse - oldImpulse;
 
@@ -352,13 +352,13 @@ namespace FarseerPhysics.Dynamics.Joints
 
 			// Solve point to line constraint
 			{
-				float Cdot = Vector2.Dot(this._ay, vB - vA) + this._sBy * wB - this._sAy * wA;
-				float impulse = this._mass * (-Cdot);
+				double Cdot = Vector2D.Dot(this._ay, vB - vA) + this._sBy * wB - this._sAy * wA;
+				double impulse = this._mass * (-Cdot);
 				this._impulse += impulse;
 
-				Vector2 P = impulse * this._ay;
-				float LA = impulse * this._sAy;
-				float LB = impulse * this._sBy;
+				Vector2D P = impulse * this._ay;
+				double LA = impulse * this._sAy;
+				double LB = impulse * this._sBy;
 
 				vA -= this.InvMassA * P;
 				wA -= this.InvIA * LA;
@@ -378,29 +378,29 @@ namespace FarseerPhysics.Dynamics.Joints
 			Body bA = this.BodyA;
 			Body bB = this.BodyB;
 
-			Vector2 xA = bA.Sweep.C;
-			float angleA = bA.Sweep.A;
+			Vector2D xA = bA.Sweep.C;
+			double angleA = bA.Sweep.A;
 
-			Vector2 xB = bB.Sweep.C;
-			float angleB = bB.Sweep.A;
+			Vector2D xB = bB.Sweep.C;
+			double angleB = bB.Sweep.A;
 
 			Mat22 RA = new Mat22(angleA);
 			Mat22 RB = new Mat22(angleB);
 
-			Vector2 rA = MathUtils.Multiply(ref RA, this.LocalAnchorA - this.LocalCenterA);
-			Vector2 rB = MathUtils.Multiply(ref RB, this.LocalAnchorB - this.LocalCenterB);
-			Vector2 d = xB + rB - xA - rA;
+			Vector2D rA = MathUtils.Multiply(ref RA, this.LocalAnchorA - this.LocalCenterA);
+			Vector2D rB = MathUtils.Multiply(ref RB, this.LocalAnchorB - this.LocalCenterB);
+			Vector2D d = xB + rB - xA - rA;
 
-			Vector2 ay = MathUtils.Multiply(ref RA, this._localYAxisA);
+			Vector2D ay = MathUtils.Multiply(ref RA, this._localYAxisA);
 
-			float sAy = MathUtils.Cross(d + rA, ay);
-			float sBy = MathUtils.Cross(rB, ay);
+			double sAy = MathUtils.Cross(d + rA, ay);
+			double sBy = MathUtils.Cross(rB, ay);
 
-			float C = Vector2.Dot(d, ay);
+			double C = Vector2D.Dot(d, ay);
 
-			float k = this.InvMassA + this.InvMassB + this.InvIA * this._sAy * this._sAy + this.InvIB * this._sBy * this._sBy;
+			double k = this.InvMassA + this.InvMassB + this.InvIA * this._sAy * this._sAy + this.InvIB * this._sBy * this._sBy;
 
-			float impulse;
+			double impulse;
 			if (k != 0.0f)
 			{
 				impulse = -C / k;
@@ -410,9 +410,9 @@ namespace FarseerPhysics.Dynamics.Joints
 				impulse = 0.0f;
 			}
 
-			Vector2 P = impulse * ay;
-			float LA = impulse * sAy;
-			float LB = impulse * sBy;
+			Vector2D P = impulse * ay;
+			double LA = impulse * sAy;
+			double LB = impulse * sBy;
 
 			xA -= this.InvMassA * P;
 			angleA -= this.InvIA * LA;
@@ -430,7 +430,7 @@ namespace FarseerPhysics.Dynamics.Joints
 			return Math.Abs(C) <= Settings.LinearSlop;
 		}
 
-		public float GetMotorTorque(float invDt)
+		public double GetMotorTorque(double invDt)
 		{
 			return invDt * this._motorImpulse;
 		}

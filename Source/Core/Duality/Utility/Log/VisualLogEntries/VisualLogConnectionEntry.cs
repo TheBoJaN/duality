@@ -12,13 +12,13 @@ namespace Duality
 	/// </summary>
 	public sealed class VisualLogConnectionEntry : VisualLogEntry
 	{
-		private	Vector3 posA;
-		private	Vector3 posB;
+		private	Vector3D posA;
+		private	Vector3D posB;
 		
 		/// <summary>
 		/// [GET / SET] The first points spatial location.
 		/// </summary>
-		public Vector3 PosA
+		public Vector3D PosA
 		{
 			get { return this.posA; }
 			set { this.posA = value; }
@@ -26,22 +26,22 @@ namespace Duality
 		/// <summary>
 		/// [GET / SET] The second points spatial location.
 		/// </summary>
-		public Vector3 PosB
+		public Vector3D PosB
 		{
 			get { return this.posB; }
 			set { this.posB = value; }
 		}
 
-		public override void Draw(Canvas target, Vector3 basePos, float baseRotation, float baseScale)
+		public override void Draw(Canvas target, Vector3D basePos, double baseRotation, double baseScale)
 		{
-			float originRadius = 5.0f;
-			float vectorThickness = 4.0f;
-			float borderRadius = DefaultOutlineWidth;
+			double originRadius = 5.0f;
+			double vectorThickness = 4.0f;
+			double borderRadius = DefaultOutlineWidth;
 
 			// Scale anti-proportional to perspective scale in order to keep a constant size 
 			// in screen space even when actually drawing in world space.
 			{
-				float scale = target.DrawDevice.GetScaleAtZ(this.posA.Z + basePos.Z);
+				double scale = target.DrawDevice.GetScaleAtZ((float)(this.posA.Z + basePos.Z));
 				originRadius /= scale;
 				borderRadius /= scale;
 				vectorThickness /= scale;
@@ -49,19 +49,19 @@ namespace Duality
 
 
 			// Determine base and target positions
-			Vector3 originPos = this.posA;
-			Vector3 targetPos = this.posB;
-			MathF.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
-			MathF.TransformCoord(ref targetPos.X, ref targetPos.Y, baseRotation, baseScale);
+			Vector3D originPos = this.posA;
+			Vector3D targetPos = this.posB;
+			MathD.TransformCoord(ref originPos.X, ref originPos.Y, baseRotation, baseScale);
+			MathD.TransformCoord(ref targetPos.X, ref targetPos.Y, baseRotation, baseScale);
 			originPos += basePos;
 			targetPos += basePos;
 
 			// Create connection polygon
-			float vectorLen = (targetPos.Xy - originPos.Xy).Length;
-			Vector2 dirForward = (targetPos.Xy - originPos.Xy).Normalized;
-			Vector2 dirLeft = dirForward.PerpendicularLeft;
-			Vector2 dirRight = -dirLeft;
-			Vector2[] connection = new Vector2[4];
+			double vectorLen = (targetPos.Xy - originPos.Xy).Length;
+			Vector2D dirForward = (targetPos.Xy - originPos.Xy).Normalized;
+			Vector2D dirLeft = dirForward.PerpendicularLeft;
+			Vector2D dirRight = -dirLeft;
+			Vector2D[] connection = new Vector2D[4];
 			connection[0] = dirLeft * vectorThickness * 0.5f;
 			connection[1] = dirLeft * vectorThickness * 0.5f + dirForward * vectorLen;
 			connection[2] = dirRight * vectorThickness * 0.5f + dirForward * vectorLen;
@@ -106,7 +106,7 @@ namespace Duality
 				originPos.Z, 
 				originRadius, 
 				0.0f, 
-				MathF.RadAngle360, 
+				MathD.RadAngle360, 
 				borderRadius);
 			target.FillCircleSegment(
 				targetPos.X, 
@@ -114,7 +114,7 @@ namespace Duality
 				targetPos.Z, 
 				originRadius, 
 				0.0f, 
-				MathF.RadAngle360, 
+				MathD.RadAngle360, 
 				borderRadius);
 		}
 	}

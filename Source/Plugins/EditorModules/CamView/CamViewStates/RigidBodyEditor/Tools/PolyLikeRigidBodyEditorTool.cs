@@ -16,7 +16,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		private int initialVertexCount = 0;
 		private int currentVertex = 0;
 		private bool pendingAdvance = false;
-		private Vector2 lastPlacedVertexPos = Vector2.Zero;
+		private Vector2D lastPlacedVertexPos = Vector2D.Zero;
 		private VertexBasedShapeInfo actionShape = null;
 
 		protected virtual int MaxVertexCount
@@ -28,16 +28,16 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			get { return true; }
 		}
 
-		protected virtual Vector2[] GetInitialVertices(Vector2 basePos)
+		protected virtual Vector2D[] GetInitialVertices(Vector2D basePos)
 		{
-			return new Vector2[] 
+			return new Vector2D[] 
 			{
 				basePos, 
-				basePos + Vector2.UnitX, 
-				basePos + Vector2.One
+				basePos + Vector2D.UnitX, 
+				basePos + Vector2D.One
 			};
 		}
-		protected abstract VertexBasedShapeInfo CreateShapeInfo(Vector2[] vertices);
+		protected abstract VertexBasedShapeInfo CreateShapeInfo(Vector2D[] vertices);
 
 		public override bool CanBeginAction(MouseButtons mouseButton)
 		{
@@ -48,7 +48,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 		{
 			base.BeginAction(mouseButton);
 
-			Vector2[] initialVertices = this.GetInitialVertices(this.Environment.ActiveBodyPos);
+			Vector2D[] initialVertices = this.GetInitialVertices(this.Environment.ActiveBodyPos);
 
 			this.currentVertex = 1;
 			this.actionShape = this.CreateShapeInfo(initialVertices);
@@ -81,7 +81,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				this.AdvanceToNextVertex();
 			}
 
-			Vector2[] vertices = this.actionShape.Vertices;
+			Vector2D[] vertices = this.actionShape.Vertices;
 			vertices[this.currentVertex] = this.Environment.ActiveBodyPos;
 
 			// Before we've defined the first two vertices, we won't have
@@ -100,12 +100,12 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			base.EndAction();
 			if (this.actionShape != null)
 			{
-				Vector2[] vertices = this.actionShape.Vertices;
+				Vector2D[] vertices = this.actionShape.Vertices;
 
 				// If we're in the process of placing another vertex, remove that unplaced one
 				if (!this.pendingAdvance)
 				{
-					List<Vector2> prevVertices = vertices.ToList();
+					List<Vector2D> prevVertices = vertices.ToList();
 					prevVertices.RemoveAt(this.currentVertex);
 					vertices = prevVertices.ToArray();
 				}
@@ -151,7 +151,7 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 				if (this.pendingAdvance)
 					return;
 
-				Vector2[] vertices = this.actionShape.Vertices;
+				Vector2D[] vertices = this.actionShape.Vertices;
 				vertices[this.currentVertex] = this.Environment.ActiveBodyPos;
 
 				// Apply the current vertex and move on to the next.
@@ -187,10 +187,10 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 
 		private void AdvanceToNextVertex()
 		{
-			this.Environment.LockedWorldPos = new Vector3(this.lastPlacedVertexPos, 0.0f);
+			this.Environment.LockedWorldPos = new Vector3D(this.lastPlacedVertexPos, 0.0f);
 
-			Vector2[] vertices = this.actionShape.Vertices;
-			List<Vector2> vertexList = vertices.ToList();
+			Vector2D[] vertices = this.actionShape.Vertices;
+			List<Vector2D> vertexList = vertices.ToList();
 			
 			if (this.currentVertex >= vertexList.Count - 1)
 				vertexList.Add(this.Environment.ActiveBodyPos);
@@ -198,24 +198,24 @@ namespace Duality.Editor.Plugins.CamView.CamViewStates
 			this.actionShape.Vertices = vertexList.ToArray();
 			this.currentVertex++;
 		}
-		private bool CheckVertexPlacement(Vector2[] vertices, int currentVertex)
+		private bool CheckVertexPlacement(Vector2D[] vertices, int currentVertex)
 		{
-			Vector2 current = vertices[this.currentVertex];
-			Vector2 last = vertices[this.currentVertex - 1];
+			Vector2D current = vertices[this.currentVertex];
+			Vector2D last = vertices[this.currentVertex - 1];
 
 			// Require a minimum distance between current and last vertex to
 			// avoid accidental double clicks and prevent ridiculously detailed
 			// collision shapes.
-			float distanceToLast = (current - last).Length;
+			double distanceToLast = (current - last).Length;
 			if (distanceToLast < 2.5f) return false;
 
 			// Do not allow to cross any already existing edges, as this would produce
 			// a non-simple polygon that can not be fixed again by placing more vertices.
 			for (int i = 1; i < this.currentVertex; i++)
 			{
-				Vector2 start = vertices[i - 1];
-				Vector2 end = vertices[i];
-				if (MathF.LinesCross(start.X, start.Y, end.X, end.Y, current.X, current.Y, last.X, last.Y))
+				Vector2D start = vertices[i - 1];
+				Vector2D end = vertices[i];
+				if (MathD.LinesCross(start.X, start.Y, end.X, end.Y, current.X, current.Y, last.X, last.Y))
 					return false;
 			}
 
