@@ -624,7 +624,6 @@ namespace Duality
 		/// <summary>
 		/// Convert from Quaternion
 		/// </summary>
-		/// <param name="v"></param>
 		public static implicit operator QuaternionD(Quaternion q)
 		{
 			return new QuaternionD(q.X, q.Y, q.Z, q.W);
@@ -633,7 +632,6 @@ namespace Duality
 		/// <summary>
 		/// Convert to Quaternion
 		/// </summary>
-		/// <param name="v"></param>
 		public static implicit operator Quaternion(QuaternionD q)
 		{
 			return new Quaternion((float)q.X, (float)q.Y, (float)q.Z, (float)q.W);

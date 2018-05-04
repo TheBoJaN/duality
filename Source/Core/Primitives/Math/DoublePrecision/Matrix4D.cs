@@ -1382,7 +1382,6 @@ namespace Duality
         /// <summary>
         /// Convert to QuaternionD
         /// </summary>
-        /// <param name="v"></param>
         public static implicit operator Matrix4(Matrix4D m)
         {
             return new Matrix4(m.Row0, m.Row1, m.Row2, m.Row3);
