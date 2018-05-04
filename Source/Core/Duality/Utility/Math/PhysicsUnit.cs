@@ -9,7 +9,7 @@
 		/// <summary>
 		/// SI unit: m
 		/// </summary>
-		public const float LengthToDuality          = 100.0f;
+		public const float LengthToDuality          = 10000f; //Drastically increased to allow for fast-moving objects, Default: 100
 		/// <summary>
 		/// SI unit: kg
 		/// </summary>
